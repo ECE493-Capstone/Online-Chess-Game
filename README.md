@@ -1,1 +1,1 @@
-#Online Chess Game
+#Chess Game
