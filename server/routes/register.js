@@ -17,12 +17,12 @@ const hashPassword = async (password) => {
 };
 
 router.post("/", jsonParser, async (req, res) => {
-  const { firstName, lastName, username, email, password } = req.body;
+  const {username, email, password } = req.body;
   console.log(req.body);
   const userByEmail = await User.findOne({ email: email });
   const userByUsername = await User.findOne({ username: username });
-  console.log(firstName, lastName, username, email, password);
-  if (!(firstName && lastName && username && email && password)) {
+  console.log(username, email, password);
+  if (!(username && password)) {
     res.status(500);
     res.send("WTF");
   }
@@ -39,8 +39,8 @@ router.post("/", jsonParser, async (req, res) => {
   } else {
     const hashedPassword = await hashPassword(password);
     const newUser = new User({
-      firstName,
-      lastName,
+      firstName: '', // removing this field from the schema
+      lastName: '', // removing this field from the schema
       email,
       username,
       password: hashedPassword,
