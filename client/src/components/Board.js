@@ -3,7 +3,17 @@ import { Chessboard } from "react-chessboard";
 import styled from "styled-components";
 import { Chess } from "chess.js";
 
-const StyledBoardContainer = styled.div``;
+const StyledBoardContainer = styled.div`
+  background: red;
+  height: 100px;
+  div {
+    width: 50px;
+
+    h1 {
+      font-size: 10px;
+    }
+  }
+`;
 const Board = () => {
   const [game, setGame] = useState(new Chess());
   const makeAMove = (move) => {
