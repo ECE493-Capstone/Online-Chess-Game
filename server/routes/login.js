@@ -7,9 +7,9 @@ const router = express.Router();
 const jsonParser = bodyParser.json();
 
 router.post("/", jsonParser, async (req, res) => {
-  const { login_cred, password } = req.body;
-  const userByEmail = await User.findOne({ email: login_cred });
-  const userByUsername = await User.findOne({ username: login_cred });
+  const { identity, password } = req.body;
+  const userByEmail = await User.findOne({ email: identity });
+  const userByUsername = await User.findOne({ username: identity });
   if (userByEmail || userByUsername) {
     const user = userByEmail || userByUsername;
     if (bcrypt.compareSync(password, user.password)) {
@@ -17,7 +17,7 @@ router.post("/", jsonParser, async (req, res) => {
       res.send({ userId: user.id, message: "login success" });
     } else {
       res.status(401);
-      res.send({ errorField: "password", message: "wrong password" });
+      res.send({ errorField: "password", message: "Incorrect password" });
     }
   } else {
     res.status(401);
