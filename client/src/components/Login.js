@@ -4,10 +4,9 @@ import React, { useReducer, useState } from "react";
 import styled from "styled-components";
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import PasswordOutlinedIcon from '@mui/icons-material/PasswordOutlined';
-import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import { SERVER_URL } from "../config";
 
-const RegistrationContainer = styled.div`
+const LoginContainer = styled.div`
   border: 1px solid white;
   border-radius: 10px;
   padding: 0px 20px 20px 20px;
@@ -27,14 +26,12 @@ const RegistrationContainer = styled.div`
   }
 `;
 
-const RegisterReducer = (state, action) => {
+const LoginReducer = (state, action) => {
   switch (action.type) {
-    case "SET_USERNAME":
-      return { ...state, username: action.payload, errorMsg: ""};
+    case "SET_IDENTITY":
+      return { ...state, identity: action.payload, errorMsg: ""};
     case "SET_PASSWORD":
       return { ...state, password: action.payload, errorMsg: ""};
-    case "SET_EMAIL":
-      return { ...state, email: action.payload, errorMsg: ""};
     case "SET_ERROR":
       return { ...state, errorMsg: action.payload };
     default:
@@ -42,12 +39,11 @@ const RegisterReducer = (state, action) => {
   }
 }
 
-const Registration = () => {
+const Login = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [{ username, password, email, errorMsg }, dispatch] = useReducer(RegisterReducer, {
-    username: "",
+  const [{ identity, password, errorMsg }, dispatch] = useReducer(LoginReducer, { // identity can be either username or email
+    identity: "",
     password: "",
-    email: "",
     errorMsg: "",
   });
 
@@ -56,22 +52,20 @@ const Registration = () => {
     dispatch({ type: "SET_ERROR", payload: "" });
 
     e.preventDefault();
-    // make a post call to the server to register the user and check response to see if the user was registered
-    fetch(`${SERVER_URL}/signup`, {
+    fetch(`${SERVER_URL}/signin`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        username: username,
+        identity: identity,
         password: password,
-        email: email,
       }),
     }).then((res) => {
       setIsSubmitting(false);
       if (res.status === 200) {
-        console.log("User registered successfully");
-        // route to the login page then return empty promise
+        console.log("User logged in successfully");
+        // TODO: route to landing page 
         return Promise.resolve(undefined);
       }
       return res.json();
@@ -84,40 +78,31 @@ const Registration = () => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <RegistrationContainer>
-        <h2>Register</h2>
+      <LoginContainer>
+        <h2>Login</h2>
         <div>
           <AccountCircleOutlinedIcon fontSize="large" />
           <TextField required 
-            id="username" label="Enter Your Username"
-            variant="outlined" value={username}
-            onChange={(e) => dispatch({ type: "SET_USERNAME", payload: e.target.value })}
+            id="identity" autoFocus={true} placeholder="Username or Email"
+            variant="outlined" value={identity}
+            onChange={(e) => dispatch({ type: "SET_IDENTITY", payload: e.target.value })}
           ></TextField>
         </div>
         <div>
           <PasswordOutlinedIcon fontSize="large"></PasswordOutlinedIcon>
           <TextField required 
-            id="password" label="Enter Your Password"
+            id="password" placeholder="Password"
             variant="outlined" value={password}
             onChange={(e) => dispatch({ type: "SET_PASSWORD", payload: e.target.value })}
           ></TextField>
         </div>
-        <div>
-          <EmailOutlinedIcon fontSize="large"></EmailOutlinedIcon>
-          <TextField
-            id="email" label="Enter Your Email"
-            variant="outlined" value={email}
-            type="email"
-            onChange={(e) => dispatch({ type: "SET_EMAIL", payload: e.target.value })}
-          ></TextField>
-        </div>
         {errorMsg && <Box color="error.main">{errorMsg}</Box>}
         <div className="footer">
-          <Button type="submit" variant="contained" disabled={isSubmitting}>Register</Button>
+          <Button type="submit" variant="contained" disabled={isSubmitting}>Login</Button>
         </div>
-      </RegistrationContainer>
+      </LoginContainer>
     </form>
   );
 };
 
-export default Registration;
+export default Login;
