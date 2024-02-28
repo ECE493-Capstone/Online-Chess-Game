@@ -17,7 +17,7 @@ const hashPassword = async (password) => {
 };
 
 router.post("/", jsonParser, async (req, res) => {
-  const {username, email, password } = req.body;
+  const { username, email, password } = req.body;
   console.log(req.body);
   const userByEmail = await User.findOne({ email: email });
   const userByUsername = await User.findOne({ username: username });
@@ -39,8 +39,6 @@ router.post("/", jsonParser, async (req, res) => {
   } else {
     const hashedPassword = await hashPassword(password);
     const newUser = new User({
-      firstName: '', // removing this field from the schema
-      lastName: '', // removing this field from the schema
       email,
       username,
       password: hashedPassword,
