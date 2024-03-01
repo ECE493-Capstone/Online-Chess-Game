@@ -1,5 +1,7 @@
+// App.js
+import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Main from "./components/pages/Main";
+import Home from "./components/Home"; // Import the Home component
 import { useSelector } from "react-redux";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 
@@ -17,7 +19,8 @@ const App = () => {
       <CssBaseline />
       <Router>
         <Routes>
-          <Route path="/" element={<Main />} />
+          {/* Route to the Home component */}
+          <Route path="/" element={<Home />} />
         </Routes>
       </Router>
     </ThemeProvider>
