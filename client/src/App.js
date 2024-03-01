@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Home from "./components/Home"; // Import the Home component
 import { useSelector } from "react-redux";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
+import Test from "./components/pages/Test";
 
 const darkTheme = createTheme({
   palette: {
@@ -19,8 +20,8 @@ const App = () => {
       <CssBaseline />
       <Router>
         <Routes>
-          {/* Route to the Home component */}
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Main />} />
+          <Route path="/test" element={<Test />} />
         </Routes>
       </Router>
     </ThemeProvider>
