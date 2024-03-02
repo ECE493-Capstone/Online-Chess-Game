@@ -5,6 +5,8 @@ import Home from "./components/pages/Home";
 import { useSelector } from "react-redux";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import Test from "./components/pages/Test";
+import TimeSelect from "./components/pages/TimeSelect";
+import Match from "./components/pages/Match";
 
 const darkTheme = createTheme({
   palette: {
@@ -22,6 +24,8 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/test" element={<Test />} />
+          <Route path="/timeselect" element={<TimeSelect />} />
+          <Route path="/match" element={<Match />} />
         </Routes>
       </Router>
     </ThemeProvider>

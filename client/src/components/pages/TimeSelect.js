@@ -1,16 +1,16 @@
 import React from "react";
-import Board from "../Board";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 
-const Match = () => {
+const TimeSelect = () => {
   return (
     <Header>
-      <>
-        <Board />
-      </>
+        <div>
+        <h1>Time Page</h1>
+        </div>
+    
     </Header>
   );
 };
 
-export default Match;
+export default TimeSelect;

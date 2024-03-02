@@ -9,6 +9,9 @@ const Home = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [roomCode, setRoomCode] = useState("");
+  const [submitClicked, setSubmitClicked] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleJoinGame = () => {
     setIsModalOpen(true);
@@ -16,6 +19,7 @@ const Home = () => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    setSubmitClicked(false);
   };
 
   const handleRoomCodeChange = (event) => {
@@ -23,11 +27,27 @@ const Home = () => {
   };
 
   const handleJoinRoom = () => {
-    // implement logic to join the room using the entered room code
+    // Set submitClicked to true to trigger validation
+    setSubmitClicked(true);
+
+    // Check if roomCode is empty
+    if (roomCode.trim() === "") {
+      // Room code is empty, handle error or display error message
+      // For now, let's just log an error message
+      console.error("Please enter the room code.");
+      return;
+    }
+
+    // implement validation here to see if the code is valid or not. Then join.
     console.log("Joining room with code:", roomCode);
-    // Close the modal after handling join action
+    navigate('/match');
     setIsModalOpen(false);
   };
+
+  const handleQuickPlayClick = () => {
+    navigate('/timeselect');
+  };
+
 
   return (
     <Header>
@@ -37,7 +57,7 @@ const Home = () => {
       </div>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", minHeight: "80vh", paddingBottom: "20px"}}>
         <div style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
-        <Button variant="contained" className="standard" style={{ marginRight: "10px", width: "300px", height: "83px", textTransform: "none"}}>
+        <Button variant="contained" className="standard" style={{ marginRight: "10px", width: "300px", height: "83px", textTransform: "none"}} onClick={handleQuickPlayClick}>
           <div>
             <div style={{ fontSize: "20px" }}>Quick Play</div>
             <div style={{ fontSize: "14px" }}>Standard, blind, or power up chess</div>
@@ -70,6 +90,8 @@ const Home = () => {
                 variant="outlined"
                 value={roomCode}
                 onChange={handleRoomCodeChange}
+                error={submitClicked && roomCode.trim() === ""}
+                helperText={(submitClicked && roomCode.trim() === "") ? "Please enter the room code." : ""}
                 style={{ marginTop: "30px" }}
               />
               <Button variant="contained" className="standard" style={{ marginTop: "30px" }} onClick={handleJoinRoom}>Join Room</Button>
