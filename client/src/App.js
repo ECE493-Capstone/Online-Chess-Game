@@ -7,6 +7,9 @@ import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import Test from "./components/pages/Test";
 import TimeSelect from "./components/pages/TimeSelect";
 import Match from "./components/pages/Match";
+import RegistrationPage from "./components/pages/RegistrationPage";
+import LoginPage from "./components/pages/LoginPage";
+import GameSelect from "./components/pages/GameSelection";
 
 const darkTheme = createTheme({
   palette: {
@@ -26,6 +29,9 @@ const App = () => {
           <Route path="/test" element={<Test />} />
           <Route path="/timeselect" element={<TimeSelect />} />
           <Route path="/match" element={<Match />} />
+          <Route path="/register" element={<RegistrationPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/gameselect" element={<GameSelect />} />
         </Routes>
       </Router>
     </ThemeProvider>

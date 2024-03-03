@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Modal, TextField, Fab } from "@mui/material";
+import CloseIcon from '@mui/icons-material/Close';
 import Header from "./Header";
 import "../styles.css";
-import CloseIcon from '@mui/icons-material/Close';
 
 const Home = () => {
 
@@ -48,6 +48,11 @@ const Home = () => {
     navigate('/timeselect');
   };
 
+  
+  const handleCreateGameClick = () => {
+    navigate('/gameselect');
+  };
+
 
   return (
     <Header>
@@ -64,7 +69,7 @@ const Home = () => {
           </div>
         </Button>
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <Button variant="contained" className="standard" style={{ marginBottom: "10px", width: "150px", textTransform: "none"}}>Create Game</Button>
+            <Button variant="contained" className="standard" style={{ marginBottom: "10px", width: "150px", textTransform: "none"}} onClick={handleCreateGameClick}>Create Game</Button>
             <Button variant="contained" className="standard" style={{ width: "150px", textTransform: "none"}} onClick={handleJoinGame}>Join Game</Button>
           </div>
         </div>

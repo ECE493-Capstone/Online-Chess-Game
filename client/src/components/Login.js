@@ -5,6 +5,7 @@ import styled from "styled-components";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import PasswordOutlinedIcon from "@mui/icons-material/PasswordOutlined";
 import { SERVER_URL } from "../config";
+import { useNavigate } from "react-router-dom";
 
 const LoginContainer = styled.div`
   border: 1px solid white;
@@ -51,6 +52,8 @@ const Login = () => {
     }
   );
 
+  const navigate = useNavigate(); // navigation element
+
   const handleSubmit = (e) => {
     setIsSubmitting(true);
     dispatch({ type: "SET_ERROR", payload: "" });
@@ -71,6 +74,7 @@ const Login = () => {
         if (res.status === 200) {
           console.log("User logged in successfully");
           // TODO: route to landing page
+          navigate('/');
           return Promise.resolve(undefined);
         }
         return res.json();

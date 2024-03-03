@@ -6,6 +6,7 @@ import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined
 import PasswordOutlinedIcon from "@mui/icons-material/PasswordOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import { SERVER_URL } from "../config";
+import { useNavigate } from "react-router-dom";
 
 const RegistrationContainer = styled.div`
   border: 1px solid white;
@@ -54,6 +55,8 @@ const Registration = () => {
     }
   );
 
+  const navigate = useNavigate(); // navigation element
+
   const handleSubmit = (e) => {
     setIsSubmitting(true);
     dispatch({ type: "SET_ERROR", payload: "" });
@@ -76,6 +79,9 @@ const Registration = () => {
         if (res.status === 200) {
           console.log("User registered successfully");
           // route to the login page then return empty promise
+
+          // route to the previous page the user was on
+          navigate(-1);
           return Promise.resolve(undefined);
         }
         return res.json();
