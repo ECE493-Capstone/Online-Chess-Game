@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import { Tooltip } from "@mui/material";
 import InfoIcon from '@mui/icons-material/Info';
-import "../styles.css";
+import "./styles.css";
 
 const GameSelect = () => {
   const navigate = useNavigate();
@@ -20,15 +20,15 @@ const GameSelect = () => {
       <div style={{ textAlign: "center", minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center" }}>
         <h1>Game Selection</h1>
         <div style={{ display: "flex", justifyContent: "center" }}>
-          <div className="standard" style={{ width: "300px", padding: "20px", margin: "0 10px" }}>
+          <div className="standard" style={{ width: "30%", maxWidth: "300px", padding: "5%", margin: "0 2.5%" }}>
             <img src="placeholder_standard_image.jpg" alt="Standard" onClick={() => handleGameSelect("Standard")} />
             <p>Standard Chess</p>
           </div>
-          <div className="standard" style={{ width: "300px", padding: "20px", margin: "0 10px" }}>
+          <div className="standard" style={{ width: "30%", maxWidth: "300px", padding: "5%", margin: "0 2.5%" }}>
             <img src="placeholder_blind_image.jpg" alt="Blind" onClick={() => handleGameSelect("Blind")} />
             <p>Blind Chess<br/>Play chess without being able to view the board!</p>
           </div>
-          <div className="standard" style={{ width: "300px", padding: "20px", margin: "0 10px", position: "relative" }}>
+          <div className="standard" style={{ width: "30%", maxWidth: "300px", padding: "5%", margin: "0 2.5%", position: "relative" }}>
             <Tooltip title="Info on the power-ups" placement="top-end" arrow style={{ position: "absolute", top: 0, right: 0 }}>
               <div>
                 <InfoIcon style={{ position: "absolute", top: 0, right: 0 }} />

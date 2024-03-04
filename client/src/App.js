@@ -5,11 +5,11 @@ import Home from "./components/pages/Home";
 import { useSelector } from "react-redux";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import Test from "./components/pages/Test";
-import TimeSelect from "./components/pages/TimeSelect";
+import TimeSelect from "./components/TimeSelect";
 import Match from "./components/pages/Match";
 import RegistrationPage from "./components/pages/RegistrationPage";
 import LoginPage from "./components/pages/LoginPage";
-import GameSelect from "./components/pages/GameSelection";
+import GameSelect from "./components/GameSelection";
 
 const darkTheme = createTheme({
   palette: {
