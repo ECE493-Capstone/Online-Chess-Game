@@ -5,6 +5,7 @@ export const userSlice = createSlice({
   initialState: {
     isLoggedIn: true,
     userId: 123,
+    socket: null,
     gameSession: null,
     spectateSessions: [],
   },
@@ -15,15 +16,13 @@ export const userSlice = createSlice({
     removeGameSession: (state, action) => {
       state.gameSession = null;
     },
+    setSocket: (state, action) => {
+      state.socket = action.payload;
+    },
   },
 });
 
-export const {
-  setUserId,
-  removeUserId,
-  setIsMoviesLoaded,
-  setLoadedToWatchMovies,
-  setMovie,
-} = userSlice.actions;
+export const { setGameSession, removeGameSession, setSocket } =
+  userSlice.actions;
 
 export default userSlice.reducer;

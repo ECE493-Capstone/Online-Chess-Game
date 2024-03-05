@@ -1,8 +1,11 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Main from "./components/pages/Main";
-import { useSelector } from "react-redux";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import Test from "./components/pages/Test";
+import { useDispatch, useSelector } from "react-redux";
+import io from "socket.io-client";
+import { setSocket } from "./features/userSlice";
+import TestJoin from "./components/pages/TestJoin";
 
 const darkTheme = createTheme({
   palette: {
@@ -11,6 +14,10 @@ const darkTheme = createTheme({
 });
 
 const App = () => {
+  const dispatch = useDispatch();
+  const socket = io.connect("http://localhost:5050/");
+  console.log(socket.id);
+  dispatch(setSocket(socket));
   const userId = useSelector((state) => state.user.userId);
   console.log(userId);
   return (
@@ -20,6 +27,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Main />} />
           <Route path="/test" element={<Test />} />
+          <Route path="/test-join" element={<TestJoin />} />
         </Routes>
       </Router>
     </ThemeProvider>
