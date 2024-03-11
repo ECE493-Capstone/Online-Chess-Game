@@ -6,6 +6,15 @@ import InfoIcon from '@mui/icons-material/Info';
 import "./styles.css";
 import styled from "styled-components";
 
+const Container = styled.div`
+  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+`;
+
 const GameContainer = styled.div`
   border: 1px solid white;
   border-radius: 10px;
@@ -38,7 +47,7 @@ const GameSelect = () => {
 
   return (
     <Header>
-      <div style={{ textAlign: "center", minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "stretch" }}>
+      <Container>
         <h1>Game Selection</h1>
         <div style={{ display: "flex", justifyContent: "center" }}>
           <GameContainer>
@@ -67,7 +76,7 @@ const GameSelect = () => {
             </div>
           </GameContainer>
         </div>
-      </div>
+      </Container>
     </Header>
   );
 };

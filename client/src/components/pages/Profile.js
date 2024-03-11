@@ -1,5 +1,6 @@
 import React from 'react';
 
+ // barebones profile page. Will add more stuff
 const Profile = ({ username, email, statistics }) => {
     return (
       <div className="profile-container">
