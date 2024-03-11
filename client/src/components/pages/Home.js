@@ -58,10 +58,9 @@ const Home = () => {
     <Header>
       <div>
         <h1>Home Page</h1>
-        {/*insert homepage wallpaper*/}
       </div>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "80vh", paddingBottom: "20px"}}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "10px" }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "end", minHeight: "80vh", paddingBottom: "20px"}}>
+        <div style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
           <Button variant="contained" className="standard" style={{ marginRight: "10px", flexGrow: 1, maxWidth: "300px", height: "auto", textTransform: "none"}} onClick={handleQuickPlayClick}>
             <div>
               <div style={{ fontSize: "20px" }}>Quick Play</div>
@@ -69,13 +68,27 @@ const Home = () => {
             </div>
           </Button>
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <Button variant="contained" className="standard" style={{ marginBottom: "10px", width: "40%", maxWidth: "150px", textTransform: "none"}} onClick={handleCreateGameClick}>Create Game</Button>
-            <Button variant="contained" className="standard" style={{ width: "40%", maxWidth: "150px", textTransform: "none"}} onClick={handleJoinGame}>Join Game</Button>
+            <Button
+              id="create-game-button"
+              variant="contained"
+              className="standard"
+              style={{ marginBottom: "10px", width: "100%", maxWidth: "150px", textTransform: "none", height: "3vh"}}
+              onClick={handleCreateGameClick}
+            >
+              Create Game
+            </Button>
+            <Button
+              id="join-game-button"
+              variant="contained"
+              className="standard"
+              style={{ width: "100%", maxWidth: "150px", textTransform: "none", height: "3vh"}}
+              onClick={handleJoinGame}
+            >
+              Join Game
+            </Button>
           </div>
         </div>
       </div>
-
-
 
       <Modal
         open={isModalOpen}
