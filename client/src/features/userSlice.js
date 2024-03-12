@@ -6,23 +6,23 @@ export const userSlice = createSlice({
     isLoggedIn: true,
     userId: 123,
     socket: null,
-    gameSession: null,
+    gameInfo: null,
     spectateSessions: [],
   },
   reducers: {
-    setGameSession: (state, action) => {
-      state.gameSession = action.payload;
+    setGameInfo: (state, action) => {
+      state.gameInfo = action.payload;
     },
-    removeGameSession: (state, action) => {
-      state.gameSession = null;
+    removeGameInfo: (state) => {
+      state.gameInfo = null;
     },
     setSocket: (state, action) => {
+      console.log("WEE");
       state.socket = action.payload;
     },
   },
 });
 
-export const { setGameSession, removeGameSession, setSocket } =
-  userSlice.actions;
+export const { setGameInfo, removeGameInfo, setSocket } = userSlice.actions;
 
 export default userSlice.reducer;

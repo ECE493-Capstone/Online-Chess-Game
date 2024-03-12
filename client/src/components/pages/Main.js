@@ -1,14 +1,17 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@mui/material";
+import TimeControl from "../TimeControl";
+import { socket } from "../../app/socket";
+import { useSelector } from "react-redux";
 
 const Main = () => {
-  const [id, setId] = useState("");
-  const navigate = useNavigate();
-  const handleClick = () => {
-    // navigate(`/game/${id}`);
-  };
-  return <Button variant="outlined">Join Game</Button>;
+  const isConnected = useSelector((state) => state.user.socket);
+  console.log(isConnected);
+  if (isConnected) {
+    console.log(socket.id);
+  }
+  return <TimeControl />;
 };
 
 export default Main;

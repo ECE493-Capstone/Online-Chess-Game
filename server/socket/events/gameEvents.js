@@ -1,6 +1,12 @@
 const Queue = require("../../models/Queue");
-const { findGameInQueue, addToOngoingGames } = require("./gameUtils");
+const { addToOngoingGames } = require("./gameUtils");
+const {
+  findGameInQueue,
+  addToQueue,
+  deleteUserFromQueue,
+} = require("./queueUtils");
 const { createRoom } = require("../rooms/roomUtils");
+const { addSocketConnection } = require("./socketUtils");
 const handleGameEvents = (io, socket) => {
   socket.on("join game", async (gameInfo) => {
     const { userId, mode, side, timeControl } = gameInfo;
@@ -12,19 +18,21 @@ const handleGameEvents = (io, socket) => {
       // join a room
       socket.join(game.room);
       console.log(io.sockets.adapter.rooms);
-      addToOngoingGames({
+      const data = {
         player1: game.side === "w" ? game.userId : userId,
         player2: game.side === "b" ? game.userId : userId,
         mode,
         timeControl,
         room: game.room,
         pgn: "",
-      });
-      io.to(game.room).emit("game joined", game.room);
+      };
+      addToOngoingGames(data);
+      deleteUserFromQueue(game.userId);
+      io.to(game.room).emit("game joined", data);
     } else {
       // create new game
       const room = createRoom();
-      const newGame = new Queue({
+      addToQueue({
         userId,
         mode,
         room,
@@ -32,9 +40,8 @@ const handleGameEvents = (io, socket) => {
         socketId: socket.id,
         timeControl,
       });
-      const saveResult = await newGame.save();
+      addSocketConnection({ userId, socketId: socket.id });
       socket.join(room);
-      // console.log(`SaveResult: ${saveResult}`);
     }
   });
   socket.on("game start", (gameId) => {

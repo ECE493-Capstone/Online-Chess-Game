@@ -5,7 +5,7 @@ import { Chess, WHITE, BLACK, SQUARES } from "chess.js";
 
 const StyledBoardContainer = styled.div``;
 
-const Board = () => {
+const Board = ({ orientation }) => {
   const [game, setGame] = useState(new Chess());
 
   // states to handle piece click -------------------------------------------
@@ -26,9 +26,10 @@ const Board = () => {
       clickedSquare: null,
       legalMoveSquares: [],
     });
-  }
+  };
 
   const makeAMove = (move) => {
+    console.log(move);
     const gameCopy = Object.assign(
       Object.create(Object.getPrototypeOf(game)),
       game
@@ -40,7 +41,9 @@ const Board = () => {
 
   const onDrop = (sourceSquare, targetSquare, piece) => {
     const fromSquare = sourceSquare || highlightedSquares.clickedSquare; // = clickedSquare if it's a promotion in click mode
-    const legalTargetSquares = game.moves({square: fromSquare, verbose: true}).map(move => move.to);
+    const legalTargetSquares = game
+      .moves({ square: fromSquare, verbose: true })
+      .map((move) => move.to);
 
     let move = null;
     if (legalTargetSquares.includes(targetSquare)) {
@@ -51,9 +54,9 @@ const Board = () => {
       });
       console.log(game.board());
     }
-    
+
     _clearHighlightedSquares();
-    
+
     return move === null ? false : true;
   };
 
@@ -61,12 +64,14 @@ const Board = () => {
     if (highlightedSquares.clickedSquare === square) {
       _clearHighlightedSquares();
     } else {
-      const legalNextMoves = game.moves({ square: square , verbose: true}).map(move => ({
-        from: move.from,
-        to: move.to,
-        promotion: move.promotion,
-        captured: move.captured,
-      }));
+      const legalNextMoves = game
+        .moves({ square: square, verbose: true })
+        .map((move) => ({
+          from: move.from,
+          to: move.to,
+          promotion: move.promotion,
+          captured: move.captured,
+        }));
       setHighlightedSquares({
         clickedSquare: square,
         legalMoveSquares: legalNextMoves,
@@ -80,16 +85,18 @@ const Board = () => {
     if (game.isGameOver()) return;
 
     const piece = game.get(square);
-    
+
     // click on an empty square or on the opponent's piece
     if (!piece || piece.color !== game.turn()) {
-      const moves = highlightedSquares.legalMoveSquares.filter(move => move.to === square);
+      const moves = highlightedSquares.legalMoveSquares.filter(
+        (move) => move.to === square
+      );
       if (moves.length === 1) {
         makeAMove({
           from: highlightedSquares.clickedSquare,
           to: square,
-        })
-      } else if (moves.some(move => move.promotion)) {
+        });
+      } else if (moves.some((move) => move.promotion)) {
         setShowPromotionDialog(true);
         setPromotionToSquare(square);
         return;
@@ -101,7 +108,7 @@ const Board = () => {
 
     // click on the player's own piece
     onOwnPieceClicked(square);
-  }
+  };
   return (
     <StyledBoardContainer>
       <Chessboard
@@ -109,20 +116,28 @@ const Board = () => {
         boardWidth={window.innerHeight * 0.8}
         position={game.fen()}
         onPieceDrop={onDrop}
+        boardOrientation={orientation}
         onSquareClick={onSquareClicked}
         customSquareStyles={{
           [highlightedSquares.clickedSquare]: {
-            backgroundColor: '#9dc3e6',
+            backgroundColor: "#9dc3e6",
           },
           ...highlightedSquares.legalMoveSquares.reduce((acc, legalMove) => {
-            acc[legalMove.to] = legalMove.captured ? { backgroundColor: '#ff3333' } : { background: 'radial-gradient(circle, grey 20%, transparent 10%)' };
+            acc[legalMove.to] = legalMove.captured
+              ? { backgroundColor: "#ff3333" }
+              : {
+                  background:
+                    "radial-gradient(circle, grey 20%, transparent 10%)",
+                };
             return acc;
           }, {}),
         }}
         showPromotionDialog={showPromotionDialog} // only applicable to piece click mode
         promotionToSquare={promotionToSquare} // only applicable to piece click mode
         onPieceDragBegin={onPieceDragBegan}
-        isDraggablePiece={({piece, sourceSquare}) => piece[0] === game.turn() && !game.isGameOver()}
+        isDraggablePiece={({ piece, sourceSquare }) =>
+          piece[0] === game.turn() && !game.isGameOver()
+        }
       />
     </StyledBoardContainer>
   );
@@ -155,4 +170,3 @@ export default Board;
   .undo()
   .validateFen(fen)
 */
-

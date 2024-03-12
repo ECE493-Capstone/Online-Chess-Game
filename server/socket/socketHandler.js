@@ -1,7 +1,7 @@
 const { Server } = require("socket.io");
 const gameEvents = require("./events/gameEvents");
 const roomHandler = require("./rooms/roomHandler");
-const { handleDisconnection } = require("./events/gameUtils");
+const { handleDisconnection } = require("./events/socketUtils");
 
 const handleSocket = (server) => {
   const io = new Server(server, {

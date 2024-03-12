@@ -70,6 +70,7 @@ const Login = () => {
         if (res.status === 200) {
           console.log("User logged in successfully");
           cookie.set("userId", res.data.userId);
+          cookie.set("username", res.data.username);
           // TODO: route to landing page
           return Promise.resolve(undefined);
         }
@@ -77,30 +78,6 @@ const Login = () => {
       .catch((err) => {
         dispatch({ type: "SET_ERROR", payload: err.response.data.message });
       });
-    // fetch(`${SERVER_URL}/signin`, {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({
-    //     identity: identity,
-    //     password: password,
-    //   }),
-    // })
-    //   .then((res) => {
-    //     setIsSubmitting(false);
-    //     if (res.status === 200) {
-    //       console.log("User logged in successfully");
-    //       // TODO: route to landing page
-    //       return Promise.resolve(undefined);
-    //     }
-    //     return res.json();
-    //   })
-    //   .then((data) => {
-    //     if (data === undefined) return;
-    //     dispatch({ type: "SET_ERROR", payload: data.message });
-    //   })
-    //   .catch((err) => console.log(err));
   };
 
   return (
