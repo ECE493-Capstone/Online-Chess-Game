@@ -40,7 +40,7 @@ const LoginReducer = (state, action) => {
   }
 };
 
-const Login = () => {
+const Login = ({ onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [{ identity, password, errorMsg }, dispatch] = useReducer(
     LoginReducer,
@@ -74,6 +74,7 @@ const Login = () => {
         if (res.status === 200) {
           console.log("User logged in successfully");
           // TODO: route to landing page
+          onClose();
           navigate('/');
           return Promise.resolve(undefined);
         }

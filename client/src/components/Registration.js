@@ -43,7 +43,7 @@ const RegisterReducer = (state, action) => {
   }
 };
 
-const Registration = () => {
+const Registration = ({ onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [{ username, password, email, errorMsg }, dispatch] = useReducer(
     RegisterReducer,
@@ -81,6 +81,7 @@ const Registration = () => {
           // route to the login page then return empty promise
 
           // route to the previous page the user was on
+          onClose();
           navigate(-1);
           return Promise.resolve(undefined);
         }
