@@ -1,130 +1,54 @@
 import React, { useState } from "react";
-import { Chessboard } from "react-chessboard";
 import styled from "styled-components";
-import { Chess, WHITE, BLACK, SQUARES } from "chess.js";
+import Pieces from "./Pieces";
+import { useSelector } from "react-redux";
+import Square from "./Square";
 
-const StyledBoardContainer = styled.div``;
+const StyledBoard = styled.div`
+  display: flex;
+  flex-direction: column;
+  border: 2px solid black;
+  width: 400px;
+  height: 400px;
+  .board-row {
+    display: flex;
+    .board-square {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .light-square {
+      background-color: #f0d9b5;
+    }
 
+    .dark-square {
+      background-color: #b58863;
+    }
+  }
+`;
 const Board = () => {
-  const [game, setGame] = useState(new Chess());
-
-  // states to handle piece click -------------------------------------------
-  const [highlightedSquares, setHighlightedSquares] = useState({
-    clickedSquare: null,
-    legalMoveSquares: [],
-  });
-  const [showPromotionDialog, setShowPromotionDialog] = useState(false);
-  const [promotionToSquare, setPromotionToSquare] = useState(null);
-  // -------------------------------------------------------------------------
-
-  if (game.isGameOver()) {
-    alert("Game Over");
-  }
-
-  const _clearHighlightedSquares = () => {
-    setHighlightedSquares({
-      clickedSquare: null,
-      legalMoveSquares: [],
-    });
-  }
-
-  const makeAMove = (move) => {
-    const gameCopy = Object.assign(
-      Object.create(Object.getPrototypeOf(game)),
-      game
-    );
-    const result = gameCopy.move(move);
-    setGame(gameCopy);
-    return result; // null if the move was illegal, the move object if the move was legal
-  };
-
-  const onDrop = (sourceSquare, targetSquare, piece) => {
-    const fromSquare = sourceSquare || highlightedSquares.clickedSquare; // = clickedSquare if it's a promotion in click mode
-    const legalTargetSquares = game.moves({square: fromSquare, verbose: true}).map(move => move.to);
-
-    let move = null;
-    if (legalTargetSquares.includes(targetSquare)) {
-      move = makeAMove({
-        from: fromSquare,
-        to: targetSquare,
-        promotion: piece.slice(-1).toLowerCase(), // piece is a string like 'wP' or 'bQ'
-      });
-      console.log(game.board());
-    }
-    
-    _clearHighlightedSquares();
-    
-    return move === null ? false : true;
-  };
-
-  const onOwnPieceClicked = (square) => {
-    if (highlightedSquares.clickedSquare === square) {
-      _clearHighlightedSquares();
-    } else {
-      const legalNextMoves = game.moves({ square: square , verbose: true}).map(move => ({
-        from: move.from,
-        to: move.to,
-        promotion: move.promotion,
-        captured: move.captured,
-      }));
-      setHighlightedSquares({
-        clickedSquare: square,
-        legalMoveSquares: legalNextMoves,
-      });
-    }
-  };
-
-  const onPieceDragBegan = (piece, square) => onOwnPieceClicked(square);
-
-  const onSquareClicked = (square) => {
-    if (game.isGameOver()) return;
-
-    const piece = game.get(square);
-    
-    // click on an empty square or on the opponent's piece
-    if (!piece || piece.color !== game.turn()) {
-      const moves = highlightedSquares.legalMoveSquares.filter(move => move.to === square);
-      if (moves.length === 1) {
-        makeAMove({
-          from: highlightedSquares.clickedSquare,
-          to: square,
-        })
-      } else if (moves.some(move => move.promotion)) {
-        setShowPromotionDialog(true);
-        setPromotionToSquare(square);
-        return;
-      }
-
-      _clearHighlightedSquares();
-      return;
-    }
-
-    // click on the player's own piece
-    onOwnPieceClicked(square);
-  }
+  // Define the chess board as a 2D array
+  const board = useSelector((state) => state.board.board);
+  // Render the chess board
   return (
-    <StyledBoardContainer>
-      <Chessboard
-        className="board"
-        boardWidth={window.innerHeight * 0.8}
-        position={game.fen()}
-        onPieceDrop={onDrop}
-        onSquareClick={onSquareClicked}
-        customSquareStyles={{
-          [highlightedSquares.clickedSquare]: {
-            backgroundColor: '#9dc3e6',
-          },
-          ...highlightedSquares.legalMoveSquares.reduce((acc, legalMove) => {
-            acc[legalMove.to] = legalMove.captured ? { backgroundColor: '#ff3333' } : { background: 'radial-gradient(circle, grey 20%, transparent 10%)' };
-            return acc;
-          }, {}),
-        }}
-        showPromotionDialog={showPromotionDialog} // only applicable to piece click mode
-        promotionToSquare={promotionToSquare} // only applicable to piece click mode
-        onPieceDragBegin={onPieceDragBegan}
-        isDraggablePiece={({piece, sourceSquare}) => piece[0] === game.turn() && !game.isGameOver()}
-      />
-    </StyledBoardContainer>
+    <StyledBoard>
+      {board.map((row, rowIndex) => (
+        <div key={rowIndex} className="board-row">
+          {row.map((piece, colIndex) => (
+            <div
+              key={colIndex}
+              className={`board-square ${
+                (rowIndex + colIndex) % 2 === 0 ? "light-square" : "dark-square"
+              }`}
+            >
+              <Square piece={piece} rowIndex={rowIndex} colIndex={colIndex} />
+            </div>
+          ))}
+        </div>
+      ))}
+    </StyledBoard>
   );
 };
 
@@ -155,4 +79,3 @@ export default Board;
   .undo()
   .validateFen(fen)
 */
-

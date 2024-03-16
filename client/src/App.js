@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import io from "socket.io-client";
 import { setSocket } from "./features/userSlice";
 import TestJoin from "./components/pages/TestJoin";
+import Match from "./components/pages/Match";
 
 const darkTheme = createTheme({
   palette: {
@@ -28,6 +29,7 @@ const App = () => {
           <Route path="/" element={<Main />} />
           <Route path="/test" element={<Test />} />
           <Route path="/test-join" element={<TestJoin />} />
+          <Route path="/match" element={<Match />} />
         </Routes>
       </Router>
     </ThemeProvider>
