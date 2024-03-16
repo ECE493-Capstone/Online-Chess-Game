@@ -5,6 +5,7 @@ import styled from "styled-components";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import PasswordOutlinedIcon from "@mui/icons-material/PasswordOutlined";
 import { SERVER_URL } from "../config";
+import { useNavigate } from "react-router-dom";
 
 const LoginContainer = styled.div`
   border: 1px solid white;
@@ -39,7 +40,7 @@ const LoginReducer = (state, action) => {
   }
 };
 
-const Login = () => {
+const Login = ({ onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [{ identity, password, errorMsg }, dispatch] = useReducer(
     LoginReducer,
@@ -50,6 +51,8 @@ const Login = () => {
       errorMsg: "",
     }
   );
+
+  const navigate = useNavigate(); // navigation element
 
   const handleSubmit = (e) => {
     setIsSubmitting(true);
@@ -71,6 +74,8 @@ const Login = () => {
         if (res.status === 200) {
           console.log("User logged in successfully");
           // TODO: route to landing page
+          onClose();
+          navigate('/');
           return Promise.resolve(undefined);
         }
         return res.json();
