@@ -8,6 +8,7 @@ import Test from "./components/pages/Test";
 import TimeSelect from "./components/TimeSelect";
 import Match from "./components/pages/Match";
 import GameSelect from "./components/GameSelection";
+import Voice from "./components/Voice";
 
 const darkTheme = createTheme({
   palette: {
@@ -28,6 +29,7 @@ const App = () => {
           <Route path="/timeselect" element={<TimeSelect />} />
           <Route path="/match" element={<Match />} />
           <Route path="/gameselect" element={<GameSelect />} />
+          <Route path="/voice" element={<Voice />} />
         </Routes>
       </Router>
     </ThemeProvider>
