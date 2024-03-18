@@ -81,6 +81,8 @@ class Chessboard {
     } else if (piece.toLowerCase() === 'r' && fromCol === 7) {
       this._castlingRights = this._castlingRights.filter(right => right !== KING_SIDE_CASTLE);
     }
+
+    this._turn = this._turn === WHITE ? BLACK : WHITE;
   }
 
   getCastlingRights() {
@@ -92,9 +94,17 @@ class Chessboard {
     const allAttackedSquares = this._getAllAttackedSquares();
     return allAttackedSquares.some(([row, col]) => row === kingSquare[0] && col === kingSquare[1]);
   }
+
+  isGameOver() {
+    return this._isEnded || this.isCheckmate() || this.isDraw();
+  }
+
+  isDraw() {
+    return this.isStalemate() || this.inThreefoldRepetition() || this.insufficientMaterial() || this.isFiftyMoveRule();
+  }
   
   isCheckmate() {
-    return this.isChecked() && this._getAllPossibleMoves().length === 0;
+    return this.isChecked() && this._getAllLegalMoves().length === 0;
   }
 
   _findKingSquare() {
@@ -144,7 +154,28 @@ class Chessboard {
     return allLegalMoves;
   }
 
-  _getAttackedSquares(fromRow, fromCol) {
+  _getCheckSquares() { // return the squares that are checking the king
+    const kingSquare = this._findKingSquare();
+    const checkSquares = [];
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        if (this.get(row, col) !== null && !this._isSameSide(this.get(row, col))) {
+          const attackedSquares = this._getAttackedSquares(row, col);
+          if (attackedSquares.some(([r, c]) => r === kingSquare[0] && c === kingSquare[1])) {
+            checkSquares.push([row, col]);
+          }
+        }
+      }
+    }
+    return checkSquares;    
+  }
+
+  _getCheckPath(fromRow, fromCol) {
+    const piece = this.get(fromRow, fromCol);
+    
+  } 
+
+  _getAttackedSquares(fromRow, fromCol) { // return squares that piece from [fromRow, fromCol] can attack
     const piece = this.get(fromRow, fromCol);
     if (piece === null) return [];
     if (this._isSameSide(piece)) return [];
@@ -264,7 +295,11 @@ class Chessboard {
     const piece = this.get(fromRow, fromCol);
     if (piece === null) return [];
 
-    const possibleMoves = [];
+    let possibleMoves = [];
+    const checkSquares = this._getCheckSquares();
+    const checkedPieces = checkSquares.map(([row, col]) => this.get(row, col));
+    const isChecked = this.isChecked();
+
     switch (piece.toLowerCase()) {
       case 'p':
         const direction = this._turn === WHITE ? -1 : 1;
@@ -293,6 +328,14 @@ class Chessboard {
           if (enPassantRow === (fromRow + direction) && (enPassantCol === fromCol - 1 || enPassantCol === fromCol + 1))
             possibleMoves.push([enPassantRow, enPassantCol]);
         }
+
+        // handle when being checked
+        if (isChecked) {
+          if (checkedPieces.length === 1 || ['q', 'r', 'b'].includes(checkedPieces[0].toLowerCase())) {
+            possibleMoves = possibleMoves.filter(([row, col]) => checkSquares.some(([r, c]) => r === row && c === col));
+          }
+        }
+
         break;
       case 'r':
         const rookDirections = [
