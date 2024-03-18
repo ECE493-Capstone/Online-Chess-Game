@@ -1,4 +1,5 @@
 import Fuse from "fuse.js";
+import { CHESS_POSITIONS } from "../constants/BoardConstants";
 export default class VoiceMove {
   Pieces = [
     { id: 1, name: "Pawn" },
@@ -15,6 +16,20 @@ export default class VoiceMove {
       keys: ["name"],
       includeScore: true,
     });
+  }
+
+  generateGrammar(legalMoves) {
+    let moveRules = Object.entries(legalMoves)
+      .map(([startPos, endPositions]) => {
+        return `${startPos} TO ${endPositions.join(" | ")}`;
+      })
+      .join(" | ");
+    moveRules += " | short castle | long castle";
+    const grammar =
+      "#JSGF V1.0; grammar chess; public <chess_position> = " +
+      CHESS_POSITIONS.join(" | ") +
+      " ; public <chess_move> = <chess_position> TO <chess_position>;";
+    console.log(grammar);
   }
 
   generateMoves() {

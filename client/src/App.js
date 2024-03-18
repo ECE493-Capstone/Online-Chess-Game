@@ -8,7 +8,6 @@ import TimeSelect from "./components/TimeSelect";
 import Match from "./components/pages/Match";
 import GameSelect from "./components/GameSelection";
 import Voice from "./components/Voice";
-import Main from "./components/pages/Main";
 import { useDispatch, useSelector } from "react-redux";
 import io from "socket.io-client";
 import { setSocket } from "./features/userSlice";

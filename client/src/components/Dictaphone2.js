@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
+import Chessboard from "../models/Chessboard";
 import FuzzySet from "fuzzyset";
+import VoiceMove from "../lib/VoiceMove";
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition;
 const SpeechGrammarList =
@@ -71,43 +73,27 @@ const CHESS_POSITIONS = [
   "H8",
 ];
 
-const MOVES = [];
-for (let i = 0; i < CHESS_POSITIONS.length; i++) {
-  for (let j = 0; j < CHESS_POSITIONS.length; j++) {
-    MOVES.push(CHESS_POSITIONS[i] + " " + CHESS_POSITIONS[j]);
-  }
-}
-const recognition = new SpeechRecognition();
-const speechRecognitionList = new SpeechGrammarList();
-const grammar = `
-  #JSGF V1.0;
-  grammar chessCommands;
-  
-  public <command> = <singleMove> | <captureMove> | <pieceMove> | <promotion>;
-  
-  <singleMove> = <file> <rank>;
-  <captureMove> = <file> <rank> "takes" <file> <rank>;
-  <pieceMove> = <piece> <position> "to" <position>;
-  <promotion> = "promote" "to" <piece>;
-  
-  <file> = A | B | C | D | E | F | G | H;
-  <rank> = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
-  <position> = <file> <rank>;
-  <piece> = "pawn" | "knight" | "bishop" | "rook" | "queen" | "king";
-`;
-console.log(grammar);
-speechRecognitionList.addFromString(grammar, 1);
-recognition.grammars = speechRecognitionList;
-recognition.lang = "en-US";
-recognition.interimResults = false;
-recognition.maxAlternatives = 1000;
-const fzySet = FuzzySet(MOVES);
-
 const Dictaphone2 = () => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
-
+  const chessboard = new Chessboard();
   useEffect(() => {
+    const MOVES = [];
+    for (let i = 0; i < CHESS_POSITIONS.length; i++) {
+      for (let j = 0; j < CHESS_POSITIONS.length; j++) {
+        MOVES.push(CHESS_POSITIONS[i] + " " + CHESS_POSITIONS[j]);
+      }
+    }
+
+    const recognition = new SpeechRecognition();
+    const speechRecognitionList = new SpeechGrammarList();
+    const grammar = "";
+    speechRecognitionList.addFromString(grammar, 1);
+    recognition.grammars = speechRecognitionList;
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1000;
+    const fzySet = FuzzySet(MOVES);
     if (isListening) {
       recognition.start();
     } else {
