@@ -6,6 +6,8 @@ import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined
 import PasswordOutlinedIcon from "@mui/icons-material/PasswordOutlined";
 import { SERVER_URL } from "../config";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import Cookies from "universal-cookie";
 
 const LoginContainer = styled.div`
   border: 1px solid white;
@@ -42,6 +44,7 @@ const LoginReducer = (state, action) => {
 
 const Login = ({ onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const cookie = new Cookies();
   const [{ identity, password, errorMsg }, dispatch] = useReducer(
     LoginReducer,
     {
@@ -59,32 +62,50 @@ const Login = ({ onClose }) => {
     dispatch({ type: "SET_ERROR", payload: "" });
 
     e.preventDefault();
-    fetch(`${SERVER_URL}/signin`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    axios
+      .post(`${SERVER_URL}/signin`, {
         identity: identity,
         password: password,
-      }),
-    })
+      })
       .then((res) => {
         setIsSubmitting(false);
+        console.log(res);
         if (res.status === 200) {
           console.log("User logged in successfully");
+          cookie.set("userId", res.data.userId);
           // TODO: route to landing page
           onClose();
-          navigate('/');
+          navigate("/");
           return Promise.resolve(undefined);
         }
-        return res.json();
       })
-      .then((data) => {
-        if (data === undefined) return;
-        dispatch({ type: "SET_ERROR", payload: data.message });
-      })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        dispatch({ type: "SET_ERROR", payload: err.response.data.message });
+      });
+    // fetch(`${SERVER_URL}/signin`, {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({
+    //     identity: identity,
+    //     password: password,
+    //   }),
+    // })
+    //   .then((res) => {
+    //     setIsSubmitting(false);
+    //     if (res.status === 200) {
+    //       console.log("User logged in successfully");
+    //       // TODO: route to landing page
+    //       return Promise.resolve(undefined);
+    //     }
+    //     return res.json();
+    //   })
+    //   .then((data) => {
+    //     if (data === undefined) return;
+    //     dispatch({ type: "SET_ERROR", payload: data.message });
+    //   })
+    //   .catch((err) => console.log(err));
   };
 
   return (
