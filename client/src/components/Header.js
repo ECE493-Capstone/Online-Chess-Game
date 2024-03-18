@@ -12,7 +12,8 @@ const HeaderElements = () => {
   const [anchorEl, setAnchorEl] = useState(null);
 
   // TODO: Edit so that we know when the user is logged in or not. For now, we hard-code it to true.
-  const isLoggedIn = true;
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+
 
   const handleSignInClick = () => {
     // navigate('/login');
@@ -40,6 +41,16 @@ const HeaderElements = () => {
     setAnchorEl(null);
   };
 
+  const handleProfileClick = () => {
+    setAnchorEl(null);
+    navigate('/profile');
+  };
+
+  const handleLogoutClick = () => {
+    setAnchorEl(null);
+    setIsLoggedIn(false);
+  };
+
   return (
     <>
       <div style={{ backgroundColor: "#f0f0f0", padding: "10px", display: "flex", justifyContent: "flex-end" }}>
@@ -56,8 +67,8 @@ const HeaderElements = () => {
               open={Boolean(anchorEl)}
               onClose={handleMenuClose}
             >
-              <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-              <MenuItem onClick={handleMenuClose}>Logout</MenuItem>
+              <MenuItem onClick={handleProfileClick}>Profile</MenuItem>
+              <MenuItem onClick={handleLogoutClick}>Logout</MenuItem>
             </Menu>
           </>
         ) : (
