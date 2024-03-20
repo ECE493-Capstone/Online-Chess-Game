@@ -2,6 +2,15 @@ const WHITE = "w";
 const BLACK = "b";
 const KING_SIDE_CASTLE = "O-O";
 const QUEEN_SIDE_CASTLE = "O-O-O";
+
+// FLOW OF GAME:
+// 1. Chessboard is created
+// 2. Call getAllLegalMoves on game start
+// 3. Player makes a move -> playYourMove
+// 4. Handle socket bs
+// 5. Opponent makes a move -> playOpponentMove
+// 6. Check if game is over
+// 7. If not, call getPinnedPieces, getAllAttackedSquares, getAllLegalMoves again
 class Chessboard {
   constructor() {
     this._turn = WHITE;
@@ -69,81 +78,16 @@ class Chessboard {
         attackedSquares.push([fromRow + direction, fromCol + 1]);
         break;
       case "r":
-        const rookDirections = [
-          [-1, 0], // up
-          [1, 0], // down
-          [0, -1], // left
-          [0, 1], // right
-        ];
-        for (const [dx, dy] of rookDirections) {
-          let currRow = fromRow + dx;
-          let currCol = fromCol + dy;
-          while (currRow >= 0 && currRow <= 7 && currCol >= 0 && currCol <= 7) {
-            attackedSquares.push([currRow, currCol]);
-            if (this.getPiece(currRow, currCol) !== null) break;
-            currRow += dx;
-            currCol += dy;
-          }
-        }
+        return this._getRookMoves(fromRow, fromCol);
         break;
       case "n":
-        const knightMoves = [
-          [-2, -1], // up left
-          [-2, 1], // up right
-          [-1, -2], // left up
-          [-1, 2], // right up
-          [1, -2], // left down
-          [1, 2], // right down
-          [2, -1], // down left
-          [2, 1], // down right
-        ];
-        for (const [dx, dy] of knightMoves) {
-          const newRow = fromRow + dx;
-          const newCol = fromCol + dy;
-          if (newRow >= 0 && newRow <= 7 && newCol >= 0 && newCol <= 7) {
-            attackedSquares.push([newRow, newCol]);
-          }
-        }
+        return this._getKnightMoves(fromRow, fromCol);
         break;
       case "b":
-        const bishopDirections = [
-          [-1, -1], // up left
-          [-1, 1], // up right
-          [1, -1], // down left
-          [1, 1], // down right
-        ];
-        for (const [dx, dy] of bishopDirections) {
-          let currRow = fromRow + dx;
-          let currCol = fromCol + dy;
-          while (currRow >= 0 && currRow <= 7 && currCol >= 0 && currCol <= 7) {
-            attackedSquares.push([currRow, currCol]);
-            if (this.getPiece(currRow, currCol) !== null) break;
-            currRow += dx;
-            currCol += dy;
-          }
-        }
+        return this._getBishopMoves(fromRow, fromCol);
         break;
       case "q":
-        const queenDirections = [
-          [-1, 0], // up
-          [1, 0], // down
-          [0, -1], // left
-          [0, 1], // right
-          [-1, -1], // up left
-          [-1, 1], // up right
-          [1, -1], // down left
-          [1, 1], // down right
-        ];
-        for (const [dx, dy] of queenDirections) {
-          let currRow = fromRow + dx;
-          let currCol = fromCol + dy;
-          while (currRow >= 0 && currRow <= 7 && currCol >= 0 && currCol <= 7) {
-            attackedSquares.push([currRow, currCol]);
-            if (this.getPiece(currRow, currCol) !== null) break;
-            currRow += dx;
-            currCol += dy;
-          }
-        }
+        return this._getQueenMoves(fromRow, fromCol);
         break;
       case "k":
         const kingMoves = [
@@ -172,7 +116,7 @@ class Chessboard {
   }
 
   _getAllAttackedSquares() {
-    const allAttackedSquares = [];
+    let allAttackedSquares = [];
     for (let row = 0; row < 8; row++) {
       for (let col = 0; col < 8; col++) {
         if (
@@ -180,7 +124,7 @@ class Chessboard {
           !this._isSameSide(this.getPiece(row, col))
         ) {
           const attackedSquares = this._getAttackedSquares(row, col);
-          allAttackedSquares.push(...attackedSquares);
+          allAttackedSquares = allAttackedSquares.concat(attackedSquares);
         }
       }
     }
