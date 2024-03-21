@@ -209,7 +209,7 @@ export class Chessboard {
       : piece === piece.toUpperCase();
   }
 
-  _checkUpdatePinnedDirections() {
+  _updatePinnedSquares() {
     const [row, col] = this._findKing();
     const pinnedSquares = {};
     // check if any piece is pinned
@@ -252,6 +252,7 @@ export class Chessboard {
       }
     }
     this._pinnedDirections = pinnedSquares;
+    return this._pinnedDirections;
   }
 
   add(row, col, piece) {
@@ -298,6 +299,7 @@ export class Chessboard {
         (right) => right !== KING_SIDE_CASTLE
       );
     }
+    return this._castlingRights;
   }
 
   _updateEnPassant(piece, fromRow, fromCol, toRow) {
@@ -307,6 +309,7 @@ export class Chessboard {
     } else {
       this._enPassantSquare = null;
     }
+    return this._enPassantSquare;
   }
 
   playYourMove(move) {
@@ -621,6 +624,10 @@ export class Chessboard {
 
   printPinnedDirections(row, col) {
     const pinnedDirection = this._pinnedDirections[this._hash(row, col)];
+    if (!pinnedDirection) {
+      console.log("not pinned");
+      return;
+    }
     const pinnedRow = row + pinnedDirection[0];
     const pinnedCol = col + pinnedDirection[1];
     const prettyBoard = this._board.map((row, i) => {
