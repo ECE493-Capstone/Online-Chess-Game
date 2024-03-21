@@ -9,9 +9,10 @@ export class Chessboard {
     this._castlingRights = [KING_SIDE_CASTLE, QUEEN_SIDE_CASTLE];
     this._isEnded = false;
     this._isInCheck = false;
-    this._checkingPieces = null;
-    this._allAttackedSquares = null;
-    this._pinnedSquares = null;
+    this._checkingPieces = []; // list of squares in the form [row, col] that are checking the king
+    this._allAttackedSquares = []; // list of all squares currently under attacked by opponent
+    this._pinnedDirections = {}; // dictionary of squares with their pinned directions (CAUTION: key is _hash(row,col))
+    this._allLegalMoves = {}; // dictionary of all legal moves for each square (CAUTION: key is _hash(row,col))
     this._board = [
       // uppercase: black, lowercase: white
       ["R", "N", "B", "Q", "K", "B", "N", "R"], // [0]
@@ -23,7 +24,6 @@ export class Chessboard {
       ["p", "p", "p", "p", "p", "p", "p", "p"], // [6]
       ["r", "n", "b", "q", "k", "b", "n", "r"], // [7]
     ];
-    this._allLegalMoves = {};
   }
 
   get turn() {
@@ -68,16 +68,81 @@ export class Chessboard {
         attackedSquares.push([fromRow + direction, fromCol + 1]);
         break;
       case "r":
-        return this._getRookMoves(fromRow, fromCol);
+        const rookDirections = [
+          [-1, 0], // up
+          [1, 0], // down
+          [0, -1], // left
+          [0, 1], // right
+        ];
+        for (const [dx, dy] of rookDirections) {
+          let currRow = fromRow + dx;
+          let currCol = fromCol + dy;
+          while (currRow >= 0 && currRow <= 7 && currCol >= 0 && currCol <= 7) {
+            attackedSquares.push([currRow, currCol]);
+            if (this.getPiece(currRow, currCol) !== null) break;
+            currRow += dx;
+            currCol += dy;
+          }
+        }
         break;
       case "n":
-        return this._getKnightMoves(fromRow, fromCol);  
+        const knightMoves = [
+          [-2, -1], // up left
+          [-2, 1], // up right
+          [-1, -2], // left up
+          [-1, 2], // right up
+          [1, -2], // left down
+          [1, 2], // right down
+          [2, -1], // down left
+          [2, 1], // down right
+        ];
+        for (const [dx, dy] of knightMoves) {
+          const newRow = fromRow + dx;
+          const newCol = fromCol + dy;
+          if (newRow >= 0 && newRow <= 7 && newCol >= 0 && newCol <= 7) {
+            attackedSquares.push([newRow, newCol]);
+          }
+        }
         break;
       case "b":
-        return this._getBishopMoves(fromRow, fromCol);
+        const bishopDirections = [
+          [-1, -1], // up left
+          [-1, 1], // up right
+          [1, -1], // down left
+          [1, 1], // down right
+        ];
+        for (const [dx, dy] of bishopDirections) {
+          let currRow = fromRow + dx;
+          let currCol = fromCol + dy;
+          while (currRow >= 0 && currRow <= 7 && currCol >= 0 && currCol <= 7) {
+            attackedSquares.push([currRow, currCol]);
+            if (this.getPiece(currRow, currCol) !== null) break;
+            currRow += dx;
+            currCol += dy;
+          }
+        }
         break;
       case "q":
-        return this._getQueenMoves(fromRow, fromCol);
+        const queenDirections = [
+          [-1, 0], // up
+          [1, 0], // down
+          [0, -1], // left
+          [0, 1], // right
+          [-1, -1], // up left
+          [-1, 1], // up right
+          [1, -1], // down left
+          [1, 1], // down right
+        ];
+        for (const [dx, dy] of queenDirections) {
+          let currRow = fromRow + dx;
+          let currCol = fromCol + dy;
+          while (currRow >= 0 && currRow <= 7 && currCol >= 0 && currCol <= 7) {
+            attackedSquares.push([currRow, currCol]);
+            if (this.getPiece(currRow, currCol) !== null) break;
+            currRow += dx;
+            currCol += dy;
+          }
+        }
         break;
       case "k":
         const kingMoves = [
@@ -105,7 +170,7 @@ export class Chessboard {
     return attackedSquares;
   }
 
-  _getAllAttackedSquares() {
+  _updateAllAttackedSquares() {
     const allAttackedSquares = [];
     for (let row = 0; row < 8; row++) {
       for (let col = 0; col < 8; col++) {
@@ -119,6 +184,7 @@ export class Chessboard {
     this._allAttackedSquares = [
       ...new Set(allAttackedSquares.map(JSON.stringify)),
     ].map(JSON.parse);
+    return this._allAttackedSquares;
   }
 
   _findKing() {
@@ -143,7 +209,7 @@ export class Chessboard {
       : piece === piece.toUpperCase();
   }
 
-  _checkUpdatePinnedSquares() {
+  _checkUpdatePinnedDirections() {
     const [row, col] = this._findKing();
     const pinnedSquares = {};
     // check if any piece is pinned
@@ -178,14 +244,14 @@ export class Chessboard {
             break;
           } else if (this._isSameSide(piece) && counter === 0) {
             counter++;
-            pinnedPiece = [currRow, currCol];
+            pinnedPiece = this._hash(currRow, currCol);
           }
         }
         currRow += dx;
         currCol += dy;
       }
     }
-    this._pinnedSquares = pinnedSquares;
+    this._pinnedDirections = pinnedSquares;
   }
 
   add(row, col, piece) {
@@ -201,12 +267,12 @@ export class Chessboard {
     this.remove(fromRow, fromCol);
   }
 
-  // playOpponentMove(move) { // this function should be part of ui module
-  //   const { fromRow, fromCol, toRow, toCol } = move;
-  //   for (let i = 0; i < fromRow.length; i++) {
-  //     this.move(fromRow[i], fromCol[i], toRow[i], toCol[i]);
-  //   }
-  // }
+  playOpponentMove(move) { // this function should be part of ui module
+    const { fromRow, fromCol, toRow, toCol } = move;
+    for (let i = 0; i < fromRow.length; i++) {
+      this._move(fromRow[i], fromCol[i], toRow[i], toCol[i]);
+    }
+  }
 
   _updateCastle(piece, fromCol, toCol) {
     // check for castling
@@ -260,7 +326,7 @@ export class Chessboard {
     const piece = this.getPiece(fromRow, fromCol);
     if (piece === null) return false;
 
-    return this._allLegalMoves[[fromRow, fromCol]].some(([r, c]) => r === toRow && c === toCol);
+    return this._allLegalMoves[this._hash(fromRow, fromCol)].some(([r, c]) => r === toRow && c === toCol);
   }
 
   getPiece(row, col) {
@@ -290,7 +356,7 @@ export class Chessboard {
     const startRow = this._turn === WHITE ? 6 : 1;
     let limit_x, limit_y;
     if (this._isPinnedSquare(fromRow, fromCol)) {
-      const [dx, dy] = this._pinnedSquares[[fromRow, fromCol]];
+      const [dx, dy] = this._getPinnedDirections(fromRow, fromCol);
       limit_x = dx;
       limit_y = dy;
     }
@@ -342,7 +408,7 @@ export class Chessboard {
     const possibleMoves = [];
     let limit_x, limit_y;
     if (this._isPinnedSquare(fromRow, fromCol)) {
-      [limit_x, limit_y] = this._pinnedSquares[[fromRow, fromCol]];
+      [limit_x, limit_y] = this._getPinnedDirections(fromRow, fromCol);
     }
     const knightMoves = [
       [-2, -1], // up left
@@ -370,7 +436,11 @@ export class Chessboard {
     return possibleMoves;
   }
   _isPinnedSquare(row, col) {
-    return this._pinnedSquares && this._pinnedSquares[[row, col]];
+    return this._pinnedDirections && this._pinnedDirections[this._hash(row, col)];
+  }
+
+  _getPinnedDirections(row, col) {
+    return this._pinnedDirections[this._hash(row, col)];
   }
   _getRookMoves(fromRow, fromCol) {
     const possibleMoves = [];
@@ -382,7 +452,7 @@ export class Chessboard {
     ];
     let limit_x, limit_y;
     if (this._isPinnedSquare(fromRow, fromCol)) {
-      [limit_x, limit_y] = this._pinnedSquares[[fromRow, fromCol]];
+      [limit_x, limit_y] = this._getPinnedDirections(fromRow, fromCol);
     }
     for (const [dx, dy] of rookDirections) {
       let currRow = fromRow + dx;
@@ -414,7 +484,7 @@ export class Chessboard {
     ];
     let limit_x, limit_y;
     if (this._isPinnedSquare(fromRow, fromCol)) {
-      [limit_x, limit_y] = this._pinnedSquares[[fromRow, fromCol]];
+      [limit_x, limit_y] = this._getPinnedDirections(fromRow, fromCol);
     }
     for (const [dx, dy] of bishopDirections) {
       let currRow = fromRow + dx;
@@ -442,10 +512,7 @@ export class Chessboard {
     );
   }
   _isSquareUnderAttack(row, col) {
-    if (this._allAttackedSquares) {
-      return this._allAttackedSquares.some(([r, c]) => r === row && c === col);
-    }
-    return false;
+    return this._allAttackedSquares.some(([r, c]) => r === row && c === col);
   }
   _getKingMoves(fromRow, fromCol) {
     const possibleMoves = [];
@@ -475,7 +542,7 @@ export class Chessboard {
     return possibleMoves;
   }
 
-  getLegalMoves(row, col) {
+  _getLegalMoves(row, col) {
     const piece = this.getPiece(row, col);
     if (piece === null) return [];
     switch (piece.toLowerCase()) {
@@ -502,14 +569,22 @@ export class Chessboard {
       for (let col = 0; col < 8; col++) {
         const piece = this.getPiece(row, col);
         if (piece && this._isSameSide(piece)) {
-          const moves = this.getLegalMoves(row, col);
-          this._allLegalMoves[[row, col]] = moves;
+          const moves = this._getLegalMoves(row, col);
+          this._allLegalMoves[this._hash(row, col)] = moves;
         }
       }
     }
+    return this._allLegalMoves;
   }
 
-  prettyPrint() {
+  _hash(row, col) {
+    // use this to get key for dictionary since they don't work well with arrays being keys
+    return row * 10 + col;
+  }
+
+  // print functions ----------------
+
+  printBoard() {
     const prettyBoard = this._board
       .map((row) =>
         row.map((piece) => (piece === null ? "| |" : `|${piece}|`)).join("")
@@ -517,6 +592,63 @@ export class Chessboard {
       .join("\n");
     console.log(prettyBoard);
   }
+
+  printCheckingPieces() {
+    const prettyBoard = this._board.map((row, i) => {
+      return row
+        .map((piece, j) => {
+          if (this._checkingPieces.some(([r, c]) => r === i && c === j))
+            return `|${piece}|`;
+          return piece === null ? "| |" : `|${piece}|`;
+        })
+        .join("");
+    }).join("\n");
+    console.log(prettyBoard);
+  }
+
+  printAttackedSquares() {
+    const prettyBoard = this._board.map((row, i) => {
+      return row
+        .map((piece, j) => {
+          if (this._allAttackedSquares.some(([r, c]) => r === i && c === j))
+            return `|!|`;
+          return piece === null ? "| |" : `|${piece}|`;
+        })
+        .join("");
+    }).join("\n");
+    console.log(prettyBoard);
+  }
+
+  printPinnedDirections(row, col) {
+    const pinnedDirection = this._pinnedDirections[this._hash(row, col)];
+    const pinnedRow = row + pinnedDirection[0];
+    const pinnedCol = col + pinnedDirection[1];
+    const prettyBoard = this._board.map((row, i) => {
+      return row
+        .map((piece, j) => {
+          if (i === pinnedRow && j === pinnedCol) return `|*|`;
+          return piece === null ? "| |" : `|${piece}|`;
+        })
+        .join("");
+    }).join("\n");
+    console.log(prettyBoard);
+  }
+
+  printLegalMoves(row, col) {
+    const moves = this._allLegalMoves[this._hash(row, col)];
+    const prettyBoard = this._board.map((row, i) => {
+      return row
+        .map((piece, j) => {
+          if (moves.some(([r, c]) => r === i && c === j)) return `|*|`;
+          return piece === null ? "| |" : `|${piece}|`;
+        })
+        .join("");
+    }).join("\n");
+    console.log(prettyBoard);
+  }
+
+  // print functions ----------------
+
 }
 
 const chessboard = new Chessboard();
