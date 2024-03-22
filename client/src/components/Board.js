@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Pieces from "./Pieces";
 import { useSelector } from "react-redux";
 import Square from "./Square";
+import { Chessboard, WHITE } from "../models/Chessboard";
 
 const StyledBoard = styled.div`
   display: flex;
@@ -28,10 +29,10 @@ const StyledBoard = styled.div`
     }
   }
 `;
-const Board = () => {
+const Board = ({ game }) => {
   // Define the chess board as a 2D array
-  const board = useSelector((state) => state.board.board);
   // Render the chess board
+  const board = game.getBoard();
   return (
     <StyledBoard>
       {board.map((row, rowIndex) => (
@@ -43,7 +44,12 @@ const Board = () => {
                 (rowIndex + colIndex) % 2 === 0 ? "light-square" : "dark-square"
               }`}
             >
-              <Square piece={piece} rowIndex={rowIndex} colIndex={colIndex} />
+              <Square
+                piece={piece}
+                rowIndex={rowIndex}
+                colIndex={colIndex}
+                game={game}
+              />
             </div>
           ))}
         </div>

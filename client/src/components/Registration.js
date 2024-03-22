@@ -6,6 +6,7 @@ import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined
 import PasswordOutlinedIcon from "@mui/icons-material/PasswordOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import { SERVER_URL } from "../config";
+import { registerUser } from "../api/auth";
 
 const RegistrationContainer = styled.div`
   border: 1px solid white;
@@ -60,17 +61,7 @@ const Registration = () => {
 
     e.preventDefault();
     // make a post call to the server to register the user and check response to see if the user was registered
-    fetch(`${SERVER_URL}/signup`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username: username,
-        password: password,
-        email: email,
-      }),
-    })
+    registerUser(username, email, password)
       .then((res) => {
         setIsSubmitting(false);
         if (res.status === 200) {

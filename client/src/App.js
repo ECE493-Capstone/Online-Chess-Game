@@ -7,6 +7,7 @@ import io from "socket.io-client";
 import { setSocket } from "./features/userSlice";
 import TestJoin from "./components/pages/TestJoin";
 import Match from "./components/pages/Match";
+import PrivateRoute from "./components/PrivateRoute";
 
 const darkTheme = createTheme({
   palette: {
@@ -29,7 +30,14 @@ const App = () => {
           <Route path="/" element={<Main />} />
           <Route path="/test" element={<Test />} />
           <Route path="/test-join" element={<TestJoin />} />
-          <Route path="/match" element={<Match />} />
+          <Route
+            path="/match"
+            element={
+              <PrivateRoute>
+                <Match />
+              </PrivateRoute>
+            }
+          />
         </Routes>
       </Router>
     </ThemeProvider>

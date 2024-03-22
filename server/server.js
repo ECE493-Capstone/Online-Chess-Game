@@ -3,6 +3,7 @@ const cors = require("cors");
 const signinRoutes = require("./routes/login.js");
 const registerRoutes = require("./routes/register.js");
 const sessionRoutes = require("./routes/session.js");
+const ongoingGamesRoutes = require("./routes/ongoingGames.js");
 const connect = require("./conn.js");
 const http = require("http");
 const bodyParser = require("body-parser");
@@ -18,6 +19,7 @@ connect();
 app.use("/signin", signinRoutes);
 app.use("/signup", registerRoutes);
 app.use("/session", sessionRoutes);
+app.use("/games/ongoing", ongoingGamesRoutes);
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });

@@ -4,9 +4,9 @@ import React, { useReducer, useState } from "react";
 import styled from "styled-components";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import PasswordOutlinedIcon from "@mui/icons-material/PasswordOutlined";
-import { SERVER_URL } from "../config";
-import axios from "axios";
 import Cookies from "universal-cookie";
+import { loginUser } from "../api/auth";
+import { useNavigate } from "react-router-dom";
 
 const LoginContainer = styled.div`
   border: 1px solid white;
@@ -44,6 +44,7 @@ const LoginReducer = (state, action) => {
 const Login = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const cookie = new Cookies();
+  const navigate = useNavigate();
   const [{ identity, password, errorMsg }, dispatch] = useReducer(
     LoginReducer,
     {
@@ -59,18 +60,14 @@ const Login = () => {
     dispatch({ type: "SET_ERROR", payload: "" });
 
     e.preventDefault();
-    axios
-      .post(`${SERVER_URL}/signin`, {
-        identity: identity,
-        password: password,
-      })
+    loginUser(identity, password)
       .then((res) => {
         setIsSubmitting(false);
         console.log(res);
         if (res.status === 200) {
           console.log("User logged in successfully");
           cookie.set("userId", res.data.userId);
-          // TODO: route to landing page
+          navigate("/");
           return Promise.resolve(undefined);
         }
       })

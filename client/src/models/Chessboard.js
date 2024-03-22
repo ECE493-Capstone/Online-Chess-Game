@@ -16,7 +16,6 @@ export class Chessboard {
     this._blockableSquares = []; // list of squares that can block the check
     this._attackedSquares = []; // list of all squares currently under attacked by opponent
     this._pinnedDirections = {}; // dictionary of squares with their pinned directions (CAUTION: key is _hash(row,col))
-    this._legalMoves = this._updateLegalMoves(); // dictionary of all legal moves for each square (CAUTION: key is _hash(row,col))
     this._board = [
       // uppercase: black, lowercase: white
       ["R", "N", "B", "Q", "K", "B", "N", "R"], // [0]
@@ -28,6 +27,7 @@ export class Chessboard {
       ["p", "p", "p", "p", "p", "p", "p", "p"], // [6]
       ["r", "n", "b", "q", "k", "b", "n", "r"], // [7]
     ];
+    this._legalMoves = this._updateLegalMoves(); // dictionary of all legal moves for each square (CAUTION: key is _hash(row,col))
   }
 
   get side() {
@@ -50,7 +50,6 @@ export class Chessboard {
     return this._castlingRights;
   }
 
-
   get isInCheck() {
     return this._isInCheck;
   }
@@ -63,12 +62,17 @@ export class Chessboard {
     return this._legalMoves;
   }
 
+  getBoard() {
+    return this._board;
+  }
 
   isDraw() {
-    return this._isStalemate() || 
+    return (
+      this._isStalemate() ||
       this._isInsufficientMaterial() ||
-      this._isThreefoldRepetition() || 
-      this._isFiftyMoveRule();
+      this._isThreefoldRepetition() ||
+      this._isFiftyMoveRule()
+    );
   }
 
   _isStalemate() {
@@ -77,14 +81,18 @@ export class Chessboard {
 
   _isInsufficientMaterial() {
     const pieces = this._board.flat().filter((piece) => piece !== null);
-    const pawns = pieces.filter(piece => piece.toLowerCase() === "p");
-    const rooks = pieces.filter(piece => piece.toLowerCase() === "r");
-    const queens = pieces.filter(piece => piece.toLowerCase() === "q");
-    const yourBishopKnights = pieces.filter(piece => this._isSameSide(piece) &&
-      (piece.toLowerCase() === "b" || piece.toLowerCase() === "n")
+    const pawns = pieces.filter((piece) => piece.toLowerCase() === "p");
+    const rooks = pieces.filter((piece) => piece.toLowerCase() === "r");
+    const queens = pieces.filter((piece) => piece.toLowerCase() === "q");
+    const yourBishopKnights = pieces.filter(
+      (piece) =>
+        this._isSameSide(piece) &&
+        (piece.toLowerCase() === "b" || piece.toLowerCase() === "n")
     );
-    const opponentBishopKnights = pieces.filter(piece => this._isEnemyPiece(piece) &&
-      (piece.toLowerCase() === "b" || piece.toLowerCase() === "n")
+    const opponentBishopKnights = pieces.filter(
+      (piece) =>
+        this._isEnemyPiece(piece) &&
+        (piece.toLowerCase() === "b" || piece.toLowerCase() === "n")
     );
 
     return (
@@ -111,7 +119,7 @@ export class Chessboard {
   _checkGameOver() {
     if (this.isCheckmate()) {
       this._isEnded = true;
-      this._winner = this._turn
+      this._winner = this._turn;
     } else if (this.isDraw()) {
       this._isEnded = true;
       this._winner = null;
@@ -166,7 +174,7 @@ export class Chessboard {
         console.warn(`we are blocking what??: ${[checkingPiece]}`);
         return blockableSquares;
     }
-   
+
     for (const [dx, dy] of directions) {
       const squaresInDirection = [];
       let currRow = checkRow + dx;
@@ -177,10 +185,10 @@ export class Chessboard {
           break;
         }
         // stop looking in this direction if hit non-king piece
-        if (!this._isEmptySquare(currRow, currCol)) break; 
-        
+        if (!this._isEmptySquare(currRow, currCol)) break;
+
         squaresInDirection.push([currRow, currCol]);
-        
+
         currRow += dx;
         currCol += dy;
       }
@@ -188,7 +196,13 @@ export class Chessboard {
     return blockableSquares;
   }
 
+  copy() {
+    return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
+  }
 
+  isSameTurn(turn) {
+    return this._turn === turn;
+  }
   _getAttackedSquares(fromRow, fromCol) {
     // return squares that piece from [fromRow, fromCol] can attack
     const piece = this.getPiece(fromRow, fromCol);
@@ -314,7 +328,9 @@ export class Chessboard {
         if (this._isEnemyPiece(this.getPiece(row, col))) {
           const attackedSquares = this._getAttackedSquares(row, col);
           allAttackedSquares.push(...attackedSquares);
-          if (allAttackedSquares.some(([r, c]) => r === kingRow && c === kingCol)) {
+          if (
+            allAttackedSquares.some(([r, c]) => r === kingRow && c === kingCol)
+          ) {
             this._checkingSquares.push([row, col]);
           }
         }
@@ -361,8 +377,7 @@ export class Chessboard {
   }
 
   _isSameSide(piece) {
-    return piece && 
-      this._side === WHITE
+    return piece && this._side === WHITE
       ? piece === piece.toLowerCase()
       : piece === piece.toUpperCase();
   }
@@ -425,7 +440,7 @@ export class Chessboard {
     const piece = this.getPiece(fromRow, fromCol);
     this.add(toRow, toCol, piece);
     this.remove(fromRow, fromCol);
-    if (piece.toLowerCase() === "k" && Math.abs(toCol - fromCol) === 2) 
+    if (piece.toLowerCase() === "k" && Math.abs(toCol - fromCol) === 2)
       this._castle(fromCol, toCol);
   }
 
@@ -459,7 +474,7 @@ export class Chessboard {
       console.error("move null???");
       return;
     }
-    
+
     // this._preUpdateHalfMove(piece, toRow, toCol);
     this._move(fromRow, fromCol, toRow, toCol);
     this._updateCastlingRights(piece, fromRow, fromCol);
@@ -467,7 +482,8 @@ export class Chessboard {
     this._turn = this._turn === WHITE ? BLACK : WHITE;
   }
 
-  _preUpdateHalfMove(piece, toRow, toCol) { // check for capturing or pawn movement
+  _preUpdateHalfMove(piece, toRow, toCol) {
+    // check for capturing or pawn movement
     if (piece.toLowerCase() === "p" || !this._isEmptySquare(toRow, toCol)) {
       this._halfMove = 0;
     } else {
@@ -489,10 +505,10 @@ export class Chessboard {
   _updateCastlingRights(piece, fromRow, fromCol) {
     if (!this._isSameSide(piece)) return;
     // only attempt to update castling rights if king or rook is moved from same side
-    if (piece.toLowerCase() === "k") { 
+    if (piece.toLowerCase() === "k") {
       this._castlingRights = [];
     } else if (piece.toLowerCase() === "r") {
-      const staringRow = this._side === WHITE ? 7 : 0;      
+      const staringRow = this._side === WHITE ? 7 : 0;
       if (fromCol === 0 && fromRow === staringRow) {
         this._castlingRights = this._castlingRights.filter(
           (right) => right !== QUEEN_SIDE_CASTLE
@@ -515,20 +531,21 @@ export class Chessboard {
     return this._enPassantSquare;
   }
 
-
   isLegalMove(move) {
     const { fromRow, fromCol, toRow, toCol } = move;
     const piece = this.getPiece(fromRow, fromCol);
     if (piece === null) return false;
 
-    return this._legalMoves[this._hash(fromRow, fromCol)].some(([r, c]) => r === toRow && c === toCol);
+    return this._legalMoves[this._hash(fromRow, fromCol)].some(
+      ([r, c]) => r === toRow && c === toCol
+    );
   }
 
   getPiece(row, col) {
     return this._board[row][col];
   }
 
-  _checkPinMovement(limit_x, limit_y, new_direction_x, new_direction_y) { 
+  _checkPinMovement(limit_x, limit_y, new_direction_x, new_direction_y) {
     /* 
       limit_x is pinned direction for row, limit_y is pinned direction for col 
       return true if piece is not pinned or new direction is same as pinned direction
@@ -556,9 +573,11 @@ export class Chessboard {
       limit_y = dy;
     }
     // check one square ahead
-    if (this._isEmptySquare(fromRow + direction, fromCol) &&
+    if (
+      this._isEmptySquare(fromRow + direction, fromCol) &&
       this._checkPinMovement(limit_x, limit_y, direction, 0) &&
-      (!this._isInCheck || this._isBlockableSquare(fromRow + direction, fromCol))
+      (!this._isInCheck ||
+        this._isBlockableSquare(fromRow + direction, fromCol))
     ) {
       possibleMoves.push([fromRow + direction, fromCol]);
     }
@@ -567,20 +586,25 @@ export class Chessboard {
       fromRow === startRow &&
       this._isEmptySquare(fromRow + 2 * direction, fromCol) &&
       this._checkPinMovement(limit_x, limit_y, direction, 0) &&
-      (!this._isInCheck || this._isBlockableSquare(fromRow + 2 * direction, fromCol))
+      (!this._isInCheck ||
+        this._isBlockableSquare(fromRow + 2 * direction, fromCol))
     ) {
       possibleMoves.push([fromRow + 2 * direction, fromCol]);
     }
     // check diagonal squares for capturing
-    if (this._isEnemyPiece(this.getPiece(fromRow + direction, fromCol - 1)) &&
+    if (
+      this._isEnemyPiece(this.getPiece(fromRow + direction, fromCol - 1)) &&
       this._checkPinMovement(limit_x, limit_y, direction, -1) &&
-      (!this._isInCheck || this._isBlockableSquare(fromRow + direction, fromCol - 1))
+      (!this._isInCheck ||
+        this._isBlockableSquare(fromRow + direction, fromCol - 1))
     ) {
       possibleMoves.push([fromRow + direction, fromCol - 1]);
     }
-    if (this._isEnemyPiece(this.getPiece(fromRow + direction, fromCol + 1)) &&
+    if (
+      this._isEnemyPiece(this.getPiece(fromRow + direction, fromCol + 1)) &&
       this._checkPinMovement(limit_x, limit_y, direction, 1) &&
-      (!this._isInCheck || this._isBlockableSquare(fromRow + direction, fromCol + 1))
+      (!this._isInCheck ||
+        this._isBlockableSquare(fromRow + direction, fromCol + 1))
     ) {
       possibleMoves.push([fromRow + direction, fromCol + 1]);
     }
@@ -591,8 +615,15 @@ export class Chessboard {
         enPassantRow === fromRow + direction &&
         (enPassantCol === fromCol - 1 || enPassantCol === fromCol + 1)
       )
-        if (this._checkPinMovement(limit_x, limit_y, direction, enPassantCol - fromCol) &&
-          (!this._isInCheck || this._isBlockableSquare(enPassantRow, enPassantCol))
+        if (
+          this._checkPinMovement(
+            limit_x,
+            limit_y,
+            direction,
+            enPassantCol - fromCol
+          ) &&
+          (!this._isInCheck ||
+            this._isBlockableSquare(enPassantRow, enPassantCol))
         ) {
           possibleMoves.push([enPassantRow, enPassantCol]);
         }
@@ -623,7 +654,8 @@ export class Chessboard {
       const newCol = fromCol + dy;
       if (newRow >= 0 && newRow <= 7 && newCol >= 0 && newCol <= 7) {
         if (
-          (this._isEmptySquare(newRow, newCol) || this._isEnemyPiece(this.getPiece(newRow, newCol))) &&
+          (this._isEmptySquare(newRow, newCol) ||
+            this._isEnemyPiece(this.getPiece(newRow, newCol))) &&
           !isPinned &&
           (!this._isInCheck || this._isBlockableSquare(newRow, newCol))
         ) {
@@ -634,7 +666,9 @@ export class Chessboard {
     return possibleMoves;
   }
   _isPinnedSquare(row, col) {
-    return this._pinnedDirections && this._pinnedDirections[this._hash(row, col)];
+    return (
+      this._pinnedDirections && this._pinnedDirections[this._hash(row, col)]
+    );
   }
 
   _getPinnedDirections(row, col) {
@@ -656,7 +690,8 @@ export class Chessboard {
       let currRow = fromRow + dx;
       let currCol = fromCol + dy;
       while (currRow >= 0 && currRow <= 7 && currCol >= 0 && currCol <= 7) {
-        if (this._checkPinMovement(limit_x, limit_y, dx, dy) &&
+        if (
+          this._checkPinMovement(limit_x, limit_y, dx, dy) &&
           (!this._isInCheck || this._isBlockableSquare(currRow, currCol))
         ) {
           if (this._isEmptySquare(currRow, currCol)) {
@@ -690,7 +725,8 @@ export class Chessboard {
       let currRow = fromRow + dx;
       let currCol = fromCol + dy;
       while (currRow >= 0 && currRow <= 7 && currCol >= 0 && currCol <= 7) {
-        if (this._checkPinMovement(limit_x, limit_y, dx, dy) &&
+        if (
+          this._checkPinMovement(limit_x, limit_y, dx, dy) &&
           (!this._isInCheck || this._isBlockableSquare(currRow, currCol))
         ) {
           if (this._isEmptySquare(currRow, currCol)) {
@@ -822,28 +858,32 @@ export class Chessboard {
   }
 
   printCheckingSquares() {
-    const prettyBoard = this._board.map((row, i) => {
-      return row
-        .map((piece, j) => {
-          if (this._checkingSquares.some(([r, c]) => r === i && c === j))
-            return `|${piece}|`;
-          return piece === null ? "| |" : `|${piece}|`;
-        })
-        .join("");
-    }).join("\n");
+    const prettyBoard = this._board
+      .map((row, i) => {
+        return row
+          .map((piece, j) => {
+            if (this._checkingSquares.some(([r, c]) => r === i && c === j))
+              return `|${piece}|`;
+            return piece === null ? "| |" : `|${piece}|`;
+          })
+          .join("");
+      })
+      .join("\n");
     console.log(prettyBoard);
   }
 
   printAttackedSquares() {
-    const prettyBoard = this._board.map((row, i) => {
-      return row
-        .map((piece, j) => {
-          if (this._attackedSquares.some(([r, c]) => r === i && c === j))
-            return `|!|`;
-          return piece === null ? "| |" : `|${piece}|`;
-        })
-        .join("");
-    }).join("\n");
+    const prettyBoard = this._board
+      .map((row, i) => {
+        return row
+          .map((piece, j) => {
+            if (this._attackedSquares.some(([r, c]) => r === i && c === j))
+              return `|!|`;
+            return piece === null ? "| |" : `|${piece}|`;
+          })
+          .join("");
+      })
+      .join("\n");
     console.log(prettyBoard);
   }
 
@@ -855,32 +895,35 @@ export class Chessboard {
     }
     const pinnedRow = row + pinnedDirection[0];
     const pinnedCol = col + pinnedDirection[1];
-    const prettyBoard = this._board.map((row, i) => {
-      return row
-        .map((piece, j) => {
-          if (i === pinnedRow && j === pinnedCol) return `|*|`;
-          return piece === null ? "| |" : `|${piece}|`;
-        })
-        .join("");
-    }).join("\n");
+    const prettyBoard = this._board
+      .map((row, i) => {
+        return row
+          .map((piece, j) => {
+            if (i === pinnedRow && j === pinnedCol) return `|*|`;
+            return piece === null ? "| |" : `|${piece}|`;
+          })
+          .join("");
+      })
+      .join("\n");
     console.log(prettyBoard);
   }
 
   printLegalMoves(row, col) {
     const moves = this._legalMoves[this._hash(row, col)];
-    const prettyBoard = this._board.map((row, i) => {
-      return row
-        .map((piece, j) => {
-          if (moves.some(([r, c]) => r === i && c === j)) return `|*|`;
-          return piece === null ? "| |" : `|${piece}|`;
-        })
-        .join("");
-    }).join("\n");
+    const prettyBoard = this._board
+      .map((row, i) => {
+        return row
+          .map((piece, j) => {
+            if (moves.some(([r, c]) => r === i && c === j)) return `|*|`;
+            return piece === null ? "| |" : `|${piece}|`;
+          })
+          .join("");
+      })
+      .join("\n");
     console.log(prettyBoard);
   }
 
   // print functions ----------------
-
 }
 
 const chessboard = new Chessboard();
