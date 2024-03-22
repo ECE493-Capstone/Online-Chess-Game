@@ -1,10 +1,12 @@
+// App.js
+import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Main from "./components/pages/Main";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import Test from "./components/pages/Test";
 import { useDispatch, useSelector } from "react-redux";
 import io from "socket.io-client";
 import { setSocket } from "./features/userSlice";
+import { Home } from "./components/pages/Home";
 import TestJoin from "./components/pages/TestJoin";
 import Match from "./components/pages/Match";
 import PrivateRoute from "./components/PrivateRoute";
@@ -27,7 +29,7 @@ const App = () => {
       <CssBaseline />
       <Router>
         <Routes>
-          <Route path="/" element={<Main />} />
+          <Route path="/" element={<Home />} />
           <Route path="/test" element={<Test />} />
           <Route path="/test-join" element={<TestJoin />} />
           <Route

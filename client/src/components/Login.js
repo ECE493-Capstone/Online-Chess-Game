@@ -41,7 +41,7 @@ const LoginReducer = (state, action) => {
   }
 };
 
-const Login = () => {
+const Login = ({ onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const cookie = new Cookies();
   const navigate = useNavigate();
