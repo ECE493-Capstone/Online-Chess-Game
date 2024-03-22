@@ -2,10 +2,6 @@ import React, { useEffect, useState } from "react";
 import Chessboard from "../models/Chessboard";
 import FuzzySet from "fuzzyset";
 import VoiceMove from "../lib/VoiceMove";
-const SpeechRecognition =
-  window.SpeechRecognition || window.webkitSpeechRecognition;
-const SpeechGrammarList =
-  window.SpeechGrammarList || window.webkitSpeechGrammarList;
 const CHESS_POSITIONS = [
   "A1",
   "A2",
@@ -76,59 +72,78 @@ const CHESS_POSITIONS = [
 const Dictaphone2 = () => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
-  const chessboard = new Chessboard();
+  const voiceMove = new VoiceMove();
   useEffect(() => {
-    const MOVES = [];
-    for (let i = 0; i < CHESS_POSITIONS.length; i++) {
-      for (let j = 0; j < CHESS_POSITIONS.length; j++) {
-        MOVES.push(CHESS_POSITIONS[i] + " " + CHESS_POSITIONS[j]);
-      }
-    }
-
-    const recognition = new SpeechRecognition();
-    const speechRecognitionList = new SpeechGrammarList();
-    const grammar = "";
-    speechRecognitionList.addFromString(grammar, 1);
-    recognition.grammars = speechRecognitionList;
-    recognition.lang = "en-US";
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1000;
-    const fzySet = FuzzySet(MOVES);
+    const MOVES = [
+      "a 7 to a 6",
+      "alpha 7 to alpha 6",
+      "a 7 to a 5",
+      "alpha 7 to alpha 5",
+      "b 7 to b 6",
+      "bravo 7 to bravo 6",
+      "b 7 to b 5",
+      "bravo 7 to bravo 5",
+      "c 7 to c 6",
+      "charlie 7 to charlie 6",
+      "c 7 c 5",
+      "charlie 7 to charlie 5",
+      "d 7 d 6",
+      "delta 7 to delta 6",
+      "d 7 d 5",
+      "delta 7 to delta 5",
+      "e 7 e 6",
+      "echo 7 to echo 6",
+      "e 7 e 5",
+      "echo 7 to echo 5",
+      "f 7 f 6",
+      "fox 7 to fox 6",
+      "f 7 f 5",
+      "fox 7 to fox 5",
+      "g 7 g 6",
+      "golf 7 to golf 6",
+      "g 7 g 5",
+      "golf 7 to golf 5",
+      "h 7 h 6",
+      "hotel 7 to hotel 6",
+      "h 7 h 5",
+      "hotel 7 to hotel 5",
+      "b 8 a 6",
+      "bravo 8 to alpha 6",
+      "b 8 c 6",
+      "bravo 8 to charlie 6",
+      "g 8 f 6",
+      "golf 8 to fox 6",
+      "g 8 h 6",
+      "golf 8 to hotel 6",
+      "King side castle",
+      "Queen side castle",
+    ];
+    // const MOVES = chessboard.getMoves();
     if (isListening) {
-      recognition.start();
+      voiceMove.recognition.start();
     } else {
-      recognition.stop();
+      voiceMove.recognition.stop();
     }
 
-    recognition.onresult = (event) => {
-      const last = event.results.length - 1;
-      const recognizedText = event.results[last][0].transcript;
-
-      let result = recognizedText.toUpperCase();
-      console.log(result, fzySet.get(result));
-      let fzySetList = fzySet.get(result) || [];
-
-      if (fzySetList.length > 0) {
-        setTranscript(fzySetList[0][1]);
-      } else {
-        setTranscript("Unrecognized move");
-      }
+    voiceMove.recognition.onresult = (event) => {
+      const data = voiceMove.recognizeMove(event, MOVES);
+      console.log(data);
     };
 
-    recognition.onerror = (event) => {
+    voiceMove.recognition.onerror = (event) => {
       console.log("Error occurred in recognition.");
     };
 
-    recognition.onend = () => {
+    voiceMove.recognition.onend = () => {
       console.log("Recognition ended.");
     };
 
     return () => {
-      recognition.removeEventListener("result", (res) => {
+      voiceMove.recognition.removeEventListener("result", (res) => {
         console.log(res);
       });
     };
-  }, [isListening]);
+  }, [isListening, voiceMove.recognition]);
 
   const startListening = () => {
     setIsListening(true);
