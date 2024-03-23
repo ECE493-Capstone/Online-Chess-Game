@@ -76,7 +76,10 @@ export class Chessboard {
   }
 
   _isStalemate() {
-    return !this._isInCheck && Object.keys(this._legalMoves).length === 0;
+    return (
+      !this._isInCheck &&
+      Object.values(this._legalMoves).every((m) => m.length === 0)
+    );
   }
 
   _isInsufficientMaterial() {
@@ -110,19 +113,25 @@ export class Chessboard {
 
   _isFiftyMoveRule() {
     return false; // not implemented
+    // return this._halfMove >= 100;
   }
 
   isCheckmate() {
-    return this._isInCheck && Object.keys(this._legalMoves).length === 0;
+    return (
+      this._isInCheck &&
+      Object.values(this._legalMoves).every((m) => m.length === 0)
+    );
   }
 
   _checkGameOver() {
     if (this.isCheckmate()) {
       this._isEnded = true;
       this._winner = this._turn;
+      console.log(`Checkmate! ${this._winner} wins!`);
     } else if (this.isDraw()) {
       this._isEnded = true;
       this._winner = null;
+      console.log("Draw!");
     }
   }
 
@@ -329,7 +338,7 @@ export class Chessboard {
           const attackedSquares = this._getAttackedSquares(row, col);
           allAttackedSquares.push(...attackedSquares);
           if (
-            allAttackedSquares.some(([r, c]) => r === kingRow && c === kingCol)
+            attackedSquares.some(([r, c]) => r === kingRow && c === kingCol)
           ) {
             this._checkingSquares.push([row, col]);
           }
@@ -440,8 +449,33 @@ export class Chessboard {
     const piece = this.getPiece(fromRow, fromCol);
     this.add(toRow, toCol, piece);
     this.remove(fromRow, fromCol);
-    if (piece.toLowerCase() === "k" && Math.abs(toCol - fromCol) === 2)
-      this._castle(fromCol, toCol);
+    this._checkMoveCastle(piece, fromCol, toCol);
+    this._checkMoveEnPassant(piece, toRow, toCol);
+  }
+
+  _checkMoveCastle(piece, fromCol, toCol) {
+    if (piece.toLowerCase() === "k" && Math.abs(toCol - fromCol) === 2) {
+      const row = this._turn === WHITE ? 7 : 0;
+      const kingSymbol = this._turn === WHITE ? "k" : "K";
+      const rookSymbol = this._turn === WHITE ? "r" : "R";
+      const rookFromCol = toCol === 6 ? 7 : 0;
+      const rookToCol = toCol === 6 ? 5 : 3;
+      this.remove(row, fromCol);
+      this.add(row, toCol, kingSymbol);
+      this.remove(row, rookFromCol);
+      this.add(row, rookToCol, rookSymbol);
+    }
+  }
+
+  _checkMoveEnPassant(piece, toRow, toCol) {
+    if (
+      piece.toLowerCase() === "p" &&
+      this._enPassantSquare &&
+      toRow === this._enPassantSquare[0] &&
+      toCol === this._enPassantSquare[1]
+    ) {
+      this.remove(toRow + (this._turn === WHITE ? 1 : -1), toCol);
+    }
   }
 
   playOpponentMove(move) {
@@ -449,6 +483,10 @@ export class Chessboard {
     const piece = this.getPiece(fromRow, fromCol);
     if (piece === null) {
       console.error("move null???");
+      return;
+    }
+    if (this._side === this._turn) {
+      console.error("calling playOpponentMove() when it's your turn??");
       return;
     }
     // this._preUpdateHalfMove(piece, toRow, toCol);
@@ -461,6 +499,11 @@ export class Chessboard {
     this._updateBlockableSquares(); // Call order: 3
     this._updatePinnedSquares(); // Call order: 3
     this._updateLegalMoves(); // Call order: 4
+
+    // DEBUG STUFF ----------------
+    console.log(`turn: ${this._turn}`);
+    this.printStates();
+    // ----------------
 
     this._checkGameOver();
 
@@ -475,9 +518,21 @@ export class Chessboard {
       return;
     }
 
+    if (this._side !== this._turn) {
+      console.error("calling playYourMove() when it's not your turn??");
+      return;
+    }
+
     // this._preUpdateHalfMove(piece, toRow, toCol);
     this._move(fromRow, fromCol, toRow, toCol);
+    this._updateEnPassant(piece, fromRow, fromCol, toRow);
+
     this._updateCastlingRights(piece, fromRow, fromCol);
+
+    // DEBUG STUFF ----------------
+    console.log(`turn: ${this._turn}`);
+    this.printBoard();
+    // ----------------
 
     this._turn = this._turn === WHITE ? BLACK : WHITE;
   }
@@ -489,17 +544,6 @@ export class Chessboard {
     } else {
       this._halfMove++;
     }
-  }
-
-  _castle(fromCol, toCol) {
-    const row = this._turn === WHITE ? 7 : 0;
-    const rookSymbol = this._turn === WHITE ? "r" : "R";
-    const rookFromCol = toCol === 6 ? 7 : 0;
-    const rookToCol = toCol === 6 ? 5 : 3;
-    this.remove(row, fromCol);
-    this.add(row, toCol, "k");
-    this.remove(row, rookFromCol);
-    this.add(row, rookToCol, rookSymbol);
   }
 
   _updateCastlingRights(piece, fromRow, fromCol) {
@@ -690,14 +734,17 @@ export class Chessboard {
       let currRow = fromRow + dx;
       let currCol = fromCol + dy;
       while (currRow >= 0 && currRow <= 7 && currCol >= 0 && currCol <= 7) {
-        if (
-          this._checkPinMovement(limit_x, limit_y, dx, dy) &&
-          (!this._isInCheck || this._isBlockableSquare(currRow, currCol))
-        ) {
-          if (this._isEmptySquare(currRow, currCol)) {
+        if (this._checkPinMovement(limit_x, limit_y, dx, dy)) {
+          if (
+            this._isEmptySquare(currRow, currCol) &&
+            (!this._isInCheck || this._isBlockableSquare(currRow, currCol))
+          ) {
             possibleMoves.push([currRow, currCol]);
           } else {
-            if (!this._isEnemyPiece(this.getPiece(currRow, currCol)))
+            if (
+              this._isEnemyPiece(this.getPiece(currRow, currCol)) &&
+              (!this._isInCheck || this._isBlockableSquare(currRow, currCol))
+            )
               possibleMoves.push([currRow, currCol]);
             break;
           }
@@ -725,14 +772,17 @@ export class Chessboard {
       let currRow = fromRow + dx;
       let currCol = fromCol + dy;
       while (currRow >= 0 && currRow <= 7 && currCol >= 0 && currCol <= 7) {
-        if (
-          this._checkPinMovement(limit_x, limit_y, dx, dy) &&
-          (!this._isInCheck || this._isBlockableSquare(currRow, currCol))
-        ) {
-          if (this._isEmptySquare(currRow, currCol)) {
+        if (this._checkPinMovement(limit_x, limit_y, dx, dy)) {
+          if (
+            this._isEmptySquare(currRow, currCol) &&
+            (!this._isInCheck || this._isBlockableSquare(currRow, currCol))
+          ) {
             possibleMoves.push([currRow, currCol]);
           } else {
-            if (this._isEnemyPiece(this.getPiece(currRow, currCol)))
+            if (
+              this._isEnemyPiece(this.getPiece(currRow, currCol)) &&
+              (!this._isInCheck || this._isBlockableSquare(currRow, currCol))
+            )
               possibleMoves.push([currRow, currCol]);
             break;
           }
@@ -848,6 +898,19 @@ export class Chessboard {
 
   // print functions ----------------
 
+  printStates() {
+    console.log("board ----------------");
+    this.printBoard();
+    console.log("\n");
+
+    console.log("highlight checking pieces (X) ----------------");
+    this.printCheckingSquares();
+    console.log("\n");
+
+    console.log("highlight attacked squares (!) ----------------");
+    this.printAttackedSquares();
+  }
+
   printBoard() {
     const prettyBoard = this._board
       .map((row) =>
@@ -863,7 +926,7 @@ export class Chessboard {
         return row
           .map((piece, j) => {
             if (this._checkingSquares.some(([r, c]) => r === i && c === j))
-              return `|${piece}|`;
+              return `|X|`;
             return piece === null ? "| |" : `|${piece}|`;
           })
           .join("");
