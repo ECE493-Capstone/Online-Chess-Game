@@ -55,7 +55,7 @@ const Registration = ({ onClose }) => {
     }
   );
 
-  const navigate = useNavigate(); // navigation element
+  // const navigate = useNavigate(); // navigation element
 
   const handleSubmit = (e) => {
     setIsSubmitting(true);
@@ -82,7 +82,7 @@ const Registration = ({ onClose }) => {
 
           // route to the previous page the user was on
           onClose();
-          navigate(-1);
+          // navigate(-1);
           return Promise.resolve(undefined);
         }
         return res.json();

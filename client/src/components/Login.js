@@ -52,7 +52,7 @@ const Login = ({ onClose }) => {
     }
   );
 
-  const navigate = useNavigate(); // navigation element
+  // const navigate = useNavigate(); // navigation element
 
   const handleSubmit = (e) => {
     setIsSubmitting(true);
@@ -73,12 +73,23 @@ const Login = ({ onClose }) => {
         setIsSubmitting(false);
         if (res.status === 200) {
           console.log("User logged in successfully");
-          // TODO: route to landing page
           onClose();
-          navigate('/');
-          return Promise.resolve(undefined);
+          return res.json(); // Parse JSON response
         }
-        return res.json();
+        return Promise.resolve(undefined);
+      })
+      .then((data) => {
+        if (data) {
+          const userId = data.userId; // Extract user ID from JSON response
+          const username = data.username;
+          const email = data.email; 
+          // Store the user ID to localstorage
+          localStorage.setItem('userId', userId);
+          localStorage.setItem('username', username);
+          localStorage.setItem('email', email);
+          console.log("userID: " + JSON.stringify(userId) + " username: " + JSON.stringify(username) + " email: " + JSON.stringify(email));
+        }
+        // navigate(-1);
       })
       .then((data) => {
         if (data === undefined) return;
