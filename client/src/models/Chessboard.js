@@ -146,7 +146,9 @@ export class Chessboard {
 
   _checkKingsExistence() {
     // handle cases where kings are captured due to global castling or exploding pawn
-    const numKingsAlive = this._board.flat().filter((piece) => this._isKing(piece));
+    const numKingsAlive = this._board
+      .flat()
+      .filter((piece) => this._isKing(piece));
     if (numKingsAlive.length === 0) {
       this._isEnded = true;
       this._winner = null;
@@ -444,15 +446,20 @@ export class Chessboard {
 
   _getMoveInfo(piece, fromRow, fromCol, toRow, toCol) {
     const info = {
-      isCapturing: false,
+      capturedPiece: null,
       isGlobalCastling: false,
     };
-    info.isCapturing =
-      this.getPiece(toRow, toCol) !== null ||
-      (this._isPawn(piece) &&
-        this._enPassantSquare &&
-        toRow === this._enPassantSquare[0] &&
-        toCol === this._enPassantSquare[1]);
+    const endPiece = this.getPiece(toRow, toCol);
+    if (endPiece !== null) {
+      info.capturedPiece = endPiece.toLowerCase();
+    } else if (
+      this._isPawn(piece) &&
+      this._enPassantSquare &&
+      toRow === this._enPassantSquare[0] &&
+      toCol === this._enPassantSquare[1]
+    ) {
+      info.capturedPiece = "p";
+    }
 
     if (this._isRook(piece) && this._isEvolvedPiece(piece)) {
       const standardRookMoves = this._getStandardRookMoves(fromRow, fromCol);
@@ -464,13 +471,74 @@ export class Chessboard {
         info.isGlobalCastling = true;
       }
     }
+    return info;
   }
 
   _checkMovePowerUpMode(initRow, initCol, finalRow, finalCol, moveInfo) {
     if (this._gameMode === GAME_MODE.POWER_UP_DUCK) {
-      this._checkGlobalCastling(finalRow, finalCol, moveInfo);
-      this._checkPowerUpProgress(initRow, finalRow, finalCol, moveInfo);
+      this._checkGlobalCastling(finalRow, finalCol, moveInfo); // Call order: 1
+      this._checkPowerUpProgress(initRow, finalRow, finalCol, moveInfo); // Call order: 2
+      this._checkBishopSniping(initRow, initCol, finalRow, finalCol); // Call order: 3
+      this._checkKingResurrection(
+        initRow,
+        initCol,
+        finalRow,
+        finalCol,
+        moveInfo
+      ); // Call order: 3
+      this._checkPawnExplosion(finalRow, finalCol, moveInfo); // Call order: 4
     }
+  }
+
+  _checkKingResurrection(initRow, initCol, finalRow, finalCol, moveInfo) {
+    // king resurrect a piece that it just captures on its side
+    const piece = this.getPiece(finalRow, finalCol);
+    if (this._isKing(piece) && moveInfo.capturedPiece) {
+      const resurrectedPiece =
+        this._turn === WHITE
+          ? moveInfo.capturedPiece.toLowerCase()
+          : moveInfo.capturedPiece.toUpperCase();
+      this.add(initRow, initCol, resurrectedPiece);
+    }
+  }
+
+  _checkBishopSniping(initRow, initCol, finalRow, finalCol) {
+    const piece = this.getPiece(finalRow, finalCol);
+    if (this._isBishop(piece) && this._isEvolvedPiece(piece)) {
+      this.remove(finalRow, finalCol);
+      this.add(initRow, initCol, piece);
+    }
+  }
+
+  _checkPawnExplosion(finalRow, finalCol, moveInfo) {
+    if (
+      moveInfo.capturedPiece &&
+      this._isPawn(moveInfo.capturedPiece) &&
+      this._isEvolvedPiece(moveInfo.capturedPiece)
+    ) {
+      this._explode(finalRow, finalCol);
+    }
+  }
+
+  _explode(row, col) {
+    const directions = [
+      [-1, 0], // up
+      [1, 0], // down
+      [0, -1], // left
+      [0, 1], // right
+      [-1, -1], // up left
+      [-1, 1], // up right
+      [1, -1], // down left
+      [1, 1], // down right
+    ];
+    for (const [dx, dy] of directions) {
+      const newRow = row + dx;
+      const newCol = col + dy;
+      if (newRow >= 0 && newRow <= 7 && newCol >= 0 && newCol <= 7) {
+        this.remove(newRow, newCol);
+      }
+    }
+    this.remove(row, col);
   }
 
   _checkGlobalCastling(finalRow, finalCol, moveInfo) {
@@ -485,7 +553,7 @@ export class Chessboard {
     if (
       this._isPawn(piece) &&
       !this._isEvolvedPiece(piece) &&
-      moveInfo.isCapturing
+      moveInfo.capturedPiece !== null
     ) {
       this._updatePawnEvolveProgress(piece, finalRow, finalCol);
     } else if (this._isKnight(piece) && !this._isEvolvedPiece(piece)) {
@@ -493,10 +561,10 @@ export class Chessboard {
     } else if (
       this._isBishop(piece) &&
       !this._isEvolvedPiece(piece) &&
-      moveInfo.isCapturing
+      moveInfo.capturedPiece !== null
     ) {
       this._updateBishopEvolveProgress(piece, initRow, finalRow, finalCol);
-    } else if (this._isRook(piece) && moveInfo.isCapturing) {
+    } else if (this._isRook(piece) && moveInfo.capturedPiece !== null) {
       this._incrementRookToken(piece, finalRow, finalCol);
     }
   }
@@ -567,14 +635,6 @@ export class Chessboard {
 
   _isEvolvedPiece(piece) {
     return piece && piece.includes(EVOLVE_SYMBOL);
-  }
-
-  _checkMovePowerUp(fromRow, fromCol, toRow, toCol) {
-    const attackingPiece = this.getPiece(fromRow, fromCol);
-    const targetPiece = this.getPiece(toRow, toCol);
-
-    switch (attackingPiece.toLowerCase()) {
-    }
   }
 
   _checkMoveCastle(piece, fromCol, toCol) {
