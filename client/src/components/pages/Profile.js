@@ -4,6 +4,8 @@ import ChangePassword  from '../ChangePassword';
 import ChangeUsername  from '../ChangeUsername';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
+import { Button } from "@mui/material";
+import { useLocation } from "react-router-dom";
 
 const UserInfo = ({ username, email, statistics }) => {
   const [openChangePassword, setOpenChangePassword] = useState(false);
@@ -30,11 +32,13 @@ const UserInfo = ({ username, email, statistics }) => {
     <div style={{ display: "flex" }}>
       <div style={{ flex: "1", marginRight: '20px' }}>
         <h2>Profile Information</h2>
-        <div>
+        <div style={{ marginBottom: '20px' }}>
           <p><strong>Username:</strong> {username}</p>
           <p><strong>Email:</strong> {email}</p>
-          <button onClick={handleOpenChangeUsername}>Change Username</button>
-          <button onClick={handleOpenChangePassword}>Change Password</button>
+          <Button variant="contained" onClick={handleOpenChangeUsername}>Change Username</Button>
+        </div>
+        <div>
+        <Button variant="contained" onClick={handleOpenChangePassword}>Change Password</Button>
         </div>
       </div>
       <div>
@@ -98,16 +102,18 @@ const UserInfo = ({ username, email, statistics }) => {
 };
 
 const Profile = () => {
-  const user = {
-    username: 'exampleUser',
-    email: 'user@example.com',
-    statistics: {
-      gamesPlayed: 10,
-      wins: 5,
-      losses: 5,
-      draws: 0
-    }
-  };
+  // const user = {
+  //   username: 'exampleUser',
+  //   email: 'user@example.com',
+  //   statistics: {
+  //     gamesPlayed: 10,
+  //     wins: 5,
+  //     losses: 5,
+  //     draws: 0
+  //   }
+  // };
+  const location = useLocation();
+  const { username, email, userId } = location.state;
 
   return (
     <Header>
@@ -115,9 +121,8 @@ const Profile = () => {
         <div>
           <h1>Profile Page</h1>
           <UserInfo
-            username={user.username}
-            email={user.email}
-            statistics={user.statistics}
+            username={username}
+            email={email}
           />
         </div>
       </div>

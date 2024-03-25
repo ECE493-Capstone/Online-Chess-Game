@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Modal, Box, Menu, MenuItem } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Login from "./Login";
@@ -10,13 +10,26 @@ const HeaderElements = () => {
   const [openlogin, setOpenLogin] = useState(false);
   const [openregister, setOpenRegister] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [userId, setUserId] = useState("");
 
-  // TODO: Edit so that we know when the user is logged in or not. For now, we hard-code it to true.
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  useEffect(() => {
+    // Check if the required items exist in localStorage
+    const storedUserId = localStorage.getItem("userId");
+    const storedUsername = localStorage.getItem("username");
+    const storedEmail = localStorage.getItem("email");
 
+    if (userId && storedUsername && storedEmail) {
+      setIsLoggedIn(true);
+      setUsername(storedUsername);
+      setEmail(storedEmail);
+      setUserId(storedUserId);
+    }
+  }, []);
 
   const handleSignInClick = () => {
-    // navigate('/login');
     setOpenLogin(true);
   };
 
@@ -25,7 +38,6 @@ const HeaderElements = () => {
   };
 
   const handleRegisterClick = () => {
-    // navigate('/register');
     setOpenRegister(true);
   };
 
@@ -43,12 +55,16 @@ const HeaderElements = () => {
 
   const handleProfileClick = () => {
     setAnchorEl(null);
-    navigate('/profile');
+    navigate('/profile', { state: { username, email, userId } });
   };
 
   const handleLogoutClick = () => {
     setAnchorEl(null);
     setIsLoggedIn(false);
+    // Clear items from localStorage upon logout
+    localStorage.removeItem("userId");
+    localStorage.removeItem("username");
+    localStorage.removeItem("email");
   };
 
   return (
@@ -139,7 +155,6 @@ const HeaderElements = () => {
         </Box>
       </Modal>
     </>
-
   );
 };
 

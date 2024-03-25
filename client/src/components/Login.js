@@ -83,7 +83,7 @@ const Login = ({ onClose }) => {
           const userId = data.userId; // Extract user ID from JSON response
           const username = data.username;
           const email = data.email; 
-          // Store the user ID to localstorage
+          // change to tokens tomorrow
           localStorage.setItem('userId', userId);
           localStorage.setItem('username', username);
           localStorage.setItem('email', email);
