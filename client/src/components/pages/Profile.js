@@ -30,7 +30,7 @@ const UserInfo = ({ username, email, statistics }) => {
 
   return (
     <div style={{ display: "flex" }}>
-      <div style={{ flex: "1", marginRight: '20px' }}>
+      <div style={{ flex: "25%", marginRight: '20px' }}>
         <h2>Profile Information</h2>
         <div style={{ marginBottom: '20px' }}>
           <p><strong>Username:</strong> {username}</p>
@@ -41,7 +41,7 @@ const UserInfo = ({ username, email, statistics }) => {
         <Button variant="contained" onClick={handleOpenChangePassword}>Change Password</Button>
         </div>
       </div>
-      <div>
+      <div style={{ flex: "75%", marginRight: '20px' }}>
         <h2>Statistics</h2>
         <ul>
           {Object.entries(statistics).map(([key, value]) => (
@@ -55,7 +55,7 @@ const UserInfo = ({ username, email, statistics }) => {
         aria-labelledby="change-password-modal"
         aria-describedby="change-password-form"
       >
-        <Box
+        <Box          
           sx={{
             position: "absolute",
             top: "50%",
@@ -68,8 +68,8 @@ const UserInfo = ({ username, email, statistics }) => {
             maxWidth: "90vw",
             maxHeight: "90vh",
             overflow: "auto",
-          }}
-        >
+            }}
+          >
           <ChangePassword onClose={handleCloseChangePassword}/>
         </Box>
       </Modal>
@@ -79,7 +79,7 @@ const UserInfo = ({ username, email, statistics }) => {
         aria-labelledby="change-username-modal"
         aria-describedby="change-username-form"
       >
-        <Box
+        <Box          
           sx={{
             position: "absolute",
             top: "50%",
@@ -92,8 +92,8 @@ const UserInfo = ({ username, email, statistics }) => {
             maxWidth: "90vw",
             maxHeight: "90vh",
             overflow: "auto",
-          }}
-        >
+            }}
+          >
           <ChangeUsername onClose={handleCloseChangeUsername}/>
         </Box>
       </Modal>
@@ -112,17 +112,27 @@ const Profile = () => {
   //     draws: 0
   //   }
   // };
+
+  const sampleUsername = "bruh";
+  const sampleEmail = "bruh@example.com";
+  const sampleStatistics = {
+    gamesPlayed: 10,
+    wins: 5,
+    losses: 5,
+    draws: 0
+  }
   const location = useLocation();
-  const { username, email, userId } = location.state;
+  // const { username, email, userId } = location.state;
 
   return (
     <Header>
-      <div>
+      <div style={{ flex: "1", marginRight: '20px', marginLeft: '20px'  }}>
         <div>
           <h1>Profile Page</h1>
           <UserInfo
-            username={username}
-            email={email}
+            username={sampleUsername}
+            email={sampleEmail}
+            statistics={sampleStatistics}
           />
         </div>
       </div>
