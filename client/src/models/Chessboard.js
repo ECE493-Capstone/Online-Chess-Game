@@ -2,13 +2,20 @@ export const WHITE = "w";
 export const BLACK = "b";
 const KING_SIDE_CASTLE = "O-O";
 const QUEEN_SIDE_CASTLE = "O-O-O";
+const EVOLVE_SYMBOL = "*";
+const PROGRESS_SYMBOL = "+";
+export const GAME_MODE = {
+  STANDARD: "standard",
+  POWER_UP_DUCK: "power-up-duck",
+};
 export class Chessboard {
-  constructor(side) {
+  constructor(side, gameMode) {
     this._side = side;
     this._turn = WHITE;
     this._isEnded = false;
     this._winner = null;
     this._halfMove = 0; // use to check for fifty move rule
+    this._gameMode = gameMode ? gameMode : GAME_MODE.STANDARD;
     this._enPassantSquare = null;
     this._castlingRights = [KING_SIDE_CASTLE, QUEEN_SIDE_CASTLE];
     this._isInCheck = false;
@@ -84,18 +91,18 @@ export class Chessboard {
 
   _isInsufficientMaterial() {
     const pieces = this._board.flat().filter((piece) => piece !== null);
-    const pawns = pieces.filter((piece) => piece.toLowerCase() === "p");
-    const rooks = pieces.filter((piece) => piece.toLowerCase() === "r");
-    const queens = pieces.filter((piece) => piece.toLowerCase() === "q");
+    const pawns = pieces.filter((piece) => this._isPawn(piece));
+    const rooks = pieces.filter((piece) => this._isRook(piece));
+    const queens = pieces.filter((piece) => this._isQueen(piece));
     const yourBishopKnights = pieces.filter(
       (piece) =>
         this._isSameSide(piece) &&
-        (piece.toLowerCase() === "b" || piece.toLowerCase() === "n")
+        (this._isBishop(piece) || this._isKnight(piece))
     );
     const opponentBishopKnights = pieces.filter(
       (piece) =>
         this._isEnemyPiece(piece) &&
-        (piece.toLowerCase() === "b" || piece.toLowerCase() === "n")
+        (this._isBishop(piece) || this._isKnight(piece))
     );
 
     return (
@@ -132,6 +139,27 @@ export class Chessboard {
       this._isEnded = true;
       this._winner = null;
       console.log("Draw!");
+    } else {
+      this._checkKingsExistence();
+    }
+  }
+
+  _checkKingsExistence() {
+    // handle cases where kings are captured due to global castling or exploding pawn
+    const numKingsAlive = this._board.flat().filter((piece) => this._isKing(piece));
+    if (numKingsAlive.length === 0) {
+      this._isEnded = true;
+      this._winner = null;
+      console.log("Draw! (no kings)");
+    } else if (numKingsAlive === 1) {
+      const king = numKingsAlive[0];
+      if (this._isSameSide(king)) {
+        this._isEnded = true;
+        this._winner = this._side;
+      } else {
+        this._isEnded = true;
+        this._winner = this._side === WHITE ? BLACK : WHITE;
+      }
     }
   }
 
@@ -146,42 +174,15 @@ export class Chessboard {
     if (!checkingPiece) return [];
     const [kingRow, kingCol] = this._findKing();
     const blockableSquares = [[checkRow, checkCol]];
-    let directions;
-    switch (checkingPiece.toLowerCase()) {
-      case "p":
-      case "n":
-        return blockableSquares;
-      case "b":
-        directions = [
-          [-1, -1], // up left
-          [-1, 1], // up right
-          [1, -1], // down left
-          [1, 1], // down right
-        ];
-        break;
-      case "r":
-        directions = [
-          [-1, 0], // up
-          [1, 0], // down
-          [0, -1], // left
-          [0, 1], // right
-        ];
-        break;
-      case "q":
-        directions = [
-          [-1, 0], // up
-          [1, 0], // down
-          [0, -1], // left
-          [0, 1], // right
-          [-1, -1], // up left
-          [-1, 1], // up right
-          [1, -1], // down left
-          [1, 1], // down right
-        ];
-        break;
-      default:
-        console.warn(`we are blocking what??: ${[checkingPiece]}`);
-        return blockableSquares;
+    let directions = [];
+    if (this._isPawn(checkingPiece) || this._isKnight(checkingPiece)) {
+      return blockableSquares;
+    } else if (this._isBishop(checkingPiece)) {
+      directions = this._getBishopDirections();
+    } else if (this._isRook(checkingPiece)) {
+      directions = this._getRookDirections();
+    } else if (this._isQueen(checkingPiece)) {
+      directions = this._getQueenDirections();
     }
 
     for (const [dx, dy] of directions) {
@@ -212,6 +213,46 @@ export class Chessboard {
   isSameTurn(turn) {
     return this._turn === turn;
   }
+
+  _getRookDirections() {
+    return [
+      [-1, 0], // up
+      [1, 0], // down
+      [0, -1], // left
+      [0, 1], // right
+    ];
+  }
+
+  _getKnightDirections() {
+    return [
+      [-2, -1], // up left
+      [-2, 1], // up right
+      [-1, -2], // left up
+      [-1, 2], // right up
+      [1, -2], // left down
+      [1, 2], // right down
+      [2, -1], // down left
+      [2, 1], // down right
+    ];
+  }
+
+  _getBishopDirections() {
+    return [
+      [-1, -1], // up left
+      [-1, 1], // up right
+      [1, -1], // down left
+      [1, 1], // down right
+    ];
+  }
+
+  _getQueenDirections() {
+    return this._getRookDirections().concat(this._getBishopDirections());
+  }
+
+  _getKingDirections() {
+    return this._getRookDirections().concat(this._getBishopDirections());
+  }
+
   _getAttackedSquares(fromRow, fromCol) {
     // return squares that piece from [fromRow, fromCol] can attack
     const piece = this.getPiece(fromRow, fromCol);
@@ -219,111 +260,57 @@ export class Chessboard {
 
     const attackingSide = this._side === WHITE ? BLACK : WHITE;
     const attackedSquares = [];
-    switch (piece.toLowerCase()) {
-      case "p":
-        const direction = attackingSide === WHITE ? -1 : 1;
-        attackedSquares.push([fromRow + direction, fromCol - 1]);
-        attackedSquares.push([fromRow + direction, fromCol + 1]);
-        break;
-      case "r":
-        const rookDirections = [
-          [-1, 0], // up
-          [1, 0], // down
-          [0, -1], // left
-          [0, 1], // right
-        ];
-        for (const [dx, dy] of rookDirections) {
-          let currRow = fromRow + dx;
-          let currCol = fromCol + dy;
-          while (currRow >= 0 && currRow <= 7 && currCol >= 0 && currCol <= 7) {
-            attackedSquares.push([currRow, currCol]);
-            if (this.getPiece(currRow, currCol) !== null) break;
-            currRow += dx;
-            currCol += dy;
-          }
+
+    if (this._isPawn(piece)) {
+      const direction = attackingSide === WHITE ? -1 : 1;
+      attackedSquares.push([fromRow + direction, fromCol - 1]);
+      attackedSquares.push([fromRow + direction, fromCol + 1]);
+    } else if (this._isKnight(piece)) {
+      const knightMoves = this._getKnightDirections();
+      for (const [dx, dy] of knightMoves) {
+        const newRow = this._isEvolvedPiece(piece)
+          ? (fromRow + dx) % 8
+          : fromRow + dx;
+        const newCol = this._isEvolvedPiece(piece)
+          ? (fromCol + dy) % 8
+          : fromCol + dy;
+
+        if (newRow >= 0 && newRow <= 7 && newCol >= 0 && newCol <= 7) {
+          attackedSquares.push([newRow, newCol]);
         }
-        break;
-      case "n":
-        const knightMoves = [
-          [-2, -1], // up left
-          [-2, 1], // up right
-          [-1, -2], // left up
-          [-1, 2], // right up
-          [1, -2], // left down
-          [1, 2], // right down
-          [2, -1], // down left
-          [2, 1], // down right
-        ];
-        for (const [dx, dy] of knightMoves) {
-          const newRow = fromRow + dx;
-          const newCol = fromCol + dy;
-          if (newRow >= 0 && newRow <= 7 && newCol >= 0 && newCol <= 7) {
-            attackedSquares.push([newRow, newCol]);
-          }
+      }
+    } else if (
+      this._isRook(piece) ||
+      this._isBishop(piece) ||
+      this._isQueen(piece)
+    ) {
+      let directions;
+      if (this._isRook(piece)) {
+        directions = this._getRookDirections();
+      } else if (this._isBishop(piece)) {
+        directions = this._getBishopDirections();
+      } else if (this._isQueen(piece)) {
+        directions = this._getQueenDirections();
+      }
+      for (const [dx, dy] of directions) {
+        let currRow = fromRow + dx;
+        let currCol = fromCol + dy;
+        while (currRow >= 0 && currRow <= 7 && currCol >= 0 && currCol <= 7) {
+          attackedSquares.push([currRow, currCol]);
+          if (this.getPiece(currRow, currCol) !== null) break;
+          currRow += dx;
+          currCol += dy;
         }
-        break;
-      case "b":
-        const bishopDirections = [
-          [-1, -1], // up left
-          [-1, 1], // up right
-          [1, -1], // down left
-          [1, 1], // down right
-        ];
-        for (const [dx, dy] of bishopDirections) {
-          let currRow = fromRow + dx;
-          let currCol = fromCol + dy;
-          while (currRow >= 0 && currRow <= 7 && currCol >= 0 && currCol <= 7) {
-            attackedSquares.push([currRow, currCol]);
-            if (this.getPiece(currRow, currCol) !== null) break;
-            currRow += dx;
-            currCol += dy;
-          }
+      }
+    } else if (this._isKing(piece)) {
+      const kingMoves = this._getKingDirections();
+      for (const [dx, dy] of kingMoves) {
+        const newRow = fromRow + dx;
+        const newCol = fromCol + dy;
+        if (newRow >= 0 && newRow <= 7 && newCol >= 0 && newCol <= 7) {
+          attackedSquares.push([newRow, newCol]);
         }
-        break;
-      case "q":
-        const queenDirections = [
-          [-1, 0], // up
-          [1, 0], // down
-          [0, -1], // left
-          [0, 1], // right
-          [-1, -1], // up left
-          [-1, 1], // up right
-          [1, -1], // down left
-          [1, 1], // down right
-        ];
-        for (const [dx, dy] of queenDirections) {
-          let currRow = fromRow + dx;
-          let currCol = fromCol + dy;
-          while (currRow >= 0 && currRow <= 7 && currCol >= 0 && currCol <= 7) {
-            attackedSquares.push([currRow, currCol]);
-            if (this.getPiece(currRow, currCol) !== null) break;
-            currRow += dx;
-            currCol += dy;
-          }
-        }
-        break;
-      case "k":
-        const kingMoves = [
-          [-1, 0], // up
-          [1, 0], // down
-          [0, -1], // left
-          [0, 1], // right
-          [-1, -1], // up left
-          [-1, 1], // up right
-          [1, -1], // down left
-          [1, 1], // down right
-        ];
-        for (const [dx, dy] of kingMoves) {
-          const newRow = fromRow + dx;
-          const newCol = fromCol + dy;
-          if (newRow >= 0 && newRow <= 7 && newCol >= 0 && newCol <= 7) {
-            attackedSquares.push([newRow, newCol]);
-          }
-        }
-        break;
-      default:
-        console.warn("piece not implemented??");
-        break;
+      }
     }
     return attackedSquares;
   }
@@ -371,10 +358,10 @@ export class Chessboard {
   }
 
   _findKing() {
-    const king = this._side === WHITE ? "k" : "K";
     for (let row = 0; row < 8; row++) {
       for (let col = 0; col < 8; col++) {
-        if (this.getPiece(row, col) === king) {
+        const piece = this.getPiece(row, col);
+        if (this._isKing(piece) && this._isSameSide(piece)) {
           return [row, col];
         }
       }
@@ -416,9 +403,9 @@ export class Chessboard {
         if (piece !== null) {
           if (this._isEnemyPiece(piece) && counter === 1) {
             if (
-              ((piece.toLowerCase() === "q" || piece.toLowerCase() === "r") && // if pinned in vertical/horizontal directions
+              ((this._isQueen(piece) || this._isRook(piece)) && // if pinned in vertical/horizontal directions
                 (dx + dy) * (dx + dy) === 1) ||
-              ((piece.toLowerCase() === "q" || piece.toLowerCase() === "b") && // if pinned in diagonal directions
+              ((this._isQueen(piece) || this._isBishop(piece)) && // if pinned in diagonal directions
                 (dx + dy) * (dx + dy) !== 1)
             ) {
               pinnedSquares[pinnedPiece] = [dx, dy];
@@ -447,14 +434,151 @@ export class Chessboard {
 
   _move(fromRow, fromCol, toRow, toCol) {
     const piece = this.getPiece(fromRow, fromCol);
+    const moveInfo = this._getMoveInfo(piece, fromRow, fromCol, toRow, toCol); // obtain info before board changes
     this.add(toRow, toCol, piece);
     this.remove(fromRow, fromCol);
     this._checkMoveCastle(piece, fromCol, toCol);
     this._checkMoveEnPassant(piece, toRow, toCol);
+    this._checkMovePowerUpMode(fromRow, fromCol, toRow, toCol, moveInfo);
+  }
+
+  _getMoveInfo(piece, fromRow, fromCol, toRow, toCol) {
+    const info = {
+      isCapturing: false,
+      isGlobalCastling: false,
+    };
+    info.isCapturing =
+      this.getPiece(toRow, toCol) !== null ||
+      (this._isPawn(piece) &&
+        this._enPassantSquare &&
+        toRow === this._enPassantSquare[0] &&
+        toCol === this._enPassantSquare[1]);
+
+    if (this._isRook(piece) && this._isEvolvedPiece(piece)) {
+      const standardRookMoves = this._getStandardRookMoves(fromRow, fromCol);
+      const globalCastleMoves = this._getGlobalCastleMoves(fromRow, fromCol);
+      if (
+        !standardRookMoves.some(([r, c]) => r === toRow && c === toCol) &&
+        globalCastleMoves.some(([r, c]) => r === toRow && c === toCol)
+      ) {
+        info.isGlobalCastling = true;
+      }
+    }
+  }
+
+  _checkMovePowerUpMode(initRow, initCol, finalRow, finalCol, moveInfo) {
+    if (this._gameMode === GAME_MODE.POWER_UP_DUCK) {
+      this._checkGlobalCastling(finalRow, finalCol, moveInfo);
+      this._checkPowerUpProgress(initRow, finalRow, finalCol, moveInfo);
+    }
+  }
+
+  _checkGlobalCastling(finalRow, finalCol, moveInfo) {
+    const piece = this.getPiece(finalRow, finalCol);
+    if (moveInfo.isGlobalCastling) {
+      this._decrementRookToken(piece, finalRow, finalCol);
+    }
+  }
+
+  _checkPowerUpProgress(initRow, finalRow, finalCol, moveInfo) {
+    const piece = this.getPiece(finalRow, finalCol);
+    if (
+      this._isPawn(piece) &&
+      !this._isEvolvedPiece(piece) &&
+      moveInfo.isCapturing
+    ) {
+      this._updatePawnEvolveProgress(piece, finalRow, finalCol);
+    } else if (this._isKnight(piece) && !this._isEvolvedPiece(piece)) {
+      this._updateKnightEvolveProgress(piece, finalRow, finalCol);
+    } else if (
+      this._isBishop(piece) &&
+      !this._isEvolvedPiece(piece) &&
+      moveInfo.isCapturing
+    ) {
+      this._updateBishopEvolveProgress(piece, initRow, finalRow, finalCol);
+    } else if (this._isRook(piece) && moveInfo.isCapturing) {
+      this._incrementRookToken(piece, finalRow, finalCol);
+    }
+  }
+
+  _incrementRookToken(piece, row, col) {
+    const newRook = piece + EVOLVE_SYMBOL;
+    this.add(row, col, newRook);
+  }
+
+  _decrementRookToken(piece, row, col) {
+    const newRook = piece.slice(0, -1);
+    this.add(row, col, newRook);
+  }
+
+  _updatePawnEvolveProgress(piece, row, col) {
+    const EVOLVE_THRESHOLD = 3;
+    const newPawn = piece + PROGRESS_SYMBOL;
+    this.add(row, col, newPawn);
+    // if new piece has 3 progress symbols, evolve it
+    if (newPawn.match(/\+/g).length === EVOLVE_THRESHOLD) {
+      this._evolve(newPawn, row, col);
+    }
+  }
+
+  _updateKnightEvolveProgress(piece, row, col) {
+    const finalRow = this._turn === WHITE ? 0 : 7;
+    if (row === finalRow) {
+      this._evolve(piece, row, col);
+    }
+  }
+
+  _updateBishopEvolveProgress(piece, fromRow, toRow, toCol) {
+    const EVOLVE_THRESHOLD = 4;
+    const rowDiff = Math.abs(fromRow - toRow);
+    if (rowDiff >= EVOLVE_THRESHOLD) {
+      this._evolve(piece, toRow, toCol);
+    }
+  }
+
+  _evolve(piece, row, col) {
+    const pieceSymbol = piece[0];
+    this.add(row, col, pieceSymbol + EVOLVE_SYMBOL);
+  }
+
+  _isPawn(piece) {
+    return piece && piece.toLowerCase().includes("p");
+  }
+
+  _isKnight(piece) {
+    return piece && piece.toLowerCase().includes("n");
+  }
+
+  _isBishop(piece) {
+    return piece && piece.toLowerCase().includes("b");
+  }
+
+  _isRook(piece) {
+    return piece && piece.toLowerCase().includes("r");
+  }
+
+  _isKing(piece) {
+    return piece && piece.toLowerCase() === "k";
+  }
+
+  _isQueen(piece) {
+    return piece && piece.toLowerCase() === "q";
+  }
+
+  _isEvolvedPiece(piece) {
+    return piece && piece.includes(EVOLVE_SYMBOL);
+  }
+
+  _checkMovePowerUp(fromRow, fromCol, toRow, toCol) {
+    const attackingPiece = this.getPiece(fromRow, fromCol);
+    const targetPiece = this.getPiece(toRow, toCol);
+
+    switch (attackingPiece.toLowerCase()) {
+    }
   }
 
   _checkMoveCastle(piece, fromCol, toCol) {
-    if (piece.toLowerCase() === "k" && Math.abs(toCol - fromCol) === 2) {
+    if (this._isKing(piece) && Math.abs(toCol - fromCol) === 2) {
       const row = this._turn === WHITE ? 7 : 0;
       const kingSymbol = this._turn === WHITE ? "k" : "K";
       const rookSymbol = this._turn === WHITE ? "r" : "R";
@@ -469,7 +593,7 @@ export class Chessboard {
 
   _checkMoveEnPassant(piece, toRow, toCol) {
     if (
-      piece.toLowerCase() === "p" &&
+      this._isPawn(piece) &&
       this._enPassantSquare &&
       toRow === this._enPassantSquare[0] &&
       toCol === this._enPassantSquare[1]
@@ -539,7 +663,7 @@ export class Chessboard {
 
   _preUpdateHalfMove(piece, toRow, toCol) {
     // check for capturing or pawn movement
-    if (piece.toLowerCase() === "p" || !this._isEmptySquare(toRow, toCol)) {
+    if (this._isPawn(piece) || !this._isEmptySquare(toRow, toCol)) {
       this._halfMove = 0;
     } else {
       this._halfMove++;
@@ -549,9 +673,9 @@ export class Chessboard {
   _updateCastlingRights(piece, fromRow, fromCol) {
     if (!this._isSameSide(piece)) return;
     // only attempt to update castling rights if king or rook is moved from same side
-    if (piece.toLowerCase() === "k") {
+    if (this._isKing(piece)) {
       this._castlingRights = [];
-    } else if (piece.toLowerCase() === "r") {
+    } else if (this._isRook(piece)) {
       const staringRow = this._side === WHITE ? 7 : 0;
       if (fromCol === 0 && fromRow === staringRow) {
         this._castlingRights = this._castlingRights.filter(
@@ -567,7 +691,7 @@ export class Chessboard {
 
   _updateEnPassant(piece, fromRow, fromCol, toRow) {
     // update en passant square (if applicable)
-    if (piece.toLowerCase() === "p" && Math.abs(toRow - fromRow) === 2) {
+    if (this._isPawn(piece) && Math.abs(toRow - fromRow) === 2) {
       this._enPassantSquare = [(fromRow + toRow) / 2, fromCol];
     } else {
       this._enPassantSquare = null;
@@ -589,11 +713,15 @@ export class Chessboard {
     return this._board[row][col];
   }
 
-  _checkPinMovement(limit_x, limit_y, new_direction_x, new_direction_y) {
+  _checkPinMovement(fromRow, fromCol, new_direction_x, new_direction_y) {
     /* 
       limit_x is pinned direction for row, limit_y is pinned direction for col 
       return true if piece is not pinned or new direction is same as pinned direction
     */
+    let limit_x, limit_y;
+    if (this._isPinnedSquare(fromRow, fromCol)) {
+      [limit_x, limit_y] = this._getPinnedDirections(fromRow, fromCol);
+    }
     if (
       !(limit_x || limit_y) ||
       (limit_x === new_direction_x && limit_y === new_direction_y)
@@ -610,16 +738,10 @@ export class Chessboard {
     const possibleMoves = [];
     const direction = this._side === WHITE ? -1 : 1;
     const startRow = this._side === WHITE ? 6 : 1;
-    let limit_x, limit_y;
-    if (this._isPinnedSquare(fromRow, fromCol)) {
-      const [dx, dy] = this._getPinnedDirections(fromRow, fromCol);
-      limit_x = dx;
-      limit_y = dy;
-    }
     // check one square ahead
     if (
       this._isEmptySquare(fromRow + direction, fromCol) &&
-      this._checkPinMovement(limit_x, limit_y, direction, 0) &&
+      this._checkPinMovement(fromRow, fromCol, direction, 0) &&
       (!this._isInCheck ||
         this._isBlockableSquare(fromRow + direction, fromCol))
     ) {
@@ -629,7 +751,7 @@ export class Chessboard {
     if (
       fromRow === startRow &&
       this._isEmptySquare(fromRow + 2 * direction, fromCol) &&
-      this._checkPinMovement(limit_x, limit_y, direction, 0) &&
+      this._checkPinMovement(fromRow, fromCol, direction, 0) &&
       (!this._isInCheck ||
         this._isBlockableSquare(fromRow + 2 * direction, fromCol))
     ) {
@@ -638,7 +760,7 @@ export class Chessboard {
     // check diagonal squares for capturing
     if (
       this._isEnemyPiece(this.getPiece(fromRow + direction, fromCol - 1)) &&
-      this._checkPinMovement(limit_x, limit_y, direction, -1) &&
+      this._checkPinMovement(fromRow, fromCol, direction, -1) &&
       (!this._isInCheck ||
         this._isBlockableSquare(fromRow + direction, fromCol - 1))
     ) {
@@ -646,7 +768,7 @@ export class Chessboard {
     }
     if (
       this._isEnemyPiece(this.getPiece(fromRow + direction, fromCol + 1)) &&
-      this._checkPinMovement(limit_x, limit_y, direction, 1) &&
+      this._checkPinMovement(fromRow, fromCol, direction, 1) &&
       (!this._isInCheck ||
         this._isBlockableSquare(fromRow + direction, fromCol + 1))
     ) {
@@ -661,8 +783,8 @@ export class Chessboard {
       )
         if (
           this._checkPinMovement(
-            limit_x,
-            limit_y,
+            fromRow,
+            fromCol,
             direction,
             enPassantCol - fromCol
           ) &&
@@ -683,19 +805,14 @@ export class Chessboard {
       [limit_x, limit_y] = this._getPinnedDirections(fromRow, fromCol);
     }
     const isPinned = limit_x || limit_y;
-    const knightMoves = [
-      [-2, -1], // up left
-      [-2, 1], // up right
-      [-1, -2], // left up
-      [-1, 2], // right up
-      [1, -2], // left down
-      [1, 2], // right down
-      [2, -1], // down left
-      [2, 1], // down right
-    ];
+    const knightMoves = this._getKnightDirections();
     for (const [dx, dy] of knightMoves) {
-      const newRow = fromRow + dx;
-      const newCol = fromCol + dy;
+      const newRow = this._isEvolvedPiece(this.getPiece(fromRow, fromCol))
+        ? (fromRow + dx) % 8
+        : fromRow + dx;
+      const newCol = this._isEvolvedPiece(this.getPiece(fromRow, fromCol))
+        ? (fromCol + dy) % 8
+        : fromCol + dy;
       if (newRow >= 0 && newRow <= 7 && newCol >= 0 && newCol <= 7) {
         if (
           (this._isEmptySquare(newRow, newCol) ||
@@ -718,23 +835,52 @@ export class Chessboard {
   _getPinnedDirections(row, col) {
     return this._pinnedDirections[this._hash(row, col)];
   }
-  _getRookMoves(fromRow, fromCol) {
+
+  _getGlobalCastleMoves(fromRow, fromCol) {
     const possibleMoves = [];
-    const rookDirections = [
-      [-1, 0], // up
-      [1, 0], // down
-      [0, -1], // left
-      [0, 1], // right
-    ];
-    let limit_x, limit_y;
-    if (this._isPinnedSquare(fromRow, fromCol)) {
-      [limit_x, limit_y] = this._getPinnedDirections(fromRow, fromCol);
+    const piece = this.getPiece(fromRow, fromCol);
+
+    if (
+      this._isRook(piece) &&
+      this._isEvolvedPiece(piece) &&
+      this._isSameSide(piece)
+    ) {
+      const [kingRow, kingCol] = this._findKing();
+      const kingDirections = this._getKingDirections();
+
+      for (const [dx, dy] of kingDirections) {
+        const newRow = kingRow + dx;
+        const newCol = kingCol + dy;
+        if (newRow >= 0 && newRow <= 7 && newCol >= 0 && newCol <= 7) {
+          if (
+            this._isEmptySquare(newRow, newCol) ||
+            this._isEnemyPiece(this.getPiece(newRow, newCol))
+          )
+            possibleMoves.push([newRow, newCol]);
+        }
+      }
     }
+    return possibleMoves;
+  }
+  _getRookMoves(fromRow, fromCol) {
+    const possibleMoves = this._getStandardRookMoves(fromRow, fromCol);
+    const globalCastleMoves = this._getGlobalCastleMoves(fromRow, fromCol);
+    for (const move of globalCastleMoves) {
+      if (!possibleMoves.some(([r, c]) => r === move[0] && c === move[1])) {
+        possibleMoves.push(move);
+      }
+    }
+    return possibleMoves;
+  }
+
+  _getStandardRookMoves(fromRow, fromCol) {
+    const possibleMoves = [];
+    const rookDirections = this._getRookDirections();
     for (const [dx, dy] of rookDirections) {
       let currRow = fromRow + dx;
       let currCol = fromCol + dy;
       while (currRow >= 0 && currRow <= 7 && currCol >= 0 && currCol <= 7) {
-        if (this._checkPinMovement(limit_x, limit_y, dx, dy)) {
+        if (this._checkPinMovement(fromRow, fromCol, dx, dy)) {
           if (
             this._isEmptySquare(currRow, currCol) &&
             (!this._isInCheck || this._isBlockableSquare(currRow, currCol))
@@ -758,21 +904,12 @@ export class Chessboard {
 
   _getBishopMoves(fromRow, fromCol) {
     const possibleMoves = [];
-    const bishopDirections = [
-      [-1, -1], // up left
-      [-1, 1], // up right
-      [1, -1], // down left
-      [1, 1], // down right
-    ];
-    let limit_x, limit_y;
-    if (this._isPinnedSquare(fromRow, fromCol)) {
-      [limit_x, limit_y] = this._getPinnedDirections(fromRow, fromCol);
-    }
+    const bishopDirections = this._getBishopDirections();
     for (const [dx, dy] of bishopDirections) {
       let currRow = fromRow + dx;
       let currCol = fromCol + dy;
       while (currRow >= 0 && currRow <= 7 && currCol >= 0 && currCol <= 7) {
-        if (this._checkPinMovement(limit_x, limit_y, dx, dy)) {
+        if (this._checkPinMovement(fromRow, fromCol, dx, dy)) {
           if (
             this._isEmptySquare(currRow, currCol) &&
             (!this._isInCheck || this._isBlockableSquare(currRow, currCol))
@@ -796,7 +933,7 @@ export class Chessboard {
 
   _getQueenMoves(fromRow, fromCol) {
     return this._getBishopMoves(fromRow, fromCol).concat(
-      this._getRookMoves(fromRow, fromCol)
+      this._getStandardRookMoves(fromRow, fromCol)
     );
   }
   _isSquareUnderAttack(row, col) {
@@ -804,16 +941,7 @@ export class Chessboard {
   }
   _getKingMoves(fromRow, fromCol) {
     const possibleMoves = [];
-    const kingMoves = [
-      [-1, 0], // up
-      [1, 0], // down
-      [0, -1], // left
-      [0, 1], // right
-      [-1, -1], // up left
-      [-1, 1], // up right
-      [1, -1], // down left
-      [1, 1], // down right
-    ];
+    const kingMoves = this._getKingDirections();
     for (const [dx, dy] of kingMoves) {
       const newRow = fromRow + dx;
       const newCol = fromCol + dy;
@@ -858,22 +986,22 @@ export class Chessboard {
   _getLegalMoves(row, col) {
     const piece = this.getPiece(row, col);
     if (piece === null) return [];
-    switch (piece.toLowerCase()) {
-      case "p":
-        return this._getPawnMoves(row, col);
-      case "n":
-        return this._getKnightMoves(row, col);
-      case "b":
-        return this._getBishopMoves(row, col);
-      case "r":
-        return this._getRookMoves(row, col);
-      case "q":
-        return this._getQueenMoves(row, col);
-      case "k":
-        return this._getKingMoves(row, col);
-      default:
-        console.warn("piece not implemented??");
-        return [];
+
+    if (this._isPawn(piece)) {
+      return this._getPawnMoves(row, col);
+    } else if (this._isKnight(piece)) {
+      return this._getKnightMoves(row, col);
+    } else if (this._isBishop(piece)) {
+      return this._getBishopMoves(row, col);
+    } else if (this._isRook(piece)) {
+      return this._getRookMoves(row, col);
+    } else if (this._isQueen(piece)) {
+      return this._getQueenMoves(row, col);
+    } else if (this._isKing(piece)) {
+      return this._getKingMoves(row, col);
+    } else {
+      console.warn("piece not implemented??");
+      return [];
     }
   }
 
