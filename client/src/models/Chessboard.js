@@ -621,7 +621,7 @@ export class Chessboard {
     if (this._gameMode === GAME_MODE.POWER_UP_DUCK) {
       this._checkGlobalCastling(finalRow, finalCol, moveInfo); // Call order: 1
       this._checkPowerUpProgress(initRow, finalRow, finalCol, moveInfo); // Call order: 2
-      this._checkBishopSniping(initRow, initCol, finalRow, finalCol); // Call order: 3
+      this._checkBishopSniping(initRow, initCol, finalRow, finalCol, moveInfo); // Call order: 3
       this._checkKingResurrection(
         initRow,
         initCol,
@@ -645,9 +645,9 @@ export class Chessboard {
     }
   }
 
-  _checkBishopSniping(initRow, initCol, finalRow, finalCol) {
+  _checkBishopSniping(initRow, initCol, finalRow, finalCol, moveInfo) {
     const piece = this.getPiece(finalRow, finalCol);
-    if (this._isBishop(piece) && this._isEvolvedPiece(piece)) {
+    if (this._isBishop(piece) && this._isEvolvedPiece(piece) && moveInfo.capturedPiece) {
       this.remove(finalRow, finalCol);
       this.add(initRow, initCol, piece);
     }
