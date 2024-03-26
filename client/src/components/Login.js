@@ -6,6 +6,7 @@ import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined
 import PasswordOutlinedIcon from "@mui/icons-material/PasswordOutlined";
 import Cookies from "universal-cookie";
 import { loginUser } from "../api/auth";
+import { SERVER_URL } from "../config";
 import { useNavigate } from "react-router-dom";
 
 const LoginContainer = styled.div`
@@ -41,7 +42,7 @@ const LoginReducer = (state, action) => {
   }
 };
 
-const Login = () => {
+const Login = ({ onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const cookie = new Cookies();
   const navigate = useNavigate();

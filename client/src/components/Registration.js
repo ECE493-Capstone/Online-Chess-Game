@@ -7,6 +7,7 @@ import PasswordOutlinedIcon from "@mui/icons-material/PasswordOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import { SERVER_URL } from "../config";
 import { registerUser } from "../api/auth";
+import { useNavigate } from "react-router-dom";
 
 const RegistrationContainer = styled.div`
   border: 1px solid white;
@@ -43,7 +44,7 @@ const RegisterReducer = (state, action) => {
   }
 };
 
-const Registration = () => {
+const Registration = ({ onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [{ username, password, email, errorMsg }, dispatch] = useReducer(
     RegisterReducer,
@@ -54,6 +55,8 @@ const Registration = () => {
       errorMsg: "",
     }
   );
+
+  const navigate = useNavigate(); // navigation element
 
   const handleSubmit = (e) => {
     setIsSubmitting(true);
@@ -67,6 +70,10 @@ const Registration = () => {
         if (res.status === 200) {
           console.log("User registered successfully");
           // route to the login page then return empty promise
+
+          // route to the previous page the user was on
+          onClose();
+          navigate(-1);
           return Promise.resolve(undefined);
         }
         return res.json();
