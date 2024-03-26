@@ -5,6 +5,7 @@ import styled from "styled-components";
 import PasswordOutlinedIcon from "@mui/icons-material/PasswordOutlined";
 import { SERVER_URL } from "../config";
 import { useNavigate } from "react-router-dom";
+import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 
 const ChangeUsernameContainer = styled.div`
   border: 1px solid white;
@@ -124,7 +125,7 @@ const ChangeUsername = ({ onClose }) => {
           ></TextField>
         </div>
         <div>
-          <PasswordOutlinedIcon fontSize="large"></PasswordOutlinedIcon>
+          <AccountCircleOutlinedIcon fontSize="large" />
           <TextField
             required
             id="newUsername"

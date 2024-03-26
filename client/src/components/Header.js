@@ -27,20 +27,39 @@ const HeaderElements = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [userId, setUserId] = useState("");
+  const [isFocused, setIsFocused] = useState(true);
 
-  useEffect(() => {
-    // Check if the required items exist in localStorage
-    const storedUserId = localStorage.getItem("userId");
-    const storedUsername = localStorage.getItem("username");
-    const storedEmail = localStorage.getItem("email");
-
-    if (userId && storedUsername && storedEmail) {
-      setIsLoggedIn(true);
-      setUsername(storedUsername);
-      setEmail(storedEmail);
-      setUserId(storedUserId);
+  const checkLoginStatus = () => {
+    try {
+      const storedUserId = localStorage.getItem("userId");
+      const storedUsername = localStorage.getItem("username");
+      const storedEmail = localStorage.getItem("email");
+  
+      if (storedUserId && storedUsername && storedEmail) {
+        setIsLoggedIn(true);
+        console.log("HEADER DETECTS LOGIN: userID: " + JSON.stringify(storedUserId) + " username: " + JSON.stringify(storedUsername) + " email: " + JSON.stringify(storedEmail));
+        setUsername(storedUsername);
+        setUserId(storedUserId);
+        setEmail(storedEmail);
+      } else {
+        console.log("Header doesn't detect login.");
+        setIsLoggedIn(false);
+        setUsername("");
+        setUserId("");
+        setEmail("");
+      }
+    } catch (error) {
+      console.log(error);
     }
-  }, []);
+  };
+  
+  useEffect(() => {
+    if (isFocused) {
+      checkLoginStatus();
+      setIsFocused(false);
+    }
+  }, [isFocused]);
+  
 
   const handleSignInClick = () => {
     setOpenLogin(true);
@@ -73,11 +92,11 @@ const HeaderElements = () => {
 
   const handleLogoutClick = () => {
     setAnchorEl(null);
-    setIsLoggedIn(false);
     // Clear items from localStorage upon logout
     localStorage.removeItem("userId");
     localStorage.removeItem("username");
     localStorage.removeItem("email");
+    setIsFocused(true);
   };
 
   return (
@@ -89,7 +108,7 @@ const HeaderElements = () => {
               style={{ marginRight: "5px", textTransform: "none" }}
               onClick={handleUserIconClick}
             >
-              <AccountCircleIcon style={{ color: 'black'}}/>
+              <AccountCircleIcon fontSize="medium" style={{ color: 'black'}}/>
             </Button>
             <Menu
               anchorEl={anchorEl}
@@ -139,7 +158,7 @@ const HeaderElements = () => {
             backgroundColor: "transparent",
           }}
         >
-          <Login onClose={handleCloseLogin}/>
+          <Login onClose={handleCloseLogin} setIsFocused={setIsFocused}/>
         </Box>
       </Modal>
       <Modal

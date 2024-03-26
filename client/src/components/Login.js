@@ -41,7 +41,7 @@ const LoginReducer = (state, action) => {
   }
 };
 
-const Login = ({ onClose }) => {
+const Login = ({ onClose, setIsFocused }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [{ identity, password, errorMsg }, dispatch] = useReducer(
     LoginReducer,
@@ -53,7 +53,7 @@ const Login = ({ onClose }) => {
     }
   );
 
-  // const navigate = useNavigate(); // navigation element
+  const navigate = useNavigate(); // navigation element
 
   const handleSubmit = (e) => {
     setIsSubmitting(true);
@@ -89,8 +89,9 @@ const Login = ({ onClose }) => {
           localStorage.setItem('username', username);
           localStorage.setItem('email', email);
           console.log("userID: " + JSON.stringify(userId) + " username: " + JSON.stringify(username) + " email: " + JSON.stringify(email));
+          setIsFocused(true);
         }
-        // navigate(-1);
+        navigate(-1);
       })
       .then((data) => {
         if (data === undefined) return;

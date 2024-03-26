@@ -6,6 +6,42 @@ import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import { Button } from "@mui/material";
 import { useLocation } from "react-router-dom";
+import styled from "styled-components";
+
+const PageContainer = styled.div`
+  display: flex;
+  background-color: rgb(184, 184, 184);
+  min-height: 100vh;
+  overflow: hidden;
+  flex-direction: column;
+
+`;
+
+const ProfileInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  ${'' /* background-color: black; */}
+  width: 40%;
+  min-width: 40%;
+  gap: 10px;
+`;
+
+const StyledButton = styled(Button)`
+  min-width: 50%;
+
+`;
+
+const Title = styled.div`
+  font-size: 20px;
+  color: white;
+`;
+
+const Subtitle = styled.div`
+  font-size: 14px;
+  text-transform: none;
+  color: white;
+`;
 
 const UserInfo = ({ username, email, statistics }) => {
   const [openChangePassword, setOpenChangePassword] = useState(false);
@@ -30,20 +66,18 @@ const UserInfo = ({ username, email, statistics }) => {
 
   return (
     <div style={{ display: "flex" }}>
-      <div style={{ flex: "25%", marginRight: '20px' }}>
+      <div style={{ flex: "25%"}}>
         <h2>Profile Information</h2>
-        <div style={{ marginBottom: '20px' }}>
-          <p><strong>Username:</strong> {username}</p>
-          <p><strong>Email:</strong> {email}</p>
-          <Button variant="contained" onClick={handleOpenChangeUsername}>Change Username</Button>
-        </div>
-        <div>
-        <Button variant="contained" onClick={handleOpenChangePassword}>Change Password</Button>
-        </div>
+        <ProfileInfo>
+          <Title>{username}</Title>
+          <Subtitle>({email})</Subtitle>
+          <StyledButton variant="contained" onClick={handleOpenChangeUsername}>Change Username</StyledButton>
+          <StyledButton variant="contained" onClick={handleOpenChangePassword}>Change Password</StyledButton>
+        </ProfileInfo>
       </div>
-      <div style={{ flex: "75%", marginRight: '20px' }}>
+      <div style={{ flex: "75%", padding: "10px" }}>
         <h2>Statistics</h2>
-        <ul>
+        <ul style={{ borderLeft: "1px solid black", borderBottom: "1px solid black", paddingBottom: "10px", paddingLeft: "10px" }}>
           {Object.entries(statistics).map(([key, value]) => (
             <li key={key}><strong>{key}:</strong> {value}</li>
           ))}
@@ -113,8 +147,8 @@ const Profile = () => {
   //   }
   // };
 
-  const sampleUsername = "bruh";
-  const sampleEmail = "bruh@example.com";
+  // const sampleUsername = "bruh";
+  // const sampleEmail = "bruh@example.com";
   const sampleStatistics = {
     gamesPlayed: 10,
     wins: 5,
@@ -122,20 +156,20 @@ const Profile = () => {
     draws: 0
   }
   const location = useLocation();
-  // const { username, email, userId } = location.state;
+  const { username, email, userId } = location.state;
 
   return (
     <Header>
-      <div style={{ flex: "1", marginRight: '20px', marginLeft: '20px'  }}>
+      <PageContainer>
         <div>
           <h1>Profile Page</h1>
           <UserInfo
-            username={sampleUsername}
-            email={sampleEmail}
+            username={username}
+            email={email}
             statistics={sampleStatistics}
           />
         </div>
-      </div>
+      </PageContainer>
     </Header>
   );
 };
