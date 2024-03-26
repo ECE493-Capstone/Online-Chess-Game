@@ -2,15 +2,20 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import { Popover } from "@mui/material";
+import { IconButton } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import styled from "styled-components";
 import Typography from '@mui/material/Typography';
+import StandardChessImage from '../img/Standard_Chess.png';
+import BlindChessImage from '../img/Blind_Chess.png';
+import PowerUpChessImage from '../img/Power_Up_Chess.png';
 
 const PageContainer = styled.div`
   display: flex;
   background-color: rgb(184, 184, 184);
   text-align: center;
   min-height: 100vh;
+  min-width: 100vh;
   overflow: hidden;
   flex-direction: column;
   justify-content: center;
@@ -26,6 +31,7 @@ const GameContainer = styled.div`
   flex-direction: column;
   min-height: 40vh;
   width: 20vw;
+  align-items: center;
   .footer {
     justify-content: flex-end;
     margin-top: 10px;
@@ -83,7 +89,12 @@ const GameSelect = () => {
       <PageContainer>
         <div style={{ display: "flex", justifyContent: "center", gap:"10vw"}}>
           <GameContainer>
-            <img src="placeholder_standard_image.jpg" alt="Standard" onClick={() => handleGameSelect("Standard")} />
+            <img 
+              src={StandardChessImage} 
+              alt="Standard" 
+              onClick={() => handleGameSelect("Standard")} 
+              style={{ width: "200px", height: "auto" }}
+            />
             <Separator />
             <div>
               <ModalContent>
@@ -92,7 +103,12 @@ const GameSelect = () => {
             </div>
           </GameContainer>
           <GameContainer>
-            <img src="placeholder_blind_image.jpg" alt="Blind" onClick={() => handleGameSelect("Blind")} />
+            <img 
+              src={BlindChessImage} 
+              alt="Blind" 
+              onClick={() => handleGameSelect("Blind")} 
+              style={{ width: "200px", height: "auto" }}
+            />
             <Separator />
             <div>
               <ModalContent>
@@ -102,31 +118,37 @@ const GameSelect = () => {
             </div>
           </GameContainer>
           <GameContainer style={{ position: "relative" }}>
-            <img src="placeholder_power_up_duck_image.jpg" alt="Power-up Duck" onClick={() => handleGameSelect("Power-up Duck")} />
+            <img 
+              src={PowerUpChessImage} 
+              alt="Power-up Duck" 
+              onClick={() => handleGameSelect("Power-up Duck")} 
+              style={{ width: "200px", height: "auto" }}
+            />
             <Separator />
             <div style={{ position: "absolute", top: 0, right: 0 }}>
-            <InfoIcon
-              aria-describedby={id}
-              onClick={handlePopoverOpen}
-            >
-              <InfoIcon />
-            </InfoIcon>
-            <Popover
-              id={id}
-              open={open}
-              anchorEl={anchorEl}
-              onClose={handlePopoverClose}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right',
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-            >
-              <Typography sx={{ p: 2 }}>Info on the power-ups</Typography>
-            </Popover>
+              <IconButton
+                aria-describedby={id}
+                onMouseEnter={handlePopoverOpen}
+                // onMouseLeave={handlePopoverClose}
+              >
+              <InfoIcon/>
+              </IconButton>
+              <Popover
+                id={id}
+                open={open}
+                anchorEl={anchorEl}
+                onClose={handlePopoverClose}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+              >
+                <Typography sx={{ p: 1 }}>Info on the power-ups</Typography>
+              </Popover>
             </div>
             <div className="standard">
               <ModalContent>
