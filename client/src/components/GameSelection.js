@@ -73,15 +73,16 @@ const GameSelect = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handlePopoverOpen = (event) => {
+    // console.log("Popover opened");
     setAnchorEl(event.currentTarget);
   };
 
   const handlePopoverClose = () => {
+    // console.log("Popover closed");
     setAnchorEl(null);
   };
 
   const open = Boolean(anchorEl);
-  const id = open ? 'simple-popover' : undefined;
 
   return (
     <Header>
@@ -123,14 +124,17 @@ const GameSelect = () => {
             <Separator />
             <div style={{ position: "absolute", top: 0, right: 0 }}>
               <IconButton
-                aria-describedby={id}
+                aria-describedby={open ? 'mouse-over-popover' : undefined}
                 onMouseEnter={handlePopoverOpen}
                 onMouseLeave={handlePopoverClose}
               >
-              <InfoIcon/>
+                <InfoIcon/>
               </IconButton>
               <Popover
-                id={id}
+                id="mouse-over-popover"
+                sx={{
+                  pointerEvents: 'none',
+                }}
                 open={open}
                 anchorEl={anchorEl}
                 onClose={handlePopoverClose}
@@ -142,6 +146,7 @@ const GameSelect = () => {
                   vertical: 'top',
                   horizontal: 'right',
                 }}
+                disableRestoreFocus
               >
                 <Typography sx={{ p: 1 }}>Info on the power-ups</Typography>
               </Popover>
