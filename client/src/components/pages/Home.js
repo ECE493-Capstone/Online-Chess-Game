@@ -3,24 +3,40 @@ import { useNavigate } from "react-router-dom";
 import { Button, Modal, TextField, Fab } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import Header from "../Header";
-import "../styles.css";
 import styled from "styled-components";
+import JoinGame from "../JoinGame";
 
-const Container = styled.div`
+const PageContainer = styled.div`
+  display: flex;
+  background-color: rgb(184, 184, 184);
+  text-align: center;
+  min-height: 100vh;
+  overflow: hidden;
+  flex-direction: column;
+  justify-content: center;
+
+`;
+
+const ButtonContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  min-height: 80vh;
-  padding-bottom: 20px;
+  margin-top: auto;
+  padding-bottom: 150px;
+  overflow: hidden;
+
 `;
 
-const StyledButton = styled(Button)`
-  margin-right: 10px;
-  flex-grow: 1;
-  max-width: 300px;
-  height: auto;
-  text-transform: none;
+const LeftButton = styled(Button)`
+  width: 50%;
+  height: 94%;
+`;
+
+const RightButton = styled(Button)`
+  width: 100%;
+  height: 100%;
+
 `;
 
 const ButtonContent = styled.div`
@@ -30,60 +46,13 @@ const ButtonContent = styled.div`
 
 const Title = styled.div`
   font-size: 20px;
+  color: white;
 `;
 
 const Subtitle = styled.div`
   font-size: 14px;
   text-transform: none;
-`;
-
-const RightButton = styled(Button)`
-  margin-bottom: 10px;
-  width: 100%;
-  max-width: 150px;
-  text-transform: none;
-  height: 3vh;
-  padding-bottom: 10px;
-  margin-bottom: 10px;
-`;
-
-const ModalContainer = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding: 20px;
-  border-radius: 8px;
-  max-width: 90%;
-`;
-
-const ModalHeader = styled.div`
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-`;
-
-const ModalTitle = styled.h2`
-  margin-right: 10px;
-  margin-bottom: 0;
-`;
-
-const ModalLine = styled.div`
-  border-bottom: 1px solid #ccc;
-  width: 100%;
-  margin-top: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const ContentWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 2em;
-  width: 90%;
-  max-width: 400px;
+  color: white;
 `;
 
 const Home = () => {
@@ -127,54 +96,60 @@ const Home = () => {
   };
 
   return (
-    <Header>
-      <div>
-        <h1>Home Page</h1>
-      </div>
-      <Container>
-        <div style={{ display: "flex", alignItems: "center"}}>
-          <StyledButton variant="contained" className="standard" onClick={handleQuickPlayClick}>
-            <ButtonContent>
-              <Title>Quick Play</Title>
-              <Subtitle>Standard, blind, or power up chess</Subtitle>
-            </ButtonContent>
-          </StyledButton>
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px"}}>
-            <RightButton id="create-game-button" variant="contained" className="standard" onClick={handleCreateGameClick}>
-              Create Game
-            </RightButton>
-            <RightButton id="join-game-button" variant="contained" className="standard" onClick={handleJoinGame}>
-              Join Game
-            </RightButton>
-          </div>
-        </div>
-      </Container>
+      <Header>
+        <PageContainer>
+          <ButtonContainer>
+            <div style={{ display: "flex", alignItems: "center"}}>
+              <LeftButton 
+                variant="contained" 
+                onClick={handleQuickPlayClick}
+                style={{
+                  backgroundColor: 'black',
+                  border: '2px solid white',
+                  borderRadius: '8px'
+                }}
+              >
+                <ButtonContent>
+                  <Title>Quick Play</Title>
+                  <Subtitle>Standard, blind, or power up chess</Subtitle>
+                </ButtonContent>
+              </LeftButton>
+              <div style={{ display: "flex", flexDirection: "column", gap: "5px", padding: "4px"}}>
+                <RightButton 
+                  variant="contained" 
+                  onClick={handleCreateGameClick}
+                  style={{
+                  backgroundColor: 'black',
+                  border: '2px solid white',
+                  borderRadius: '8px'
+                }}>
+                  <Title>Create Game</Title>
 
-      <Modal open={isModalOpen} aria-labelledby="join-game-modal-title" aria-describedby="join-game-modal-description">
-        <ModalContainer className="standard">
-          <ModalHeader>
-            <ModalTitle id="join-game-modal-title">Join Game</ModalTitle>
-            <div style={{ marginLeft: "auto" }}>
-              <Fab onClick={handleCloseModal} style={{ width: "35px", height: "35px" }}><CloseIcon /></Fab>
+                </RightButton>
+                <RightButton 
+                  variant="contained" 
+                  onClick={handleJoinGame}
+                  style={{
+                  backgroundColor: 'black',
+                  border: '2px solid white',
+                  borderRadius: '8px'
+                }}>
+                  <Title>Join Game</Title>
+                </RightButton>
+              </div>
             </div>
-          </ModalHeader>
-          <ModalLine></ModalLine>
-            <ContentWrapper>
-              <TextField
-                id="room-code"
-                label="Room Code"
-                variant="outlined"
-                value={roomCode}
-                onChange={handleRoomCodeChange}
-                error={submitClicked && roomCode.trim() === ""}
-                helperText={(submitClicked && roomCode.trim() === "") ? "Please enter the room code." : ""}
-                style={{ marginTop: "2em" }}
-              />
-              <Button variant="contained" className="standard" style={{ marginTop: "2em" }} onClick={handleJoinRoom}>Join Room</Button>
-            </ContentWrapper>
-        </ModalContainer>
-      </Modal>
-    </Header>
+          </ButtonContainer>
+          <JoinGame        
+            isModalOpen={isModalOpen}
+            handleCloseModal={handleCloseModal}
+            roomCode={roomCode}
+            handleRoomCodeChange={handleRoomCodeChange}
+            handleJoinRoom={handleJoinRoom}
+            submitClicked={submitClicked}
+          />
+        </PageContainer>
+      </Header>
+
   );
 };
 

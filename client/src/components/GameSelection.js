@@ -1,38 +1,58 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
-import { Tooltip } from "@mui/material";
+import { Popover } from "@mui/material";
 import InfoIcon from '@mui/icons-material/Info';
-import "./styles.css";
 import styled from "styled-components";
+import Typography from '@mui/material/Typography';
 
-const Container = styled.div`
+const PageContainer = styled.div`
+  display: flex;
+  background-color: rgb(184, 184, 184);
   text-align: center;
   min-height: 100vh;
-  display: flex;
+  overflow: hidden;
   flex-direction: column;
   justify-content: center;
-  align-items: stretch;
+
 `;
 
 const GameContainer = styled.div`
   border: 1px solid white;
-  border-radius: 10px;
+  background-color: black;
+  border-radius: 30px;
   padding: 0px 20px 20px 20px;
   display: flex;
   flex-direction: column;
-  max-width: 300px;
-  div {
-    margin: 2px 0px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
+  min-height: 40vh;
+  width: 20vw;
   .footer {
     justify-content: flex-end;
     margin-top: 10px;
   }
+`;
+
+const Title = styled.div`
+  font-size: 20px;
+  color: white;
+`;
+
+const Subtitle = styled.div`
+  font-size: 14px;
+  text-transform: none;
+  color: white;
+`;
+
+const ModalContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const Separator = styled.div`
+  width: 100%;
+  border-top: 1px solid #ccc; /* Adjust color and thickness as needed */
+  margin-top: 10px; /* Adjust spacing as needed */
 `;
 
 const GameSelect = () => {
@@ -45,38 +65,78 @@ const GameSelect = () => {
     navigate("/game");
   };
 
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const handlePopoverOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+  const id = open ? 'simple-popover' : undefined;
+
   return (
     <Header>
-      <Container>
-        <h1>Game Selection</h1>
-        <div style={{ display: "flex", justifyContent: "center" }}>
+      <PageContainer>
+        <div style={{ display: "flex", justifyContent: "center", gap:"10vw"}}>
           <GameContainer>
             <img src="placeholder_standard_image.jpg" alt="Standard" onClick={() => handleGameSelect("Standard")} />
-            <div className="standard">
-              <p>Standard Chess</p>
+            <Separator />
+            <div>
+              <ModalContent>
+                <Title>Standard Chess</Title>
+              </ModalContent>
             </div>
           </GameContainer>
           <GameContainer>
             <img src="placeholder_blind_image.jpg" alt="Blind" onClick={() => handleGameSelect("Blind")} />
-            <div className="standard">
-              <p>Blind Chess<br/>Play chess without being able to view the board!</p>
+            <Separator />
+            <div>
+              <ModalContent>
+                  <Title>Blind Chess</Title>
+                  <Subtitle>Play chess without being able to view the board!</Subtitle>
+              </ModalContent>
             </div>
           </GameContainer>
           <GameContainer style={{ position: "relative" }}>
             <img src="placeholder_power_up_duck_image.jpg" alt="Power-up Duck" onClick={() => handleGameSelect("Power-up Duck")} />
+            <Separator />
             <div style={{ position: "absolute", top: 0, right: 0 }}>
-              <Tooltip title="Info on the power-ups" placement="top-end" arrow>
-                <div>
-                  <InfoIcon />
-                </div>
-              </Tooltip>
+            <InfoIcon
+              aria-describedby={id}
+              onClick={handlePopoverOpen}
+            >
+              <InfoIcon />
+            </InfoIcon>
+            <Popover
+              id={id}
+              open={open}
+              anchorEl={anchorEl}
+              onClose={handlePopoverClose}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+            >
+              <Typography sx={{ p: 2 }}>Info on the power-ups</Typography>
+            </Popover>
             </div>
             <div className="standard">
-              <p>Power-up Duck<br/>Play chess with a duck piece, controlled by the spectators! Additional power-up mechanics for certain chess pieces!</p>
+              <ModalContent>
+                  <Title>Power-up Duck</Title>
+                  <Subtitle>Play chess with a duck piece, controlled by the spectators! Additional power-up mechanics for certain chess pieces!</Subtitle>
+              </ModalContent>
             </div>
           </GameContainer>
         </div>
-      </Container>
+      </PageContainer>
     </Header>
   );
 };
