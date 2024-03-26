@@ -4,6 +4,7 @@ const KING_SIDE_CASTLE = "O-O";
 const QUEEN_SIDE_CASTLE = "O-O-O";
 const EVOLVE_SYMBOL = "*";
 const PROGRESS_SYMBOL = "+";
+const DUCK = "DD";
 export const GAME_MODE = {
   STANDARD: "standard",
   POWER_UP_DUCK: "power-up-duck",
@@ -29,7 +30,16 @@ export class Chessboard {
       ["P", "P", "P", "P", "P", "P", "P", "P"], // [1]
       [null, null, null, null, null, null, null, null], // [2]
       [null, null, null, null, null, null, null, null], // [3]
-      [null, null, null, null, null, null, null, null], // [4]
+      [
+        null,
+        null,
+        null,
+        this._gameMode === GAME_MODE.POWER_UP_DUCK ? DUCK : null,
+        null,
+        null,
+        null,
+        null,
+      ], // [4]
       [null, null, null, null, null, null, null, null], // [5]
       ["p", "p", "p", "p", "p", "p", "p", "p"], // [6]
       ["r", "n", "b", "q", "k", "b", "n", "r"], // [7]
@@ -255,6 +265,39 @@ export class Chessboard {
     return this._getRookDirections().concat(this._getBishopDirections());
   }
 
+  getEmptySquares() {
+    const emptySquares = [];
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        if (this._isEmptySquare(row, col)) {
+          emptySquares.push([row, col]);
+        }
+      }
+    }
+    return emptySquares;
+  }
+
+  randomizeDuckPosition() {
+    // return random empty square in the form [row, col]
+    const emptySquares = this.getEmptySquares();
+    const [newRow, newCol] =
+      emptySquares[Math.floor(Math.random() * emptySquares.length)];
+
+    const [oldRow, oldCol] = this._findDuck();
+    this.remove(oldRow, oldCol);
+    this.add(newRow, newCol, DUCK);
+  }
+
+  _findDuck() {
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        if (this._isDuckPiece(this.getPiece(row, col))) {
+          return [row, col];
+        }
+      }
+    }
+  }
+
   _getAttackedSquares(fromRow, fromCol) {
     // return squares that piece from [fromRow, fromCol] can attack
     const piece = this.getPiece(fromRow, fromCol);
@@ -371,13 +414,17 @@ export class Chessboard {
   }
 
   _isEnemyPiece(piece) {
-    return piece && !this._isSameSide(piece);
+    return piece && !this._isDuckPiece(piece) && !this._isSameSide(piece);
   }
 
   _isSameSide(piece) {
-    return piece && this._side === WHITE
+    return piece && !this._isDuckPiece(piece) && this._side === WHITE
       ? piece === piece.toLowerCase()
       : piece === piece.toUpperCase();
+  }
+
+  _isDuckPiece(piece) {
+    return piece && piece === DUCK;
   }
 
   _updatePinnedSquares() {
@@ -403,7 +450,10 @@ export class Chessboard {
         // check if exactly one piece in line of fire
         let piece = this.getPiece(currRow, currCol);
         if (piece !== null) {
-          if (this._isEnemyPiece(piece) && counter === 1) {
+          if (
+            (this._isEnemyPiece(piece) || this._isDuckPiece(piece)) &&
+            counter === 1
+          ) {
             if (
               ((this._isQueen(piece) || this._isRook(piece)) && // if pinned in vertical/horizontal directions
                 (dx + dy) * (dx + dy) === 1) ||
@@ -434,10 +484,10 @@ export class Chessboard {
     this._board[row][col] = null;
   }
 
-  _move(fromRow, fromCol, toRow, toCol) {
+  _move(fromRow, fromCol, toRow, toCol, promotionPiece) {
     const piece = this.getPiece(fromRow, fromCol);
     const moveInfo = this._getMoveInfo(piece, fromRow, fromCol, toRow, toCol); // obtain info before board changes
-    this.add(toRow, toCol, piece);
+    this.add(toRow, toCol, promotionPiece ? promotionPiece : piece);
     this.remove(fromRow, fromCol);
     this._checkMoveCastle(piece, fromCol, toCol);
     this._checkMoveEnPassant(piece, toRow, toCol);
@@ -663,7 +713,7 @@ export class Chessboard {
   }
 
   playOpponentMove(move) {
-    const { fromRow, fromCol, toRow, toCol } = move;
+    const { fromRow, fromCol, toRow, toCol, promotionPiece = null } = move;
     const piece = this.getPiece(fromRow, fromCol);
     if (piece === null) {
       console.error("move null???");
@@ -675,7 +725,7 @@ export class Chessboard {
     }
     // this._preUpdateHalfMove(piece, toRow, toCol);
 
-    this._move(fromRow, fromCol, toRow, toCol);
+    this._move(fromRow, fromCol, toRow, toCol, promotionPiece);
     this._updateEnPassant(piece, fromRow, fromCol, toRow);
 
     this._updateAttackedSquares(); // Call order: 1
@@ -695,7 +745,7 @@ export class Chessboard {
   }
 
   playYourMove(move) {
-    const { fromRow, fromCol, toRow, toCol } = move;
+    const { fromRow, fromCol, toRow, toCol, promotionPiece = null } = move;
     const piece = this.getPiece(fromRow, fromCol);
     if (piece === null) {
       console.error("move null???");
@@ -708,7 +758,7 @@ export class Chessboard {
     }
 
     // this._preUpdateHalfMove(piece, toRow, toCol);
-    this._move(fromRow, fromCol, toRow, toCol);
+    this._move(fromRow, fromCol, toRow, toCol, promotionPiece);
     this._updateEnPassant(piece, fromRow, fromCol, toRow);
 
     this._updateCastlingRights(piece, fromRow, fromCol);
