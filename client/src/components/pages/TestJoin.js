@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Button, Input } from "@mui/material";
 import Cookies from "universal-cookie";
-import { useSelector } from "react-redux";
 import styled from "styled-components";
+import { socket } from "../../app/socket";
 
 const StyledJoinContainer = styled.div`
   display: flex;
@@ -17,9 +17,9 @@ const StyledJoinContainer = styled.div`
 const TestJoin = () => {
   const [input, setInput] = useState("");
   const [gameRoom, setGameRoom] = useState(null);
-  const socket = useSelector((state) => state.user.socket);
   const cookies = new Cookies();
   const userId = cookies.get("userId");
+  console.log(socket.id);
   const handleJoinGame = () => {
     if (userId) {
       const prob = Math.floor(Math.random() * 2);

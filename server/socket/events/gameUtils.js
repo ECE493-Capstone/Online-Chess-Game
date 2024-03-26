@@ -1,5 +1,6 @@
 const OngoingGames = require("../../models/OngoingGames");
 const Queue = require("../../models/Queue");
+const { handleUserDisconnect } = require("../user/userSocketHandler");
 const findGameInQueue = async (mode, tc, side) => {
   const game = await Queue.findOne(
     { mode: mode, timeControl: tc, side: { $ne: side } },
@@ -17,15 +18,11 @@ const addToOngoingGames = async (data) => {
 };
 const deleteOneFromQueue = async (query) => {
   const result = await Queue.deleteOne(query);
-  console.log(result);
-};
-
-const handleDeleteUserFromQueue = async (userId) => {
-  await deleteOneFromQueue({ userId });
 };
 
 const handleDisconnection = async (socketId) => {
   await deleteOneFromQueue({ socketId });
+  await handleUserDisconnect(socketId);
 };
 
 module.exports = {

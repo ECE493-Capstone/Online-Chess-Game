@@ -8,21 +8,21 @@ export const userSlice = createSlice({
     socket: null,
     gameSession: null,
     spectateSessions: [],
+    gameInfo: null,
   },
   reducers: {
-    setGameSession: (state, action) => {
-      state.gameSession = action.payload;
-    },
-    removeGameSession: (state, action) => {
-      state.gameSession = null;
+    setGameInfo: (state, action) => {
+      state.gameInfo = action.payload;
     },
     setSocket: (state, action) => {
       state.socket = action.payload;
     },
+    removeGameInfo: (state) => {
+      state.gameInfo = null;
+    },
   },
 });
 
-export const { setGameSession, removeGameSession, setSocket } =
-  userSlice.actions;
+export const { setGameInfo, removeGameInfo, setSocket } = userSlice.actions;
 
 export default userSlice.reducer;

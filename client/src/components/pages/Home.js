@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Modal, TextField, Fab } from "@mui/material";
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
 import Header from "../Header";
 import "../styles.css";
 import styled from "styled-components";
@@ -114,16 +114,16 @@ const Home = () => {
     }
 
     console.log("Joining room with code:", roomCode);
-    navigate('/match');
+    navigate("/match");
     setIsModalOpen(false);
   };
 
   const handleQuickPlayClick = () => {
-    navigate('/timeselect');
+    navigate("/timeselect");
   };
 
   const handleCreateGameClick = () => {
-    navigate('/gameselect');
+    navigate("/gameselect");
   };
 
   return (
@@ -132,46 +132,82 @@ const Home = () => {
         <h1>Home Page</h1>
       </div>
       <Container>
-        <div style={{ display: "flex", alignItems: "center"}}>
-          <StyledButton variant="contained" className="standard" onClick={handleQuickPlayClick}>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <StyledButton
+            variant="contained"
+            className="standard"
+            onClick={handleQuickPlayClick}
+          >
             <ButtonContent>
               <Title>Quick Play</Title>
               <Subtitle>Standard, blind, or power up chess</Subtitle>
             </ButtonContent>
           </StyledButton>
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px"}}>
-            <RightButton id="create-game-button" variant="contained" className="standard" onClick={handleCreateGameClick}>
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+          >
+            <RightButton
+              id="create-game-button"
+              variant="contained"
+              className="standard"
+              onClick={handleCreateGameClick}
+            >
               Create Game
             </RightButton>
-            <RightButton id="join-game-button" variant="contained" className="standard" onClick={handleJoinGame}>
+            <RightButton
+              id="join-game-button"
+              variant="contained"
+              className="standard"
+              onClick={handleJoinGame}
+            >
               Join Game
             </RightButton>
           </div>
         </div>
       </Container>
 
-      <Modal open={isModalOpen} aria-labelledby="join-game-modal-title" aria-describedby="join-game-modal-description">
+      <Modal
+        open={isModalOpen}
+        aria-labelledby="join-game-modal-title"
+        aria-describedby="join-game-modal-description"
+      >
         <ModalContainer className="standard">
           <ModalHeader>
             <ModalTitle id="join-game-modal-title">Join Game</ModalTitle>
             <div style={{ marginLeft: "auto" }}>
-              <Fab onClick={handleCloseModal} style={{ width: "35px", height: "35px" }}><CloseIcon /></Fab>
+              <Fab
+                onClick={handleCloseModal}
+                style={{ width: "35px", height: "35px" }}
+              >
+                <CloseIcon />
+              </Fab>
             </div>
           </ModalHeader>
           <ModalLine></ModalLine>
-            <ContentWrapper>
-              <TextField
-                id="room-code"
-                label="Room Code"
-                variant="outlined"
-                value={roomCode}
-                onChange={handleRoomCodeChange}
-                error={submitClicked && roomCode.trim() === ""}
-                helperText={(submitClicked && roomCode.trim() === "") ? "Please enter the room code." : ""}
-                style={{ marginTop: "2em" }}
-              />
-              <Button variant="contained" className="standard" style={{ marginTop: "2em" }} onClick={handleJoinRoom}>Join Room</Button>
-            </ContentWrapper>
+          <ContentWrapper>
+            <TextField
+              id="room-code"
+              label="Room Code"
+              variant="outlined"
+              value={roomCode}
+              onChange={handleRoomCodeChange}
+              error={submitClicked && roomCode.trim() === ""}
+              helperText={
+                submitClicked && roomCode.trim() === ""
+                  ? "Please enter the room code."
+                  : ""
+              }
+              style={{ marginTop: "2em" }}
+            />
+            <Button
+              variant="contained"
+              className="standard"
+              style={{ marginTop: "2em" }}
+              onClick={handleJoinRoom}
+            >
+              Join Room
+            </Button>
+          </ContentWrapper>
         </ModalContainer>
       </Modal>
     </Header>
