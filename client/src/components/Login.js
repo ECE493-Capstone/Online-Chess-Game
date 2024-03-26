@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 const LoginContainer = styled.div`
   border: 1px solid white;
+  background-color: black;
   border-radius: 10px;
   padding: 0px 20px 20px 20px;
   display: flex;

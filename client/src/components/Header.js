@@ -118,13 +118,12 @@ const HeaderElements = () => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            bgcolor: "background.paper",
-            boxShadow: 24,
             p: 4,
             borderRadius: "8px",
-            maxWidth: "90vw",
-            maxHeight: "90vh",
+            Width: "90vw",
+            Height: "90vh",
             overflow: "auto",
+            backgroundColor: "transparent",
           }}
         >
           <Login onClose={handleCloseLogin}/>
@@ -142,13 +141,12 @@ const HeaderElements = () => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            bgcolor: "background.paper",
-            boxShadow: 24,
             p: 4,
             borderRadius: "8px",
-            maxWidth: "90vw",
-            maxHeight: "90vh",
+            Width: "90vw",
+            Height: "90vh",
             overflow: "auto",
+            backgroundColor: "transparent",
           }}
         >
           <Registration onClose={handleCloseRegister}/>

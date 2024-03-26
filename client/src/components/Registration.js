@@ -9,6 +9,7 @@ import { SERVER_URL } from "../config";
 import { useNavigate } from "react-router-dom";
 
 const RegistrationContainer = styled.div`
+  background-color: black;
   border: 1px solid white;
   border-radius: 10px;
   padding: 0px 20px 20px 20px;
