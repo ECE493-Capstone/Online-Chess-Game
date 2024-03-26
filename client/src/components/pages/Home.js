@@ -119,7 +119,7 @@ const Home = () => {
   };
 
   const handleQuickPlayClick = () => {
-    navigate("/timeselect");
+    // navigate("/timeselect");
   };
 
   const handleCreateGameClick = () => {

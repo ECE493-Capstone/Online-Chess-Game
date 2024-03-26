@@ -11,13 +11,19 @@ import { TimeControlCategories } from "../app/constant";
 
 const StyledPlayTypeContainer = styled.div`
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  button {
+    width: 300px;
+  }
 `;
 const PlayType = () => {
-  const [tcId, setTcId] = React.useState(0);
+  const [tcId, setTcId] = React.useState(null);
   const cookies = new Cookies();
   const userId = cookies.get("userId");
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  console.log(tcId);
   const handleSetTcId = (id) => {
     setTcId(id);
   };
@@ -37,7 +43,7 @@ const PlayType = () => {
   };
   return (
     <StyledPlayTypeContainer>
-      <TimeSelect handleTcSelect={handleSetTcId} />
+      <TimeSelect handleTcSelect={handleSetTcId} tcId={tcId} />
       <Button variant="filled" onClick={handleSubmit}>
         Start Game
       </Button>

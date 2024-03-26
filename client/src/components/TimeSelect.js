@@ -31,27 +31,19 @@ const StyledTimeControlDiv = styled.div`
       }
     }
   }
+  .selected {
+    background-color: #00abe3 !important;
+  }
 `;
 
-const TimeSelect = ({ handleTcSelect }) => {
+const TimeSelect = ({ handleTcSelect, tcId }) => {
   const cookies = new Cookies();
   const userId = cookies.get("userId");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const handleButtonClick = (e) => {
-    if (userId) {
-      const tcId = parseInt(e.currentTarget.value) - 1;
-      socket.emit("join game", {
-        userId: userId,
-        mode: "standard",
-        side: userId === "65e2755c28bd77ea3394d6e5" ? "w" : "b",
-        timeControl: TimeControlCategories[Math.floor(tcId / 3)][tcId % 3].tc,
-      });
-      socket.on("game joined", (gameInfo) => {
-        dispatch(setGameInfo(gameInfo));
-        navigate(`/match/${gameInfo}`);
-      });
-    }
+    const tcId = parseInt(e.currentTarget.value) - 1;
+    handleTcSelect(tcId);
   };
   return (
     <StyledTimeControlDiv>
@@ -59,7 +51,7 @@ const TimeSelect = ({ handleTcSelect }) => {
         <div className="tc-row" key={rowIndex}>
           {tcRow.map((tcCat) => (
             <Button
-              className="tc-box"
+              className={`tc-box ${tcCat.id === tcId + 1 ? "selected" : ""}`}
               value={tcCat.id}
               onClick={handleButtonClick}
               key={tcCat.id}
