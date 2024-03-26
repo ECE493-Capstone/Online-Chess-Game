@@ -14,6 +14,7 @@ const ChangeUsernameContainer = styled.div`
   display: flex;
   flex-direction: column;
   max-width: 300px;
+  background-color: black;
   div {
     margin: 2px 0px;
     display: flex;
