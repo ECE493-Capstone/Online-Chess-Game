@@ -23,7 +23,7 @@ const ButtonContainer = styled.div`
   align-items: center;
   justify-content: flex-end;
   margin-top: auto;
-  padding-bottom: 150px;
+  padding-bottom: 10vh;
   overflow: hidden;
 
 `;

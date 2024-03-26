@@ -15,7 +15,7 @@ const PageContainer = styled.div`
   background-color: rgb(184, 184, 184);
   text-align: center;
   min-height: 100vh;
-  min-width: 100vh;
+  min-width: 100vw;
   overflow: hidden;
   flex-direction: column;
   justify-content: center;
@@ -91,7 +91,7 @@ const GameSelect = () => {
             <img 
               src={StandardChessImage} 
               alt="Standard" 
-              style={{ width: "200px", height: "auto" }}
+              style={{ width: "70%", height: "auto" }}
             />
             <Separator />
             <div>
@@ -104,7 +104,7 @@ const GameSelect = () => {
             <img 
               src={BlindChessImage} 
               alt="Blind" 
-              style={{ width: "200px", height: "auto" }}
+              style={{ width: "70%", height: "auto" }}
             />
             <Separator />
             <div>
@@ -118,7 +118,7 @@ const GameSelect = () => {
             <img 
               src={PowerUpChessImage} 
               alt="Power-up Duck" 
-              style={{ width: "200px", height: "auto" }}
+              style={{ width: "70%", height: "auto" }}
             />
             <Separator />
             <div style={{ position: "absolute", top: 0, right: 0 }}>

@@ -4,6 +4,19 @@ import { useNavigate } from "react-router-dom";
 import Login from "./Login";
 import Registration from "./Registration";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import styled from 'styled-components';
+
+const StyledHeader = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: #f0f0f0;
+  padding: 10px;
+  display: flex;
+  justify-content: flex-end;
+`;
 
 const HeaderElements = () => {
   const navigate = useNavigate();
@@ -159,7 +172,9 @@ const HeaderElements = () => {
 const Header = ({ children }) => {
   return (
     <div>
-      <HeaderElements />
+        <StyledHeader>
+          <HeaderElements />
+        </StyledHeader>
       <div>{children}</div>
     </div>
   );
