@@ -32,6 +32,7 @@ const GameContainer = styled.div`
   min-height: 40vh;
   width: 20vw;
   align-items: center;
+  cursor: pointer;
   .footer {
     justify-content: flex-end;
     margin-top: 10px;
@@ -57,18 +58,16 @@ const ModalContent = styled.div`
 
 const Separator = styled.div`
   width: 100%;
-  border-top: 1px solid #ccc; /* Adjust color and thickness as needed */
-  margin-top: 10px; /* Adjust spacing as needed */
+  border-top: 1px solid #ccc; 
+  margin-top: 10px;
 `;
 
 const GameSelect = () => {
   const navigate = useNavigate();
 
   const handleGameSelect = (gameMode) => {
-    // You can perform any action here when a game mode is selected
     console.log("Selected game mode:", gameMode);
-    // For demonstration, let's navigate to a hypothetical "/game" route
-    navigate("/game");
+    navigate("/timeselect");
   };
 
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -88,11 +87,10 @@ const GameSelect = () => {
     <Header>
       <PageContainer>
         <div style={{ display: "flex", justifyContent: "center", gap:"10vw"}}>
-          <GameContainer>
+          <GameContainer onClick={() => handleGameSelect("Standard")}>
             <img 
               src={StandardChessImage} 
               alt="Standard" 
-              onClick={() => handleGameSelect("Standard")} 
               style={{ width: "200px", height: "auto" }}
             />
             <Separator />
@@ -102,11 +100,10 @@ const GameSelect = () => {
               </ModalContent>
             </div>
           </GameContainer>
-          <GameContainer>
+          <GameContainer onClick={() => handleGameSelect("Blind")}>
             <img 
               src={BlindChessImage} 
               alt="Blind" 
-              onClick={() => handleGameSelect("Blind")} 
               style={{ width: "200px", height: "auto" }}
             />
             <Separator />
@@ -117,11 +114,10 @@ const GameSelect = () => {
               </ModalContent>
             </div>
           </GameContainer>
-          <GameContainer style={{ position: "relative" }}>
+          <GameContainer style={{ position: "relative" }}  onClick={() => handleGameSelect("Power-up Duck")}>
             <img 
               src={PowerUpChessImage} 
               alt="Power-up Duck" 
-              onClick={() => handleGameSelect("Power-up Duck")} 
               style={{ width: "200px", height: "auto" }}
             />
             <Separator />
@@ -129,7 +125,7 @@ const GameSelect = () => {
               <IconButton
                 aria-describedby={id}
                 onMouseEnter={handlePopoverOpen}
-                // onMouseLeave={handlePopoverClose}
+                onMouseLeave={handlePopoverClose}
               >
               <InfoIcon/>
               </IconButton>
