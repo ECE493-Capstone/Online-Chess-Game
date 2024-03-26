@@ -1,50 +1,67 @@
 export const WHITE = "w";
 export const BLACK = "b";
+export const GAME_MODE = {
+  STANDARD: "standard",
+  POWER_UP_DUCK: "power-up-duck",
+};
+
 const KING_SIDE_CASTLE = "O-O";
 const QUEEN_SIDE_CASTLE = "O-O-O";
 const EVOLVE_SYMBOL = "*";
 const PROGRESS_SYMBOL = "+";
 const DUCK = "DD";
-export const GAME_MODE = {
-  STANDARD: "standard",
-  POWER_UP_DUCK: "power-up-duck",
-};
+
 export class Chessboard {
-  constructor(side, gameMode) {
+  constructor(side, gameMode, fen = null) {
     this._side = side;
-    this._turn = WHITE;
+    this._gameMode = gameMode ? gameMode : GAME_MODE.STANDARD;
     this._isEnded = false;
     this._winner = null;
-    this._halfMove = 0; // use to check for fifty move rule
-    this._gameMode = gameMode ? gameMode : GAME_MODE.STANDARD;
-    this._enPassantSquare = null;
-    this._castlingRights = [KING_SIDE_CASTLE, QUEEN_SIDE_CASTLE];
     this._isInCheck = false;
     this._checkingSquares = []; // list of squares in the form [row, col] that are checking the king
     this._blockableSquares = []; // list of squares that can block the check
     this._attackedSquares = []; // list of all squares currently under attacked by opponent
     this._pinnedDirections = {}; // dictionary of squares with their pinned directions (CAUTION: key is _hash(row,col))
-    this._board = [
-      // uppercase: black, lowercase: white
-      ["R", "N", "B", "Q", "K", "B", "N", "R"], // [0]
-      ["P", "P", "P", "P", "P", "P", "P", "P"], // [1]
-      [null, null, null, null, null, null, null, null], // [2]
-      [null, null, null, null, null, null, null, null], // [3]
-      [
-        null,
-        null,
-        null,
-        this._gameMode === GAME_MODE.POWER_UP_DUCK ? DUCK : null,
-        null,
-        null,
-        null,
-        null,
-      ], // [4]
-      [null, null, null, null, null, null, null, null], // [5]
-      ["p", "p", "p", "p", "p", "p", "p", "p"], // [6]
-      ["r", "n", "b", "q", "k", "b", "n", "r"], // [7]
-    ];
-    this._legalMoves = this._updateLegalMoves(); // dictionary of all legal moves for each square (CAUTION: key is _hash(row,col))
+
+    if (fen) {
+      this._initFromFEN(fen);
+    } else {
+      this._turn = WHITE;
+      this._halfMove = 0; // use to check for fifty move rule
+      this._fullMove = 1;
+      this._enPassantSquare = null;
+      this._castlingRights = {
+        [WHITE]: [KING_SIDE_CASTLE, QUEEN_SIDE_CASTLE],
+        [BLACK]: [KING_SIDE_CASTLE, QUEEN_SIDE_CASTLE],
+      };
+
+      this._board = [
+        // uppercase: black, lowercase: white
+        ["R", "N", "B", "Q", "K", "B", "N", "R"], // [0]
+        ["P", "P", "P", "P", "P", "P", "P", "P"], // [1]
+        [null, null, null, null, null, null, null, null], // [2]
+        [null, null, null, null, null, null, null, null], // [3]
+        [
+          null,
+          null,
+          null,
+          this._gameMode === GAME_MODE.POWER_UP_DUCK ? DUCK : null,
+          null,
+          null,
+          null,
+          null,
+        ], // [4]
+        [null, null, null, null, null, null, null, null], // [5]
+        ["p", "p", "p", "p", "p", "p", "p", "p"], // [6]
+        ["r", "n", "b", "q", "k", "b", "n", "r"], // [7]
+      ];
+    }
+
+    if (this._side === this._turn) {
+      this._legalMoves = this._updateLegalMoves(); // dictionary of all legal moves for each square (CAUTION: key is _hash(row,col))
+    } else {
+      this._legalMoves = {};
+    }
   }
 
   get side() {
@@ -81,6 +98,82 @@ export class Chessboard {
 
   getBoard() {
     return this._board;
+  }
+
+  _initFromFEN(fen) {
+    const [board, turn, castlingRights, enPassantSquare, halfMove, fullMove] =
+      fen.split(" ");
+    const rows = board.split("/");
+    this._board = rows.map((row) => row.split(""));
+    this._turn = turn;
+    this._castlingRights = {
+      [WHITE]: [],
+      [BLACK]: [],
+    };
+    if (castlingRights !== "-") {
+      for (const right of castlingRights) {
+        if (right === "k") {
+          this._castlingRights[WHITE].push(KING_SIDE_CASTLE);
+        } else if (right === "q") {
+          this._castlingRights[WHITE].push(QUEEN_SIDE_CASTLE);
+        } else if (right === "K") {
+          this._castlingRights[BLACK].push(KING_SIDE_CASTLE);
+        } else if (right === "Q") {
+          this._castlingRights[BLACK].push(QUEEN_SIDE_CASTLE);
+        }
+      }
+    }
+    this._enPassantSquare = enPassantSquare !== "-" ? enPassantSquare : null;
+    this._halfMove = parseInt(halfMove);
+    this._fullMove = parseInt(fullMove);
+  }
+
+  convertToFEN() {
+    let fen = "";
+    for (let row = 0; row < 8; row++) {
+      let empty = 0;
+      for (let col = 0; col < 8; col++) {
+        const piece = this.getPiece(row, col);
+        if (piece === null) {
+          empty++;
+        } else {
+          if (empty > 0) {
+            fen += empty;
+            empty = 0;
+          }
+          fen += piece;
+        }
+      }
+      if (empty > 0) {
+        fen += empty;
+      }
+      if (row < 7) {
+        fen += "/";
+      }
+    }
+    fen += ` ${this._turn} `;
+    fen += this._getCastlingRightsInFEN();
+    fen += ` ${this._enPassantSquare ? this._enPassantSquare : "-"}`;
+    fen += ` ${this._halfMove}`;
+    fen += ` ${this._fullMove}`;
+    return fen;
+  }
+
+  _getCastlingRightsInFEN() {
+    let castling = "";
+    if (this._castlingRights[WHITE].includes(KING_SIDE_CASTLE)) {
+      castling += "k";
+    }
+    if (this._castlingRights[WHITE].includes(QUEEN_SIDE_CASTLE)) {
+      castling += "q";
+    }
+    if (this._castlingRights[BLACK].includes(KING_SIDE_CASTLE)) {
+      castling += "K";
+    }
+    if (this._castlingRights[BLACK].includes(QUEEN_SIDE_CASTLE)) {
+      castling += "Q";
+    }
+    return castling === "" ? "-" : castling;
   }
 
   isDraw() {
@@ -727,6 +820,7 @@ export class Chessboard {
 
     this._move(fromRow, fromCol, toRow, toCol, promotionPiece);
     this._updateEnPassant(piece, fromRow, fromCol, toRow);
+    this._updateCastlingRights(piece, fromRow, fromCol);
 
     this._updateAttackedSquares(); // Call order: 1
     this._updateIsInCheck(); // Call order: 2
@@ -738,6 +832,10 @@ export class Chessboard {
     console.log(`turn: ${this._turn}`);
     this.printStates();
     // ----------------
+
+    if (this._turn === BLACK) {
+      this._fullMove++;
+    }
 
     this._checkGameOver();
 
@@ -760,13 +858,16 @@ export class Chessboard {
     // this._preUpdateHalfMove(piece, toRow, toCol);
     this._move(fromRow, fromCol, toRow, toCol, promotionPiece);
     this._updateEnPassant(piece, fromRow, fromCol, toRow);
-
     this._updateCastlingRights(piece, fromRow, fromCol);
 
     // DEBUG STUFF ----------------
     console.log(`turn: ${this._turn}`);
     this.printBoard();
     // ----------------
+
+    if (this._turn === BLACK) {
+      this._fullMove++;
+    }
 
     this._turn = this._turn === WHITE ? BLACK : WHITE;
   }
@@ -781,20 +882,18 @@ export class Chessboard {
   }
 
   _updateCastlingRights(piece, fromRow, fromCol) {
-    if (!this._isSameSide(piece)) return;
-    // only attempt to update castling rights if king or rook is moved from same side
     if (this._isKing(piece)) {
-      this._castlingRights = [];
+      this._castlingRights[this._turn] = [];
     } else if (this._isRook(piece)) {
-      const staringRow = this._side === WHITE ? 7 : 0;
+      const staringRow = this._turn === WHITE ? 7 : 0;
       if (fromCol === 0 && fromRow === staringRow) {
-        this._castlingRights = this._castlingRights.filter(
-          (right) => right !== QUEEN_SIDE_CASTLE
-        );
+        this._castlingRights[this._turn] = this._castlingRights[
+          this._turn
+        ].filter((right) => right !== QUEEN_SIDE_CASTLE);
       } else if (fromCol === 7 && fromRow === staringRow) {
-        this._castlingRights = this._castlingRights.filter(
-          (right) => right !== KING_SIDE_CASTLE
-        );
+        this._castlingRights[this._turn] = this._castlingRights[
+          this._turn
+        ].filter((right) => right !== KING_SIDE_CASTLE);
       }
     }
   }
@@ -1069,7 +1168,7 @@ export class Chessboard {
     // castling moves
     const startingRow = this._side === WHITE ? 7 : 0;
     if (fromRow === startingRow && fromCol === 4) {
-      if (this._castlingRights.includes(KING_SIDE_CASTLE)) {
+      if (this._castlingRights[this._side].includes(KING_SIDE_CASTLE)) {
         if (
           this._isEmptySquare(startingRow, 5) &&
           this._isEmptySquare(startingRow, 6) &&
@@ -1078,7 +1177,7 @@ export class Chessboard {
         )
           possibleMoves.push([startingRow, 6]);
       }
-      if (this._castlingRights.includes(QUEEN_SIDE_CASTLE)) {
+      if (this._castlingRights[this._side].includes(QUEEN_SIDE_CASTLE)) {
         if (
           this._isEmptySquare(startingRow, 3) &&
           this._isEmptySquare(startingRow, 2) &&
@@ -1227,6 +1326,5 @@ export class Chessboard {
   // print functions ----------------
 }
 
-const chessboard = new Chessboard();
 var global = window;
 global.Chessboard = Chessboard;
