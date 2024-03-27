@@ -9,7 +9,6 @@ import JoinGame from "../JoinGame";
 const PageContainer = styled.div`
   display: flex;
   background-color: rgb(184, 184, 184);
-  text-align: center;
   min-height: 100vh;
   overflow: hidden;
   flex-direction: column;
@@ -35,7 +34,7 @@ const LeftButton = styled(Button)`
 
 const RightButton = styled(Button)`
   width: 100%;
-  height: 100%;
+  height: 50%;
 
 `;
 
@@ -57,6 +56,7 @@ const Subtitle = styled.div`
 
 const Home = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isGameSelectModalOpen, setIsGameSelectModalOpen] = useState(false);
   const [roomCode, setRoomCode] = useState("");
   const [submitClicked, setSubmitClicked] = useState(false);
   const navigate = useNavigate();
@@ -114,7 +114,7 @@ const Home = () => {
                   <Subtitle>Standard, blind, or power up chess</Subtitle>
                 </ButtonContent>
               </LeftButton>
-              <div style={{ display: "flex", flexDirection: "column", gap: "5px", padding: "4px"}}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "5px"}}>
                 <RightButton 
                   variant="contained" 
                   onClick={handleCreateGameClick}

@@ -10,7 +10,7 @@ import styled from "styled-components";
 import Cookies from "universal-cookie";
 import { fetchUser } from "../../api/fetchUser";
 import GameStatistics from "../Statistics";
-import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 const PageContainer = styled.div`
   display: flex;
@@ -118,7 +118,7 @@ const UserInfo = ({statistics, setIsLoggedIn}) => {
     <div style={{ display: "flex" }}>
       <div style={{ flex: "20%", paddingTop: "80px", paddingLeft: "10px"}}>
         <ProfileInfo>
-          <AccountCircleOutlinedIcon fontSize="large" />
+          <AccountCircleIcon fontSize="large" />
           <Title>{username}</Title>
           <Subtitle>({email})</Subtitle>
           <StyledButton variant="contained" onClick={handleOpenChangeUsername}>Change Username</StyledButton>
@@ -223,13 +223,10 @@ const Profile = () => {
             </div>
         ) : (
 
-          <div style={{ paddingTop: "80px", alignItems: "center"}}>
+          <div style={{ paddingTop: "80px", alignItems: "center", textAlign: "center"}}>
               <h1>Please Log in to View this Page.</h1>
-
             </div>
-
-        )
-        }
+        )}
       </PageContainer>
     </Header>
   );

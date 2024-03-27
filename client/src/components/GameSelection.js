@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import { Popover } from "@mui/material";
@@ -84,81 +84,91 @@ const GameSelect = () => {
 
   const open = Boolean(anchorEl);
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+
+
   return (
-    <Header>
+    <Header setOthersIsLoggedIn={setIsLoggedIn}>
       <PageContainer>
-        <div style={{ display: "flex", justifyContent: "center", gap:"10vw"}}>
-          <GameContainer onClick={() => handleGameSelect("Standard")}>
-            <img 
-              src={StandardChessImage} 
-              alt="Standard" 
-              style={{ width: "70%", height: "auto" }}
-            />
-            <Separator />
-            <div>
-              <ModalContent>
-                <Title>Standard Chess</Title>
-              </ModalContent>
-            </div>
-          </GameContainer>
-          <GameContainer onClick={() => handleGameSelect("Blind")}>
-            <img 
-              src={BlindChessImage} 
-              alt="Blind" 
-              style={{ width: "70%", height: "auto" }}
-            />
-            <Separator />
-            <div>
-              <ModalContent>
-                  <Title>Blind Chess</Title>
-                  <Subtitle>Play chess without being able to view the board!</Subtitle>
-              </ModalContent>
-            </div>
-          </GameContainer>
-          <GameContainer style={{ position: "relative" }}  onClick={() => handleGameSelect("Power-up Duck")}>
-            <img 
-              src={PowerUpChessImage} 
-              alt="Power-up Duck" 
-              style={{ width: "70%", height: "auto" }}
-            />
-            <Separator />
-            <div style={{ position: "absolute", top: 0, right: 0 }}>
-              <IconButton
-                aria-describedby={open ? 'mouse-over-popover' : undefined}
-                onMouseEnter={handlePopoverOpen}
-                onMouseLeave={handlePopoverClose}
-              >
-                <InfoIcon/>
-              </IconButton>
-              <Popover
-                id="mouse-over-popover"
-                sx={{
-                  pointerEvents: 'none',
-                }}
-                open={open}
-                anchorEl={anchorEl}
-                onClose={handlePopoverClose}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right',
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                disableRestoreFocus
-              >
-                <Typography sx={{ p: 1 }}>Info on the power-ups</Typography>
-              </Popover>
-            </div>
-            <div className="standard">
-              <ModalContent>
-                  <Title>Power-up Duck</Title>
-                  <Subtitle>Play chess with a duck piece, controlled by the spectators! Additional power-up mechanics for certain chess pieces!</Subtitle>
-              </ModalContent>
-            </div>
-          </GameContainer>
+      {isLoggedIn ? (
+          <div style={{ display: "flex", justifyContent: "center", gap:"10vw"}}>
+            <GameContainer onClick={() => handleGameSelect("Standard")}>
+              <img 
+                src={StandardChessImage} 
+                alt="Standard" 
+                style={{ width: "70%", height: "auto" }}
+              />
+              <Separator />
+              <div>
+                <ModalContent>
+                  <Title>Standard Chess</Title>
+                </ModalContent>
+              </div>
+            </GameContainer>
+            <GameContainer onClick={() => handleGameSelect("Blind")}>
+              <img 
+                src={BlindChessImage} 
+                alt="Blind" 
+                style={{ width: "70%", height: "auto" }}
+              />
+              <Separator />
+              <div>
+                <ModalContent>
+                    <Title>Blind Chess</Title>
+                    <Subtitle>Play chess without being able to view the board!</Subtitle>
+                </ModalContent>
+              </div>
+            </GameContainer>
+            <GameContainer style={{ position: "relative" }}  onClick={() => handleGameSelect("Power-up Duck")}>
+              <img 
+                src={PowerUpChessImage} 
+                alt="Power-up Duck" 
+                style={{ width: "70%", height: "auto" }}
+              />
+              <Separator />
+              <div style={{ position: "absolute", top: 0, right: 0 }}>
+                <IconButton
+                  aria-describedby={open ? 'mouse-over-popover' : undefined}
+                  onMouseEnter={handlePopoverOpen}
+                  onMouseLeave={handlePopoverClose}
+                >
+                  <InfoIcon/>
+                </IconButton>
+                <Popover
+                  id="mouse-over-popover"
+                  sx={{
+                    pointerEvents: 'none',
+                  }}
+                  open={open}
+                  anchorEl={anchorEl}
+                  onClose={handlePopoverClose}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right',
+                  }}
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  disableRestoreFocus
+                >
+                  <Typography sx={{ p: 1 }}>Info on the power-ups</Typography>
+                </Popover>
+              </div>
+              <div className="standard">
+                <ModalContent>
+                    <Title>Power-up Duck</Title>
+                    <Subtitle>Play chess with a duck piece, controlled by the spectators! Additional power-up mechanics for certain chess pieces!</Subtitle>
+                </ModalContent>
+              </div>
+            </GameContainer>
+          </div>
+      ) : (
+        <div style={{ paddingTop: "80px", alignItems: "center"}}>
+          <h1>Please Log in to View this Page.</h1>
         </div>
+      )}
       </PageContainer>
     </Header>
   );
