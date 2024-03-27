@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 
 const LoginContainer = styled.div`
   border: 1px solid white;
+  background-color: black;
   border-radius: 10px;
   padding: 0px 20px 20px 20px;
   display: flex;
@@ -42,7 +43,7 @@ const LoginReducer = (state, action) => {
   }
 };
 
-const Login = ({ onClose }) => {
+const Login = ({ onClose, setIsFocused }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const cookie = new Cookies();
   const navigate = useNavigate();
@@ -68,37 +69,15 @@ const Login = ({ onClose }) => {
         if (res.status === 200) {
           console.log("User logged in successfully");
           cookie.set("userId", res.data.userId);
-          navigate("/");
+          console.log("Cookie userId:", cookie.get("userId")); // Log the cookie value
+          setIsFocused(true);
+          onClose();
           return Promise.resolve(undefined);
         }
       })
       .catch((err) => {
         dispatch({ type: "SET_ERROR", payload: err.response.data.message });
       });
-    // fetch(`${SERVER_URL}/signin`, {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({
-    //     identity: identity,
-    //     password: password,
-    //   }),
-    // })
-    //   .then((res) => {
-    //     setIsSubmitting(false);
-    //     if (res.status === 200) {
-    //       console.log("User logged in successfully");
-    //       // TODO: route to landing page
-    //       return Promise.resolve(undefined);
-    //     }
-    //     return res.json();
-    //   })
-    //   .then((data) => {
-    //     if (data === undefined) return;
-    //     dispatch({ type: "SET_ERROR", payload: data.message });
-    //   })
-    //   .catch((err) => console.log(err));
   };
 
   return (

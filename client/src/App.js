@@ -12,6 +12,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import Home from "./components/pages/Home";
 import TimeSelect from "./components/TimeSelect";
 import GameSelect from "./components/GameSelection";
+import Profile from "./components/pages/Profile";
 
 const darkTheme = createTheme({
   palette: {
@@ -45,6 +46,7 @@ const App = () => {
           <Route path="/timeselect" element={<TimeSelect />} />
           <Route path="/match" element={<Match />} />
           <Route path="/gameselect" element={<GameSelect />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </Router>
     </ThemeProvider>
