@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import Pieces from "./Pieces";
-import { useSelector } from "react-redux";
 import Square from "./Square";
-import { Chessboard, WHITE } from "../models/Chessboard";
 
 const StyledBoard = styled.div`
   display: flex;
@@ -33,6 +30,10 @@ const Board = ({ game }) => {
   // Define the chess board as a 2D array
   // Render the chess board
   const board = game.getBoard();
+  const orientation = game.side;
+  const flipConstant = orientation === "w" ? 0 : 7;
+  const getRow = (rowIndex) => Math.abs(flipConstant - rowIndex);
+  const getCol = (colIndex) => Math.abs(flipConstant - colIndex);
   return (
     <StyledBoard>
       {board.map((row, rowIndex) => (
@@ -41,13 +42,15 @@ const Board = ({ game }) => {
             <div
               key={colIndex}
               className={`board-square ${
-                (rowIndex + colIndex) % 2 === 0 ? "light-square" : "dark-square"
+                (getRow(rowIndex) + getCol(colIndex)) % 2 === 0
+                  ? "light-square"
+                  : "dark-square"
               }`}
             >
               <Square
-                piece={piece}
-                rowIndex={rowIndex}
-                colIndex={colIndex}
+                piece={board[getRow(rowIndex)][getCol(colIndex)]}
+                rowIndex={getRow(rowIndex)}
+                colIndex={getCol(colIndex)}
                 game={game}
               />
             </div>

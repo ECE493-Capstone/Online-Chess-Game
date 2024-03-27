@@ -647,7 +647,11 @@ export class Chessboard {
 
   _checkBishopSniping(initRow, initCol, finalRow, finalCol, moveInfo) {
     const piece = this.getPiece(finalRow, finalCol);
-    if (this._isBishop(piece) && this._isEvolvedPiece(piece) && moveInfo.capturedPiece) {
+    if (
+      this._isBishop(piece) &&
+      this._isEvolvedPiece(piece) &&
+      moveInfo.capturedPiece
+    ) {
       this.remove(finalRow, finalCol);
       this.add(initRow, initCol, piece);
     }
@@ -960,6 +964,7 @@ export class Chessboard {
     if (
       fromRow === startRow &&
       this._isEmptySquare(fromRow + 2 * direction, fromCol) &&
+      this._isEmptySquare(fromRow + direction, fromCol) &&
       this._checkPinMovement(fromRow, fromCol, direction, 0) &&
       (!this._isInCheck ||
         this._isBlockableSquare(fromRow + 2 * direction, fromCol))

@@ -5,7 +5,6 @@ import styled from "styled-components";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import PasswordOutlinedIcon from "@mui/icons-material/PasswordOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import { SERVER_URL } from "../config";
 import { registerUser } from "../api/auth";
 import { useNavigate } from "react-router-dom";
 

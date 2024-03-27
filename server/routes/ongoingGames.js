@@ -8,8 +8,8 @@ const router = express.Router();
 const jsonParser = bodyParser.json();
 
 router.get("/byPlayer", jsonParser, async (req, res) => {
-  const { player } = req.body;
-  console.log(req.body);
+  const { player } = req.query;
+  console.log(req.query);
   const player1Game = await OngoingGames.findOne({ player1: player });
   const player2Game = await OngoingGames.findOne({ player2: player });
   if (player1Game || player2Game) {
