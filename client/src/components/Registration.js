@@ -9,6 +9,7 @@ import { registerUser } from "../api/auth";
 import { useNavigate } from "react-router-dom";
 
 const RegistrationContainer = styled.div`
+  background-color: black;
   border: 1px solid white;
   border-radius: 10px;
   padding: 0px 20px 20px 20px;
@@ -55,7 +56,7 @@ const Registration = ({ onClose }) => {
     }
   );
 
-  const navigate = useNavigate(); // navigation element
+  // const navigate = useNavigate(); // navigation element
 
   const handleSubmit = (e) => {
     setIsSubmitting(true);
@@ -72,7 +73,7 @@ const Registration = ({ onClose }) => {
 
           // route to the previous page the user was on
           onClose();
-          navigate(-1);
+          // navigate(-1);
           return Promise.resolve(undefined);
         }
         return res.json();

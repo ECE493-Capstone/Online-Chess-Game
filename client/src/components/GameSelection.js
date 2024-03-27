@@ -1,82 +1,165 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
-import { Tooltip } from "@mui/material";
+import { Popover } from "@mui/material";
+import { IconButton } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
-import "./styles.css";
 import styled from "styled-components";
+import Typography from '@mui/material/Typography';
+import StandardChessImage from '../img/Standard_Chess.png';
+import BlindChessImage from '../img/Blind_Chess.png';
+import PowerUpChessImage from '../img/Power_Up_Chess.png';
 
-const Container = styled.div`
+const PageContainer = styled.div`
+  display: flex;
+  background-color: rgb(184, 184, 184);
   text-align: center;
   min-height: 100vh;
-  display: flex;
+  min-width: 100vw;
+  overflow: hidden;
   flex-direction: column;
   justify-content: center;
-  align-items: stretch;
+
 `;
 
 const GameContainer = styled.div`
   border: 1px solid white;
-  border-radius: 10px;
+  background-color: black;
+  border-radius: 30px;
   padding: 0px 20px 20px 20px;
   display: flex;
   flex-direction: column;
-  max-width: 300px;
-  div {
-    margin: 2px 0px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
+  min-height: 40vh;
+  width: 20vw;
+  align-items: center;
+  cursor: pointer;
   .footer {
     justify-content: flex-end;
     margin-top: 10px;
   }
 `;
 
+const Title = styled.div`
+  font-size: 20px;
+  color: white;
+`;
+
+const Subtitle = styled.div`
+  font-size: 14px;
+  text-transform: none;
+  color: white;
+`;
+
+const ModalContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const Separator = styled.div`
+  width: 100%;
+  border-top: 1px solid #ccc; 
+  margin-top: 10px;
+`;
+
 const GameSelect = () => {
   const navigate = useNavigate();
 
   const handleGameSelect = (gameMode) => {
-    // You can perform any action here when a game mode is selected
     console.log("Selected game mode:", gameMode);
-    // For demonstration, let's navigate to a hypothetical "/game" route
-    navigate("/game");
+    navigate("/timeselect");
   };
+
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const handlePopoverOpen = (event) => {
+    // console.log("Popover opened");
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handlePopoverClose = () => {
+    // console.log("Popover closed");
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
 
   return (
     <Header>
-      <Container>
-        <h1>Game Selection</h1>
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <GameContainer>
-            <img src="placeholder_standard_image.jpg" alt="Standard" onClick={() => handleGameSelect("Standard")} />
-            <div className="standard">
-              <p>Standard Chess</p>
+      <PageContainer>
+        <div style={{ display: "flex", justifyContent: "center", gap:"10vw"}}>
+          <GameContainer onClick={() => handleGameSelect("Standard")}>
+            <img 
+              src={StandardChessImage} 
+              alt="Standard" 
+              style={{ width: "70%", height: "auto" }}
+            />
+            <Separator />
+            <div>
+              <ModalContent>
+                <Title>Standard Chess</Title>
+              </ModalContent>
             </div>
           </GameContainer>
-          <GameContainer>
-            <img src="placeholder_blind_image.jpg" alt="Blind" onClick={() => handleGameSelect("Blind")} />
-            <div className="standard">
-              <p>Blind Chess<br/>Play chess without being able to view the board!</p>
+          <GameContainer onClick={() => handleGameSelect("Blind")}>
+            <img 
+              src={BlindChessImage} 
+              alt="Blind" 
+              style={{ width: "70%", height: "auto" }}
+            />
+            <Separator />
+            <div>
+              <ModalContent>
+                  <Title>Blind Chess</Title>
+                  <Subtitle>Play chess without being able to view the board!</Subtitle>
+              </ModalContent>
             </div>
           </GameContainer>
-          <GameContainer style={{ position: "relative" }}>
-            <img src="placeholder_power_up_duck_image.jpg" alt="Power-up Duck" onClick={() => handleGameSelect("Power-up Duck")} />
+          <GameContainer style={{ position: "relative" }}  onClick={() => handleGameSelect("Power-up Duck")}>
+            <img 
+              src={PowerUpChessImage} 
+              alt="Power-up Duck" 
+              style={{ width: "70%", height: "auto" }}
+            />
+            <Separator />
             <div style={{ position: "absolute", top: 0, right: 0 }}>
-              <Tooltip title="Info on the power-ups" placement="top-end" arrow>
-                <div>
-                  <InfoIcon />
-                </div>
-              </Tooltip>
+              <IconButton
+                aria-describedby={open ? 'mouse-over-popover' : undefined}
+                onMouseEnter={handlePopoverOpen}
+                onMouseLeave={handlePopoverClose}
+              >
+                <InfoIcon/>
+              </IconButton>
+              <Popover
+                id="mouse-over-popover"
+                sx={{
+                  pointerEvents: 'none',
+                }}
+                open={open}
+                anchorEl={anchorEl}
+                onClose={handlePopoverClose}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                disableRestoreFocus
+              >
+                <Typography sx={{ p: 1 }}>Info on the power-ups</Typography>
+              </Popover>
             </div>
             <div className="standard">
-              <p>Power-up Duck<br/>Play chess with a duck piece, controlled by the spectators! Additional power-up mechanics for certain chess pieces!</p>
+              <ModalContent>
+                  <Title>Power-up Duck</Title>
+                  <Subtitle>Play chess with a duck piece, controlled by the spectators! Additional power-up mechanics for certain chess pieces!</Subtitle>
+              </ModalContent>
             </div>
           </GameContainer>
         </div>
-      </Container>
+      </PageContainer>
     </Header>
   );
 };

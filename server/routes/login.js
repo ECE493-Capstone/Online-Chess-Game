@@ -14,6 +14,7 @@ router.post("/", jsonParser, async (req, res) => {
     const user = userByEmail || userByUsername;
     if (bcrypt.compareSync(password, user.password)) {
       res.status(200);
+      console.log("Login succes: Username: " + user.username + " Email: " + user.email); // Log username and email to console
       res.send({ userId: user.id, message: "login success" });
     } else {
       res.status(401);
