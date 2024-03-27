@@ -1,48 +1,39 @@
 const Queue = require("../models/Queue");
-const { findGameInQueue, addToOngoingGames } = require("./events/gameUtils");
-const { createRoom } = require("./rooms/roomUtils");
-const { addSocket, addActiveGame } = require("../data");
+const {
+  findGameInQueue,
+  addToOngoingGames,
+  handleGameJoin,
+  handleCreateGame,
+  findPrivateGame,
+} = require("./events/gameUtils");
 const { emitToRoom } = require("./emittors");
 const { handleDisconnection } = require("./events/gameUtils");
 const listen = (io, socket) => {
   // Logic for handling a new game join
-  socket.on("join game", async (gameInfo) => {
-    const { userId, mode, side, timeControl } = gameInfo;
-    const game = await findGameInQueue(mode, timeControl, side);
+  socket.on("join quick play", async (gameInfo) => {
+    const { userId, mode, side, type, timeControl } = gameInfo;
+    const game = await findGameInQueue(mode, timeControl, side, type);
     if (game) {
-      // join existing game
-      // delete from queue
-      // add to active game
-      // join a room
-      socket.join(game.room);
-      addToOngoingGames({
-        player1: game.side === "w" ? game.userId : userId,
-        player2: game.side === "b" ? game.userId : userId,
-        mode,
-        timeControl,
-        room: game.room,
-        pgn: "",
-      });
-      addSocket(game.userId, game.socketId);
-      addSocket(userId, socket.id);
-      addActiveGame(game.userId, game.room);
-      addActiveGame(userId, game.room);
-      emitToRoom(io, game.room, "game joined", game.room);
+      handleGameJoin(io, socket, game, gameInfo);
     } else {
-      // create new game
-      const room = createRoom();
-      const newGame = new Queue({
-        userId,
-        mode,
-        room,
-        side,
-        socketId: socket.id,
-        timeControl,
-      });
-      const saveResult = await newGame.save();
-      socket.join(room);
+      handleCreateGame(socket, gameInfo);
     }
   });
+
+  socket.on("join private game", async (gameInfo) => {
+    console.log("WHAT");
+    const { userId, mode, side, type, timeControl, room } = gameInfo;
+    // INSTEAD FIND GAME ROOM IN QUEUE
+    const game = await findPrivateGame(room);
+    console.log("GAME", game);
+    if (game) {
+      handleGameJoin(io, socket, game, gameInfo);
+    } else {
+      // ERROR: GAME NOT FOUND
+      socket.emit("join fail", "Game not found");
+    }
+  });
+
   socket.on("game start", (gameId) => {
     // Logic for starting the game
   });

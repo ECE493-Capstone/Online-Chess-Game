@@ -5,6 +5,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import Header from "../Header";
 import "../styles.css";
 import styled from "styled-components";
+import { socket } from "../../app/socket";
+import { useDispatch } from "react-redux";
+import { setGameInfo } from "../../features/userSlice";
+import Cookies from "universal-cookie";
 
 const Container = styled.div`
   display: flex;
@@ -90,8 +94,10 @@ const Home = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [roomCode, setRoomCode] = useState("");
   const [submitClicked, setSubmitClicked] = useState(false);
+  const cookies = new Cookies();
+  const userId = cookies.get("userId");
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
   const handleJoinGame = () => {
     setIsModalOpen(true);
   };
@@ -114,7 +120,20 @@ const Home = () => {
     }
 
     console.log("Joining room with code:", roomCode);
-    navigate("/match");
+
+    socket.emit("join private game", {
+      userId: userId,
+      room: roomCode,
+    });
+
+    socket.on("game joined", (gameInfo) => {
+      dispatch(setGameInfo(gameInfo));
+      navigate(`/match/${gameInfo}`);
+    });
+
+    socket.on("join fail", (gameInfo) => {
+      console.log("Failed to join room with code:", roomCode);
+    });
     setIsModalOpen(false);
   };
 

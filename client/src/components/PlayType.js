@@ -29,9 +29,10 @@ const PlayType = () => {
   };
   const handleSubmit = () => {
     if (userId) {
-      socket.emit("join game", {
+      socket.emit("join quick play", {
         userId: userId,
         mode: "standard",
+        type: "Create game", // "Quick Play" or "Custom Game
         side: userId === "65e2755c28bd77ea3394d6e5" ? "w" : "b",
         timeControl: TimeControlCategories[Math.floor(tcId / 3)][tcId % 3].tc,
       });
