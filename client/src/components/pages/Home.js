@@ -88,7 +88,7 @@ const Home = () => {
   };
 
   const handleQuickPlayClick = () => {
-    navigate('/timeselect');
+    navigate('/gameselect');
   };
 
   const handleCreateGameClick = () => {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from "../Header";
 import ChangePassword  from '../ChangePassword';
 import ChangeUsername  from '../ChangeUsername';
@@ -7,6 +7,9 @@ import Box from '@mui/material/Box';
 import { Button } from "@mui/material";
 import { useLocation } from "react-router-dom";
 import styled from "styled-components";
+import Cookies from "universal-cookie";
+import { fetchUser } from "../../api/fetchUser";
+import Statistics from "../Statistics";
 
 const PageContainer = styled.div`
   display: flex;
@@ -43,9 +46,16 @@ const Subtitle = styled.div`
   color: white;
 `;
 
-const UserInfo = ({ username, email, statistics }) => {
+const cookie = new Cookies();
+
+const UserInfo = ({statistics}) => {
+
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [openChangePassword, setOpenChangePassword] = useState(false);
   const [openChangeUsername, setOpenChangeUsername] = useState(false);
+  const [isFocused, setIsFocused] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleOpenChangePassword = () => {
     setOpenChangePassword(true);
@@ -63,6 +73,43 @@ const UserInfo = ({ username, email, statistics }) => {
     setOpenChangeUsername(false);
   };
 
+  const checkLoginStatus = async () => {
+    try {
+      const storedUserId = cookie.get("userId");
+  
+      if (storedUserId) {
+        console.log('Retrieved user ID from cookie: ' + storedUserId);
+        setIsLoggedIn(true);
+  
+        const response = await fetchUser(storedUserId);
+        const userData = response.data;
+  
+        if (response.status === 200) {
+          const { username, email } = userData;
+          setUsername(username);
+          setEmail(email);
+          console.log("HEADER DETECTS LOGIN: userID: " + JSON.stringify(storedUserId) + " username: " + JSON.stringify(username) + " email: " + JSON.stringify(email));
+        } else {
+          console.log("Failed to fetch user data");
+        }
+      } else {
+        console.log("Header doesn't detect login.");
+        setIsLoggedIn(false);
+        setUsername("");
+        setEmail("");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  
+  useEffect(() => {
+    if (isFocused) {
+      checkLoginStatus();
+      setIsFocused(false);
+    }
+  }, [isFocused]);
+
 
   return (
     <div style={{ display: "flex" }}>
@@ -76,12 +123,12 @@ const UserInfo = ({ username, email, statistics }) => {
         </ProfileInfo>
       </div>
       <div style={{ flex: "75%", padding: "10px" }}>
-        <h2>Statistics</h2>
-        <ul style={{ borderLeft: "1px solid black", borderBottom: "1px solid black", paddingBottom: "10px", paddingLeft: "10px" }}>
-          {Object.entries(statistics).map(([key, value]) => (
-            <li key={key}><strong>{key}:</strong> {value}</li>
-          ))}
-        </ul>
+        <Statistics
+          gamesPlayed={statistics.gamesPlayed}
+          wins={statistics.wins}
+          losses={statistics.losses}
+          draws={statistics.draws}
+        />
       </div>
       <Modal
         open={openChangePassword}
@@ -104,7 +151,7 @@ const UserInfo = ({ username, email, statistics }) => {
             overflow: "auto",
             }}
           >
-          <ChangePassword onClose={handleCloseChangePassword}/>
+          <ChangePassword onClose={handleCloseChangePassword} setIsFocused={setIsFocused}/>
         </Box>
       </Modal>
       <Modal
@@ -128,7 +175,7 @@ const UserInfo = ({ username, email, statistics }) => {
             overflow: "auto",
             }}
           >
-          <ChangeUsername onClose={handleCloseChangeUsername}/>
+          <ChangeUsername onClose={handleCloseChangeUsername} setIsFocused={setIsFocused}/>
         </Box>
       </Modal>
     </div>
@@ -156,7 +203,7 @@ const Profile = () => {
     draws: 0
   }
   const location = useLocation();
-  const { username, email, userId } = location.state;
+  // const { username, email, userId } = location.state;
 
   return (
     <Header>
@@ -164,8 +211,8 @@ const Profile = () => {
         <div>
           <h1>Profile Page</h1>
           <UserInfo
-            username={username}
-            email={email}
+            // username={username}
+            // email={email}
             statistics={sampleStatistics}
           />
         </div>

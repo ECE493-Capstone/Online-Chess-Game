@@ -69,7 +69,7 @@ const fetchEmail = async () => {
   }
 };
 
-const ChangePassword = ({ onClose }) => {
+const ChangePassword = ({ onClose, setIsFocused }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [{ oldPassword, newPassword, errorMsg }, dispatch] = useReducer(
     ChangePasswordReducer,
@@ -103,6 +103,7 @@ const ChangePassword = ({ onClose }) => {
 
         if (res.status === 200) {
           console.log("Password changed successfully!");
+          setIsFocused(true);
           onClose();
           // Redirect to previous page after password change
           // navigate(-1);

@@ -96,7 +96,7 @@ const HeaderElements = () => {
 
   const handleProfileClick = () => {
     setAnchorEl(null);
-    navigate('/profile', { state: { username, email } });
+    navigate('/profile');
   };
 
   const handleLogoutClick = () => {
@@ -106,6 +106,7 @@ const HeaderElements = () => {
     setEmail(email);
     cookie.remove("userId");
     setIsFocused(true);
+    navigate('/');
   };
 
   return (

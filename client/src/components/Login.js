@@ -72,7 +72,6 @@ const Login = ({ onClose, setIsFocused }) => {
           console.log("Cookie userId:", cookie.get("userId")); // Log the cookie value
           setIsFocused(true);
           onClose();
-          navigate(-1);
           return Promise.resolve(undefined);
         }
       })

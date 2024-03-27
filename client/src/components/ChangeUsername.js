@@ -69,7 +69,7 @@ const fetchEmail = async () => {
   }
 };
 
-const ChangeUsername = ({ onClose }) => {
+const ChangeUsername = ({ onClose, setIsFocused }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [{ password, newUsername, errorMsg }, dispatch] = useReducer(
     ChangeUsernameReducer,
@@ -104,6 +104,7 @@ const ChangeUsername = ({ onClose }) => {
         if (res.status === 200) {
           console.log("Username changed successfully!");
           onClose();
+          setIsFocused(true);
           // Redirect to previous page after username change
           // navigate(-1);
           return Promise.resolve(undefined);
