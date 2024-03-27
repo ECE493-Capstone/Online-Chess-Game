@@ -7,6 +7,7 @@ const queueSchema = mongoose.Schema(
     timeControl: String,
     room: String,
     side: String,
+    type: String,
     socketId: String,
     joinTime: { type: Date, default: Date.now },
   },

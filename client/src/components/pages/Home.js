@@ -1,9 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Modal, TextField, Fab } from "@mui/material";
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
 import Header from "../Header";
 import styled from "styled-components";
+import { socket } from "../../app/socket";
+import { useDispatch } from "react-redux";
+import { setGameInfo } from "../../features/userSlice";
+import Cookies from "universal-cookie";
 import JoinGame from "../JoinGame";
 
 const PageContainer = styled.div`
@@ -13,7 +17,6 @@ const PageContainer = styled.div`
   overflow: hidden;
   flex-direction: column;
   justify-content: center;
-
 `;
 
 const ButtonContainer = styled.div`
@@ -24,7 +27,6 @@ const ButtonContainer = styled.div`
   margin-top: auto;
   padding-bottom: 10vh;
   overflow: hidden;
-
 `;
 
 const LeftButton = styled(Button)`
@@ -34,8 +36,7 @@ const LeftButton = styled(Button)`
 
 const RightButton = styled(Button)`
   width: 100%;
-  height: 50%;
-
+  height: 100%;
 `;
 
 const ButtonContent = styled.div`
@@ -59,8 +60,10 @@ const Home = () => {
   const [isGameSelectModalOpen, setIsGameSelectModalOpen] = useState(false);
   const [roomCode, setRoomCode] = useState("");
   const [submitClicked, setSubmitClicked] = useState(false);
+  const cookies = new Cookies();
+  const userId = cookies.get("userId");
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
   const handleJoinGame = () => {
     setIsModalOpen(true);
   };
@@ -83,73 +86,94 @@ const Home = () => {
     }
 
     console.log("Joining room with code:", roomCode);
-    navigate('/match');
+
+    socket.emit("join private game", {
+      userId: userId,
+      room: roomCode,
+    });
+
+    socket.on("game joined", (gameInfo) => {
+      dispatch(setGameInfo(gameInfo));
+      navigate(`/match/${gameInfo}`);
+    });
+
+    socket.on("join fail", (gameInfo) => {
+      console.log("Failed to join room with code:", roomCode);
+    });
     setIsModalOpen(false);
   };
 
   const handleQuickPlayClick = () => {
-    navigate('/gameselect');
+    // navigate("/timeselect");
+    navigate("/gameselect");
   };
 
   const handleCreateGameClick = () => {
-    navigate('/gameselect');
+    navigate("/gameselect");
   };
 
   return (
-      <Header>
-        <PageContainer>
-          <ButtonContainer>
-            <div style={{ display: "flex", alignItems: "center"}}>
-              <LeftButton 
-                variant="contained" 
-                onClick={handleQuickPlayClick}
+    <Header>
+      <PageContainer>
+        <ButtonContainer>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <LeftButton
+              variant="contained"
+              onClick={handleQuickPlayClick}
+              style={{
+                backgroundColor: "black",
+                border: "2px solid white",
+                borderRadius: "8px",
+              }}
+            >
+              <ButtonContent>
+                <Title>Quick Play</Title>
+                <Subtitle>Standard, blind, or power up chess</Subtitle>
+              </ButtonContent>
+            </LeftButton>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "5px",
+                padding: "4px",
+              }}
+            >
+              <RightButton
+                variant="contained"
+                onClick={handleCreateGameClick}
                 style={{
-                  backgroundColor: 'black',
-                  border: '2px solid white',
-                  borderRadius: '8px'
+                  backgroundColor: "black",
+                  border: "2px solid white",
+                  borderRadius: "8px",
                 }}
               >
-                <ButtonContent>
-                  <Title>Quick Play</Title>
-                  <Subtitle>Standard, blind, or power up chess</Subtitle>
-                </ButtonContent>
-              </LeftButton>
-              <div style={{ display: "flex", flexDirection: "column", gap: "5px"}}>
-                <RightButton 
-                  variant="contained" 
-                  onClick={handleCreateGameClick}
-                  style={{
-                  backgroundColor: 'black',
-                  border: '2px solid white',
-                  borderRadius: '8px'
-                }}>
-                  <Title>Create Game</Title>
-
-                </RightButton>
-                <RightButton 
-                  variant="contained" 
-                  onClick={handleJoinGame}
-                  style={{
-                  backgroundColor: 'black',
-                  border: '2px solid white',
-                  borderRadius: '8px'
-                }}>
-                  <Title>Join Game</Title>
-                </RightButton>
-              </div>
+                <Title>Create Game</Title>
+              </RightButton>
+              <RightButton
+                variant="contained"
+                onClick={handleJoinGame}
+                style={{
+                  backgroundColor: "black",
+                  border: "2px solid white",
+                  borderRadius: "8px",
+                }}
+              >
+                <Title>Join Game</Title>
+              </RightButton>
             </div>
-          </ButtonContainer>
-          <JoinGame        
-            isModalOpen={isModalOpen}
-            handleCloseModal={handleCloseModal}
-            roomCode={roomCode}
-            handleRoomCodeChange={handleRoomCodeChange}
-            handleJoinRoom={handleJoinRoom}
-            submitClicked={submitClicked}
-          />
-        </PageContainer>
-      </Header>
-
+          </div>
+        </ButtonContainer>
+        <JoinGame
+          isModalOpen={isModalOpen}
+          handleCloseModal={handleCloseModal}
+          roomCode={roomCode}
+          handleRoomCodeChange={handleRoomCodeChange}
+          handleJoinRoom={handleJoinRoom}
+          submitClicked={submitClicked}
+        />
+      </PageContainer>
+    </Header>
   );
 };
 
