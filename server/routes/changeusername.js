@@ -39,7 +39,7 @@ router.post("/", jsonParser, async (req, res) => {
     // Send success response
     res.status(200);
 
-    res.send({username: user.username, message: "Username changed successfully!"});
+    res.send({message: "Username changed successfully!"});
 
   } catch (error) {
     // If an error occurs, send internal server error response

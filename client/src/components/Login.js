@@ -4,6 +4,8 @@ import React, { useReducer, useState } from "react";
 import styled from "styled-components";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import PasswordOutlinedIcon from "@mui/icons-material/PasswordOutlined";
+import Cookies from "universal-cookie";
+import { loginUser } from "../api/auth";
 import { SERVER_URL } from "../config";
 import { useNavigate } from "react-router-dom";
 
@@ -43,6 +45,8 @@ const LoginReducer = (state, action) => {
 
 const Login = ({ onClose, setIsFocused }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const cookie = new Cookies();
+  const navigate = useNavigate();
   const [{ identity, password, errorMsg }, dispatch] = useReducer(
     LoginReducer,
     {
@@ -53,51 +57,28 @@ const Login = ({ onClose, setIsFocused }) => {
     }
   );
 
-  const navigate = useNavigate(); // navigation element
-
   const handleSubmit = (e) => {
     setIsSubmitting(true);
     dispatch({ type: "SET_ERROR", payload: "" });
 
     e.preventDefault();
-    fetch(`${SERVER_URL}/signin`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        identity: identity,
-        password: password,
-      }),
-    })
+    loginUser(identity, password)
       .then((res) => {
         setIsSubmitting(false);
+        console.log(res);
         if (res.status === 200) {
           console.log("User logged in successfully");
-          onClose();
-          return res.json(); // Parse JSON response
-        }
-        return Promise.resolve(undefined);
-      })
-      .then((data) => {
-        if (data) {
-          const userId = data.userId; // Extract user ID from JSON response
-          const username = data.username;
-          const email = data.email; 
-          // change to tokens tomorrow
-          localStorage.setItem('userId', userId);
-          localStorage.setItem('username', username);
-          localStorage.setItem('email', email);
-          console.log("userID: " + JSON.stringify(userId) + " username: " + JSON.stringify(username) + " email: " + JSON.stringify(email));
+          cookie.set("userId", res.data.userId);
+          console.log("Cookie userId:", cookie.get("userId")); // Log the cookie value
           setIsFocused(true);
+          onClose();
+          navigate(-1);
+          return Promise.resolve(undefined);
         }
-        navigate(-1);
       })
-      .then((data) => {
-        if (data === undefined) return;
-        dispatch({ type: "SET_ERROR", payload: data.message });
-      })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        dispatch({ type: "SET_ERROR", payload: err.response.data.message });
+      });
   };
 
   return (

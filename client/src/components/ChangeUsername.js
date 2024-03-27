@@ -4,8 +4,10 @@ import React, { useReducer, useState } from "react";
 import styled from "styled-components";
 import PasswordOutlinedIcon from "@mui/icons-material/PasswordOutlined";
 import { SERVER_URL } from "../config";
+import Cookies from "universal-cookie";
 import { useNavigate } from "react-router-dom";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import { fetchUser } from "../api/fetchUser";
 
 const ChangeUsernameContainer = styled.div`
   border: 1px solid white;
@@ -27,6 +29,7 @@ const ChangeUsernameContainer = styled.div`
     margin-top: 10px;
   }
 `;
+const cookie = new Cookies();
 
 const ChangeUsernameReducer = (state, action) => {
   switch (action.type) {
@@ -41,6 +44,31 @@ const ChangeUsernameReducer = (state, action) => {
   }
 };
 
+const fetchEmail = async () => {
+  try {
+    const storedUserId = cookie.get("userId"); // Retrieve user ID from cookie
+
+    if (storedUserId) {
+      console.log('Retrieved user ID from cookie: ' + storedUserId);
+
+      // Fetch username and email associated with the userId
+      const response = await fetchUser(storedUserId);
+      const userData = response.data;
+
+      if (response.status === 200) {
+        const { email } = userData;
+        return email;
+      } else {
+        console.log("Failed to fetch user email");
+      }
+    } else {
+      console.log("Login not detected.");
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const ChangeUsername = ({ onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [{ password, newUsername, errorMsg }, dispatch] = useReducer(
@@ -52,57 +80,45 @@ const ChangeUsername = ({ onClose }) => {
     }
   );
 
-  //   const navigate = useNavigate();
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => { // Make handleSubmit an async function
     e.preventDefault();
     setIsSubmitting(true);
     dispatch({ type: "SET_ERROR", payload: "" });
 
-    // Fetch email from local storage
-    const userEmail = localStorage.getItem('email');
+    try {
+      const userEmail = await fetchEmail(); // Wait for fetchEmail to complete
 
-    // Check if userEmail is not null or undefined
-    if (userEmail) {
-      fetch(`${SERVER_URL}/changeusername`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: userEmail, // Use fetched email
-          password: password,
-          newUsername: newUsername,
-        }),
-      })
-        .then((res) => {
-          setIsSubmitting(false);
-          if (res.status === 200) {
-            console.log("Username changed successfully!");
-            onClose();
-            // Redirect to previous page after username change
-            // navigate(-1);
-            return Promise.resolve(undefined);
-          }
-          return res.json();
-        })
-        .then((data) => {
-            if (data) {
-              const username = data.username;
-              // Store the user ID to localstorage
-              localStorage.setItem('username', username);
-              console.log("new username: " + JSON.stringify(username));
-            }
-        })
-        .then((data) => {
-          if (data === undefined) return;
-          dispatch({ type: "SET_ERROR", payload: data.message });
-        })
-        .catch((err) => console.log(err));
-    } else {
-      // Handle case where email is not found in local storage
-      console.log('Error. Email not found in local storage');
-      dispatch({ type: "SET_ERROR", payload: "Error finding user's email in local storage. Are you logged in?" });
+      if (userEmail) {
+        const res = await fetch(`${SERVER_URL}/changeusername`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: userEmail,
+            password: password,
+            newUsername: newUsername,
+          }),
+        });
+
+        if (res.status === 200) {
+          console.log("Username changed successfully!");
+          onClose();
+          // Redirect to previous page after username change
+          // navigate(-1);
+          return Promise.resolve(undefined);
+        }
+
+        const data = await res.json();
+        dispatch({ type: "SET_ERROR", payload: data.message });
+      } else {
+        console.log('Error. Email not found in cookie');
+        dispatch({ type: "SET_ERROR", payload: "Error finding user's email in cookie. Are you logged in?" });
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

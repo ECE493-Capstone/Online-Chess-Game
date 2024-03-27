@@ -5,6 +5,8 @@ import Login from "./Login";
 import Registration from "./Registration";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import styled from 'styled-components';
+import Cookies from "universal-cookie";
+import { fetchUser } from "../api/fetchUser";
 
 const StyledHeader = styled.div`
   position: fixed;
@@ -26,26 +28,33 @@ const HeaderElements = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [userId, setUserId] = useState("");
   const [isFocused, setIsFocused] = useState(true);
 
-  const checkLoginStatus = () => {
+  const cookie = new Cookies();
+
+  const checkLoginStatus = async () => {
     try {
-      const storedUserId = localStorage.getItem("userId");
-      const storedUsername = localStorage.getItem("username");
-      const storedEmail = localStorage.getItem("email");
+      const storedUserId = cookie.get("userId");
   
-      if (storedUserId && storedUsername && storedEmail) {
+      if (storedUserId) {
+        console.log('Retrieved user ID from cookie: ' + storedUserId);
         setIsLoggedIn(true);
-        console.log("HEADER DETECTS LOGIN: userID: " + JSON.stringify(storedUserId) + " username: " + JSON.stringify(storedUsername) + " email: " + JSON.stringify(storedEmail));
-        setUsername(storedUsername);
-        setUserId(storedUserId);
-        setEmail(storedEmail);
+  
+        const response = await fetchUser(storedUserId);
+        const userData = response.data;
+  
+        if (response.status === 200) {
+          const { username, email } = userData;
+          setUsername(username);
+          setEmail(email);
+          console.log("HEADER DETECTS LOGIN: userID: " + JSON.stringify(storedUserId) + " username: " + JSON.stringify(username) + " email: " + JSON.stringify(email));
+        } else {
+          console.log("Failed to fetch user data");
+        }
       } else {
         console.log("Header doesn't detect login.");
         setIsLoggedIn(false);
         setUsername("");
-        setUserId("");
         setEmail("");
       }
     } catch (error) {
@@ -87,15 +96,15 @@ const HeaderElements = () => {
 
   const handleProfileClick = () => {
     setAnchorEl(null);
-    navigate('/profile', { state: { username, email, userId } });
+    navigate('/profile', { state: { username, email } });
   };
 
   const handleLogoutClick = () => {
     setAnchorEl(null);
     // Clear items from localStorage upon logout
-    localStorage.removeItem("userId");
-    localStorage.removeItem("username");
-    localStorage.removeItem("email");
+    setUsername(username);
+    setEmail(email);
+    cookie.remove("userId");
     setIsFocused(true);
   };
 
