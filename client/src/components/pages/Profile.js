@@ -9,7 +9,8 @@ import { useLocation } from "react-router-dom";
 import styled from "styled-components";
 import Cookies from "universal-cookie";
 import { fetchUser } from "../../api/fetchUser";
-import Statistics from "../Statistics";
+import GameStatistics from "../Statistics";
+import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 
 const PageContainer = styled.div`
   display: flex;
@@ -113,9 +114,9 @@ const UserInfo = ({statistics}) => {
 
   return (
     <div style={{ display: "flex" }}>
-      <div style={{ flex: "25%"}}>
-        <h2>Profile Information</h2>
+      <div style={{ flex: "20%"}}>
         <ProfileInfo>
+          <AccountCircleOutlinedIcon fontSize="large" />
           <Title>{username}</Title>
           <Subtitle>({email})</Subtitle>
           <StyledButton variant="contained" onClick={handleOpenChangeUsername}>Change Username</StyledButton>
@@ -123,7 +124,7 @@ const UserInfo = ({statistics}) => {
         </ProfileInfo>
       </div>
       <div style={{ flex: "75%", padding: "10px" }}>
-        <Statistics
+        <GameStatistics
           gamesPlayed={statistics.gamesPlayed}
           wins={statistics.wins}
           losses={statistics.losses}
