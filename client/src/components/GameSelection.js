@@ -2,13 +2,13 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import { Popover } from "@mui/material";
-import { IconButton } from '@mui/material';
-import InfoIcon from '@mui/icons-material/Info';
+import { IconButton } from "@mui/material";
+import InfoIcon from "@mui/icons-material/Info";
 import styled from "styled-components";
-import Typography from '@mui/material/Typography';
-import StandardChessImage from '../img/Standard_Chess.png';
-import BlindChessImage from '../img/Blind_Chess.png';
-import PowerUpChessImage from '../img/Power_Up_Chess.png';
+import Typography from "@mui/material/Typography";
+import StandardChessImage from "../img/Standard_Chess.png";
+import BlindChessImage from "../img/Blind_Chess.png";
+import PowerUpChessImage from "../img/Power_Up_Chess.png";
 
 const PageContainer = styled.div`
   display: flex;
@@ -19,7 +19,6 @@ const PageContainer = styled.div`
   overflow: hidden;
   flex-direction: column;
   justify-content: center;
-
 `;
 
 const GameContainer = styled.div`
@@ -58,7 +57,7 @@ const ModalContent = styled.div`
 
 const Separator = styled.div`
   width: 100%;
-  border-top: 1px solid #ccc; 
+  border-top: 1px solid #ccc;
   margin-top: 10px;
 `;
 
@@ -67,7 +66,7 @@ const GameSelect = () => {
 
   const handleGameSelect = (gameMode) => {
     console.log("Selected game mode:", gameMode);
-    navigate("/timeselect");
+    navigate("/play-game");
   };
 
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -87,11 +86,11 @@ const GameSelect = () => {
   return (
     <Header>
       <PageContainer>
-        <div style={{ display: "flex", justifyContent: "center", gap:"10vw"}}>
+        <div style={{ display: "flex", justifyContent: "center", gap: "10vw" }}>
           <GameContainer onClick={() => handleGameSelect("Standard")}>
-            <img 
-              src={StandardChessImage} 
-              alt="Standard" 
+            <img
+              src={StandardChessImage}
+              alt="Standard"
               style={{ width: "70%", height: "auto" }}
             />
             <Separator />
@@ -102,49 +101,54 @@ const GameSelect = () => {
             </div>
           </GameContainer>
           <GameContainer onClick={() => handleGameSelect("Blind")}>
-            <img 
-              src={BlindChessImage} 
-              alt="Blind" 
+            <img
+              src={BlindChessImage}
+              alt="Blind"
               style={{ width: "70%", height: "auto" }}
             />
             <Separator />
             <div>
               <ModalContent>
-                  <Title>Blind Chess</Title>
-                  <Subtitle>Play chess without being able to view the board!</Subtitle>
+                <Title>Blind Chess</Title>
+                <Subtitle>
+                  Play chess without being able to view the board!
+                </Subtitle>
               </ModalContent>
             </div>
           </GameContainer>
-          <GameContainer style={{ position: "relative" }}  onClick={() => handleGameSelect("Power-up Duck")}>
-            <img 
-              src={PowerUpChessImage} 
-              alt="Power-up Duck" 
+          <GameContainer
+            style={{ position: "relative" }}
+            onClick={() => handleGameSelect("Power-up Duck")}
+          >
+            <img
+              src={PowerUpChessImage}
+              alt="Power-up Duck"
               style={{ width: "70%", height: "auto" }}
             />
             <Separator />
             <div style={{ position: "absolute", top: 0, right: 0 }}>
               <IconButton
-                aria-describedby={open ? 'mouse-over-popover' : undefined}
+                aria-describedby={open ? "mouse-over-popover" : undefined}
                 onMouseEnter={handlePopoverOpen}
                 onMouseLeave={handlePopoverClose}
               >
-                <InfoIcon/>
+                <InfoIcon />
               </IconButton>
               <Popover
                 id="mouse-over-popover"
                 sx={{
-                  pointerEvents: 'none',
+                  pointerEvents: "none",
                 }}
                 open={open}
                 anchorEl={anchorEl}
                 onClose={handlePopoverClose}
                 anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right',
+                  vertical: "bottom",
+                  horizontal: "right",
                 }}
                 transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
+                  vertical: "top",
+                  horizontal: "right",
                 }}
                 disableRestoreFocus
               >
@@ -153,8 +157,11 @@ const GameSelect = () => {
             </div>
             <div className="standard">
               <ModalContent>
-                  <Title>Power-up Duck</Title>
-                  <Subtitle>Play chess with a duck piece, controlled by the spectators! Additional power-up mechanics for certain chess pieces!</Subtitle>
+                <Title>Power-up Duck</Title>
+                <Subtitle>
+                  Play chess with a duck piece, controlled by the spectators!
+                  Additional power-up mechanics for certain chess pieces!
+                </Subtitle>
               </ModalContent>
             </div>
           </GameContainer>

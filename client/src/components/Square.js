@@ -31,7 +31,7 @@ const Square = ({ piece, rowIndex, colIndex, game }) => {
     socket.emit("move piece", { gameRoom: gameId, input: move });
   };
   const handleClick = () => {
-    if (game.isSameTurn("w")) {
+    if (game.isSameTurn(game.side)) {
       // move the piece
       if (isHighlighted) {
         const move = {
@@ -51,7 +51,7 @@ const Square = ({ piece, rowIndex, colIndex, game }) => {
         }
       } else {
         // highlight if clicked on piece
-        if (piece) {
+        if (piece && game._isSameSide(piece)) {
           dispatch(
             setClickPiece({
               clickedSquare: { rowIndex, colIndex },
