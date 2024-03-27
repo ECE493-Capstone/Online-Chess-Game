@@ -20,7 +20,7 @@ const StyledHeader = styled.div`
   justify-content: flex-end;
 `;
 
-const HeaderElements = () => {
+const HeaderElements = ({setOthersIsLoggedIn}) => {
   const navigate = useNavigate();
   const [openlogin, setOpenLogin] = useState(false);
   const [openregister, setOpenRegister] = useState(false);
@@ -39,7 +39,8 @@ const HeaderElements = () => {
       if (storedUserId) {
         console.log('Retrieved user ID from cookie: ' + storedUserId);
         setIsLoggedIn(true);
-  
+        setOthersIsLoggedIn(true);
+        
         const response = await fetchUser(storedUserId);
         const userData = response.data;
   
@@ -54,6 +55,7 @@ const HeaderElements = () => {
       } else {
         console.log("Header doesn't detect login.");
         setIsLoggedIn(false);
+        setOthersIsLoggedIn(false);
         setUsername("");
         setEmail("");
       }
@@ -106,7 +108,7 @@ const HeaderElements = () => {
     setEmail(email);
     cookie.remove("userId");
     setIsFocused(true);
-    navigate('/');
+    // navigate('/');
   };
 
   return (
@@ -198,11 +200,11 @@ const HeaderElements = () => {
   );
 };
 
-const Header = ({ children }) => {
+const Header = ({ children, setOthersIsLoggedIn }) => {
   return (
     <div>
         <StyledHeader>
-          <HeaderElements />
+          <HeaderElements setOthersIsLoggedIn = {setOthersIsLoggedIn}/>
         </StyledHeader>
       <div>{children}</div>
     </div>

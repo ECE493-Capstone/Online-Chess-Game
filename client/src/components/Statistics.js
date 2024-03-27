@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Menu, MenuItem, Button, ButtonGroup, MenuList, Paper, Popper, Grow, ClickAwayListener } from '@mui/material';
-import { BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, Legend } from 'recharts'; // Import from 'recharts' instead of '@mui/x-charts'
+import { MenuItem, Button, ButtonGroup, MenuList, Paper, Popper, Grow, ClickAwayListener } from '@mui/material';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts'; // Import from 'recharts' instead of '@mui/x-charts'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import styled from "styled-components";
 
@@ -67,7 +67,6 @@ const GameStatistics = () => {
     return null;
   };
   
-  
   return (
     <PageContainer>
       <h2>Statistics for {selectedGameMode} Chess</h2>
@@ -77,7 +76,7 @@ const GameStatistics = () => {
         data={selectedGameData}
         margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
       >
-        <CartesianGrid strokeDasharray="3 3" />
+
         <XAxis dataKey="gameMode" />
         <YAxis />
         <Tooltip content={<CustomTooltip />}/>

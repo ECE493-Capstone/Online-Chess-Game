@@ -5,7 +5,7 @@ import ChangeUsername  from '../ChangeUsername';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import { Button } from "@mui/material";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import Cookies from "universal-cookie";
 import { fetchUser } from "../../api/fetchUser";
@@ -16,7 +16,6 @@ const PageContainer = styled.div`
   display: flex;
   background-color: rgb(184, 184, 184);
   min-height: 100vh;
-  overflow: hidden;
   flex-direction: column;
 
 `;
@@ -24,7 +23,7 @@ const PageContainer = styled.div`
 const ProfileInfo = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   ${'' /* background-color: black; */}
   width: 40%;
   min-width: 40%;
@@ -32,7 +31,7 @@ const ProfileInfo = styled.div`
 `;
 
 const StyledButton = styled(Button)`
-  min-width: 50%;
+  width: 70%;
 
 `;
 
@@ -49,14 +48,16 @@ const Subtitle = styled.div`
 
 const cookie = new Cookies();
 
-const UserInfo = ({statistics}) => {
+const UserInfo = ({statistics, setIsLoggedIn}) => {
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [openChangePassword, setOpenChangePassword] = useState(false);
   const [openChangeUsername, setOpenChangeUsername] = useState(false);
   const [isFocused, setIsFocused] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleOpenChangePassword = () => {
     setOpenChangePassword(true);
@@ -80,7 +81,6 @@ const UserInfo = ({statistics}) => {
   
       if (storedUserId) {
         console.log('Retrieved user ID from cookie: ' + storedUserId);
-        setIsLoggedIn(true);
   
         const response = await fetchUser(storedUserId);
         const userData = response.data;
@@ -90,14 +90,16 @@ const UserInfo = ({statistics}) => {
           setUsername(username);
           setEmail(email);
           console.log("HEADER DETECTS LOGIN: userID: " + JSON.stringify(storedUserId) + " username: " + JSON.stringify(username) + " email: " + JSON.stringify(email));
+          setIsLoggedIn(true);
         } else {
           console.log("Failed to fetch user data");
         }
       } else {
-        console.log("Header doesn't detect login.");
-        setIsLoggedIn(false);
+        console.log("Profile doesn't detect login.");
         setUsername("");
         setEmail("");
+        setIsLoggedIn(false);
+        // navigate('/');
       }
     } catch (error) {
       console.log(error);
@@ -114,7 +116,7 @@ const UserInfo = ({statistics}) => {
 
   return (
     <div style={{ display: "flex" }}>
-      <div style={{ flex: "20%"}}>
+      <div style={{ flex: "20%", paddingTop: "80px", paddingLeft: "10px"}}>
         <ProfileInfo>
           <AccountCircleOutlinedIcon fontSize="large" />
           <Title>{username}</Title>
@@ -123,7 +125,7 @@ const UserInfo = ({statistics}) => {
           <StyledButton variant="contained" onClick={handleOpenChangePassword}>Change Password</StyledButton>
         </ProfileInfo>
       </div>
-      <div style={{ flex: "75%", padding: "10px" }}>
+      <div style={{ flex: "75%", padding: "10px", paddingTop: "60px"}}>
         <GameStatistics
           gamesPlayed={statistics.gamesPlayed}
           wins={statistics.wins}
@@ -206,17 +208,33 @@ const Profile = () => {
   const location = useLocation();
   // const { username, email, userId } = location.state;
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   return (
-    <Header>
+    <Header setOthersIsLoggedIn={setIsLoggedIn}>
       <PageContainer>
-        <div>
-          <h1>Profile Page</h1>
-          <UserInfo
-            // username={username}
-            // email={email}
-            statistics={sampleStatistics}
-          />
-        </div>
+        {isLoggedIn ? (
+            <div>
+              <UserInfo
+                // username={username}
+                // email={email}
+                statistics={sampleStatistics}
+                setIsLoggedIn={setIsLoggedIn}
+              />
+            </div>
+        ) : (
+
+          <div>
+              <h1>Profile Page</h1>
+              <UserInfo
+                // username={username}
+                // email={email}
+                statistics={sampleStatistics}
+                setIsLoggedIn={setIsLoggedIn}
+              />
+            </div>
+
+        )
+        }
       </PageContainer>
     </Header>
   );
