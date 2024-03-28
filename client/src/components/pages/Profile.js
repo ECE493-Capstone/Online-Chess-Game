@@ -25,8 +25,7 @@ const ProfileInfo = styled.div`
   flex-direction: column;
   align-items: stretch;
   ${'' /* background-color: black; */}
-  width: 40%;
-  min-width: 40%;
+  width: 50%;
   gap: 10px;
 `;
 
@@ -38,12 +37,18 @@ const StyledButton = styled(Button)`
 const Title = styled.div`
   font-size: 20px;
   color: white;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 `;
 
 const Subtitle = styled.div`
   font-size: 14px;
   text-transform: none;
   color: white;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 `;
 
 const cookie = new Cookies();
@@ -56,6 +61,8 @@ const UserInfo = ({statistics, setIsLoggedIn}) => {
   const [openChangeUsername, setOpenChangeUsername] = useState(false);
   const [isFocused, setIsFocused] = useState(true);
   // const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const longUsernameTest = "longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong"
 
   const navigate = useNavigate();
 
@@ -116,7 +123,7 @@ const UserInfo = ({statistics, setIsLoggedIn}) => {
 
   return (
     <div style={{ display: "flex" }}>
-      <div style={{ flex: "20%", paddingTop: "80px", paddingLeft: "10px"}}>
+      <div style={{ paddingTop: "80px", paddingLeft: "10px", width:  "20%"}}>
         <ProfileInfo>
           <AccountCircleIcon fontSize="large" />
           <Title>{username}</Title>
@@ -125,7 +132,7 @@ const UserInfo = ({statistics, setIsLoggedIn}) => {
           <StyledButton variant="contained" onClick={handleOpenChangePassword}>Change Password</StyledButton>
         </ProfileInfo>
       </div>
-      <div style={{ flex: "75%", padding: "10px", paddingTop: "60px"}}>
+      <div style={{ maxWidth:  "70%", padding: "10px", paddingTop: "60px"}}>
         <GameStatistics
           gamesPlayed={statistics.gamesPlayed}
           wins={statistics.wins}
@@ -213,14 +220,14 @@ const Profile = () => {
     <Header setOthersIsLoggedIn={setIsLoggedIn}>
       <PageContainer>
         {isLoggedIn ? (
-            <div>
+
               <UserInfo
                 // username={username}
                 // email={email}
                 statistics={sampleStatistics}
                 setIsLoggedIn={setIsLoggedIn}
               />
-            </div>
+
         ) : (
 
           <div style={{ paddingTop: "80px", alignItems: "center", textAlign: "center"}}>

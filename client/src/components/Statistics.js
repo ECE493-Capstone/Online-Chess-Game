@@ -8,7 +8,7 @@ const PageContainer = styled.div`
   display: flex;
   align-items: center;
   flex-direction: column;
-  width: 30vw;
+  width: 100%;
   gap: 5vh;
 `;
 
