@@ -42,7 +42,7 @@ const Head2Head = ({ PlayerId }) => {
                 if (response.status === 200) {
                 const { username } = userData;
                 setPlayerUsername(username);
-                console.log("HEADER DETECTS USER: userID: " + JSON.stringify(storedUserId) + " username: " + JSON.stringify(username));
+                console.log("H2H DETECTS USER: userID: " + JSON.stringify(storedUserId) + " username: " + JSON.stringify(username));
                 } else {
                 console.log("Failed to fetch user data");
                 }
@@ -74,7 +74,7 @@ const Head2Head = ({ PlayerId }) => {
                 if (response.status === 200) {
                 const { username } = userData;
                 setOpponentUsername(username);
-                console.log("HEADER DETECTS OPPONENT: opponentID: " + JSON.stringify(opponentId) + " opponentusername: " + JSON.stringify(username));
+                console.log("H2H DETECTS OPPONENT: opponentID: " + JSON.stringify(opponentId) + " opponentusername: " + JSON.stringify(username));
                 } else {
                 console.log("Failed to fetch opponent data");
                 }

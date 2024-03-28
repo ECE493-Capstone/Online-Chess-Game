@@ -165,6 +165,8 @@ const Home = () => {
               >
                 <Title>Join Game</Title>
               </RightButton>
+              
+              {/* Uncomment this to test the head2head */}
               <Button
                 variant="contained"
                 onClick={handleTestClick}
@@ -174,7 +176,7 @@ const Home = () => {
                   borderRadius: "8px",
                 }}
               >
-                <Title>Test Header2Header</Title>
+                <Title>Test Head2Head</Title>
               </Button>
             </div>
           </div>
