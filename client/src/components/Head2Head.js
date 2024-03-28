@@ -97,7 +97,7 @@ const Head2Head = ({ PlayerId }) => {
 
   const PlayerGameData = {
     Classic: [
-      { win: 10, lose: 5, tie: 3 }
+      { win: 1, lose: 5, tie: 3 }
     ],
     Blind: [
       { win: 7, lose: 8, tie: 2 }
@@ -127,50 +127,79 @@ const Head2Head = ({ PlayerId }) => {
     return acc + gameModeData[0].win;
   }, 0);
   
-  const Separator = styled.div`
-  border-left: 1px solid #ccc;
-  height: 100%;
-  margin-left: 10px; /* Adjust as needed */
-`;
+  const getColorArray = () => {
 
-return (
+    const getColor = (playerValue, opponentValue) => {
+        if (playerValue > opponentValue) {
+            return 'green';
+        } else if (playerValue < opponentValue) {
+            return 'red';
+        } else {
+            return 'grey';
+        }
+    };
+      
+    const colors = [];
+  
+    // Classic
+    colors.push(getColor(PlayerGameData.Classic[0].win, OpponentGameData.Classic[0].win));
+    colors.push(getColor(OpponentGameData.Classic[0].win, PlayerGameData.Classic[0].win));
+  
+    // Blind
+    colors.push(getColor(PlayerGameData.Blind[0].win, OpponentGameData.Blind[0].win));
+    colors.push(getColor(OpponentGameData.Blind[0].win, PlayerGameData.Blind[0].win));
+  
+    // PowerUp
+    colors.push(getColor(PlayerGameData.PowerUp[0].win, OpponentGameData.PowerUp[0].win));
+    colors.push(getColor(OpponentGameData.PowerUp[0].win, PlayerGameData.PowerUp[0].win));
+  
+    // Total wins
+    colors.push(getColor(playerTotalWins, opponentTotalWins));
+    colors.push(getColor(opponentTotalWins, playerTotalWins));
+  
+    return colors;
+  };
+  
+  const colors = getColorArray();
+  
+  return (
     <div>
       <AppBar position="static">
-        <Toolbar>
+        <Toolbar style={{ justifyContent: 'flex-end' }}>
           <Typography variant="h6" style={{ borderRight: '0.1em solid white', padding: '0.5em' }} >
             <strong>{playerUsername}</strong>&nbsp;
           </Typography>
           <Typography variant="h6">&nbsp;Wins:&nbsp;</Typography>
-          <Typography variant="h6" style={{ color: PlayerGameData.Classic[0].win > OpponentGameData.Classic[0].win ? 'green' : 'red' }}>
+          <Typography variant="h6" style={{ color: colors[0] }}>
             Classic: {PlayerGameData.Classic[0].win}&nbsp;
           </Typography>
-          <Typography variant="h6" style={{ color: PlayerGameData.Blind[0].win > OpponentGameData.Blind[0].win ? 'green' : 'red' }}>
+          <Typography variant="h6" style={{ color: colors[2] }}>
             &nbsp;Blind: {PlayerGameData.Blind[0].win}&nbsp;
           </Typography>
-          <Typography variant="h6" style={{ borderRight: '0.1em solid white', padding: '0.5em', color: PlayerGameData.PowerUp[0].win > OpponentGameData.PowerUp[0].win ? 'green' : 'red' }}>
+          <Typography variant="h6" style={{ borderRight: '0.1em solid white', padding: '0.5em', color: colors[4] }}>
             PowerUp: {PlayerGameData.PowerUp[0].win}
           </Typography>
-          <Typography variant="h6" style={{ color: playerTotalWins > opponentTotalWins ? 'green' : 'red' }}>
+          <Typography variant="h6" style={{ color: colors[6] }}>
             &nbsp;{playerTotalWins}
           </Typography>
         </Toolbar>
       </AppBar>
       <AppBar position="static">
-        <Toolbar>
+        <Toolbar style={{ justifyContent: 'flex-end' }}>
           <Typography variant="h6" style={{ borderRight: '0.1em solid white', padding: '0.5em' }} >
             <strong>{opponentUsername}</strong>&nbsp;
           </Typography>
           <Typography variant="h6">&nbsp;Wins:&nbsp;</Typography>
-          <Typography variant="h6" style={{ color: OpponentGameData.Classic[0].win > PlayerGameData.Classic[0].win ? 'green' : 'red' }}>
+          <Typography variant="h6" style={{ color: colors[1] }}>
             Classic: {OpponentGameData.Classic[0].win}&nbsp;
           </Typography>
-          <Typography variant="h6" style={{ color: OpponentGameData.Blind[0].win > PlayerGameData.Blind[0].win ? 'green' : 'red' }}>
+          <Typography variant="h6" style={{ color: colors[3] }}>
             &nbsp;Blind: {OpponentGameData.Blind[0].win}&nbsp;
           </Typography>
-          <Typography variant="h6" style={{ borderRight: '0.1em solid white', padding: '0.5em', color: OpponentGameData.PowerUp[0].win > PlayerGameData.PowerUp[0].win ? 'green' : 'red' }}>
+          <Typography variant="h6" style={{ borderRight: '0.1em solid white', padding: '0.5em', color: colors[5] }}>
             PowerUp: {OpponentGameData.PowerUp[0].win}
           </Typography>
-          <Typography variant="h6" style={{ color: opponentTotalWins > playerTotalWins ? 'green' : 'red' }}>
+          <Typography variant="h6" style={{ color: colors[7] }}>
             &nbsp;{opponentTotalWins}
           </Typography>
         </Toolbar>
