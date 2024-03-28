@@ -112,6 +112,10 @@ const Home = () => {
     navigate("/gameselect");
   };
 
+  const handleTestClick = () => {
+    navigate("/h2htest");
+  };
+
   return (
     <Header>
       <PageContainer>
@@ -161,6 +165,17 @@ const Home = () => {
               >
                 <Title>Join Game</Title>
               </RightButton>
+              <Button
+                variant="contained"
+                onClick={handleTestClick}
+                style={{
+                  backgroundColor: "black",
+                  border: "2px solid white",
+                  borderRadius: "8px",
+                }}
+              >
+                <Title>Test Header2Header</Title>
+              </Button>
             </div>
           </div>
         </ButtonContainer>

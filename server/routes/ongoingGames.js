@@ -14,9 +14,11 @@ router.get("/byPlayer", jsonParser, async (req, res) => {
   const player2Game = await OngoingGames.findOne({ player2: player });
   if (player1Game || player2Game) {
     const game = player1Game || player2Game;
+    console.log("found player. Sending game.");
     res.status(200);
     res.send(game);
   } else {
+    console.log("404 status.");
     res.status(404);
     res.send({ message: "No ongoing game found" });
   }

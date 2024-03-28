@@ -223,13 +223,8 @@ const Profile = () => {
             </div>
         ) : (
 
-          <div>
-              <UserInfo
-                // username={username}
-                // email={email}
-                statistics={sampleStatistics}
-                setIsLoggedIn={setIsLoggedIn}
-              />
+          <div style={{ paddingTop: "80px", alignItems: "center", textAlign: "center"}}>
+              <h1>Please Log in to View this Page.</h1>
             </div>
         )}
       </PageContainer>

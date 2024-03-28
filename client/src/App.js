@@ -13,6 +13,7 @@ import TimeSelect from "./components/TimeSelect";
 import { socket } from "./app/socket";
 import PlayType from "./components/PlayType";
 import Profile from "./components/pages/Profile";
+import H2HTest from "./components/pages/H2HTest";
 
 const darkTheme = createTheme({
   palette: {
@@ -45,10 +46,9 @@ const App = () => {
               </PrivateRoute>
             }
           />
-          <Route path="/timeselect" element={<TimeSelect />} />
           <Route path="/match" element={<Match />} />
-          <Route path="/gameselect" element={<GameSelect />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/h2htest" element={<H2HTest />} />
         </Routes>
       </Router>
     </ThemeProvider>
