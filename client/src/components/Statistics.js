@@ -15,61 +15,11 @@ const PageContainer = styled.div`
 
 // Sample game mode data. Hard-coded.
 const sampleGameModesData = {
-  Classic: [
-    { 
-      name: "Wins",
-      white: 6,
-      black: 3
-    },
-    { 
-      name: "Loses",
-      white: 4,
-      black: 2
-    },
-    { 
-      name: "Ties",
-      white: 2,
-      black: 2
-    },
-  ],
-  Blind: [
-    { 
-      name: "Wins",
-      white: 3,
-      black: 6
-    },
-    { 
-      name: "Loses",
-      white: 7,
-      black: 1
-    },
-    { 
-      name: "Ties",
-      white: 5,
-      black: 11
-    },
-  ],
-  PowerUp: [
-    { 
-      name: "Wins",
-      white: 9,
-      black: 4
-    },
-    { 
-      name: "Loses",
-      white: 3,
-      black: 3
-    },
-    { 
-      name: "Ties",
-      white: 2,
-      black: 1
-    },
-  ]
+  Classic: [{ name: "Wins", white: 6, black: 3 }, { name: "Loses", white: 4, black: 2 }, { name: "Ties", white: 2, black: 2 }],
+  Blind: [{ name: "Wins", white: 3, black: 6 }, { name: "Loses", white: 7, black: 1 }, { name: "Ties", white: 5, black: 11 }],
+  PowerUp: [{ name: "Wins", white: 9, black: 4}, { name: "Loses", white: 3, black: 3 }, { name: "Ties", white: 2, black: 1 }]
 };
 
-
-// TODO: Huge nested if-else statements. Might want to switch to cases just to make it not this big.
 const formatPastGamesData = async (userId, setGameModesData) => {
   try {
 
@@ -81,75 +31,40 @@ const formatPastGamesData = async (userId, setGameModesData) => {
       PowerUp: [{ name: "Wins", white: 0, black: 0 }, { name: "Loses", white: 0, black: 0 }, { name: "Ties", white: 0, black: 0 }]
     };
 
+    const gameModeDataMap = {
+      Classic: formattedData.Classic,
+      Blind: formattedData.Blind,
+      PowerUp: formattedData.PowerUp
+    };
+
 
     gamesRetrieved.forEach((game) => {
       const isWinner = game.winner === userId;
-      const isLoser = game.winner && game.winner !== userId;
+      const isLoser = game.winner !== userId;
       const isTie = game.tie && game.winner === null;
       const isWhite = game.white === userId;
-
-      if (game.mode === "Classic") {
-        if (isWinner) {
-          if (isWhite) {
-            formattedData.Classic.find(item => item.name === "Wins").white++;
-          } else {
-            formattedData.Classic.find(item => item.name === "Wins").black++;
-          }
-        } else if (isLoser) {
-          if (isWhite) {
-            formattedData.Classic.find(item => item.name === "Loses").white++;
-          } else {
-            formattedData.Classic.find(item => item.name === "Loses").black++;
-          }
-        } else if (isTie) {
-          if (isWhite) {
-            formattedData.Classic.find(item => item.name === "Ties").white++;
-          } else {
-            formattedData.Classic.find(item => item.name === "Ties").black++;
-          }
+    
+      const modeData = gameModeDataMap[game.mode];
+    
+      if (isWinner) {
+        if (isWhite) {
+          modeData.find(item => item.name === "Wins").white++;
+        } else {
+          modeData.find(item => item.name === "Wins").black++;
         }
-      } else if (game.mode === "Blind") {
-        if (isWinner) {
-          if (isWhite) {
-            formattedData.Blind.find(item => item.name === "Wins").white++;
-          } else {
-            formattedData.Blind.find(item => item.name === "Wins").black++;
-          }
-        } else if (isLoser) {
-          if (isWhite) {
-            formattedData.Blind.find(item => item.name === "Loses").white++;
-          } else {
-            formattedData.Blind.find(item => item.name === "Loses").black++;
-          }
-        } else if (isTie) {
-          if (isWhite) {
-            formattedData.Blind.find(item => item.name === "Ties").white++;
-          } else {
-            formattedData.Blind.find(item => item.name === "Ties").black++;
-          }
+      } else if (isLoser) {
+        if (isWhite) {
+          modeData.find(item => item.name === "Loses").white++;
+        } else {
+          modeData.find(item => item.name === "Loses").black++;
         }
-      } else if (game.mode === "PowerUp") {
-        if (isWinner) {
-          if (isWhite) {
-            formattedData.PowerUp.find(item => item.name === "Wins").white++;
-          } else {
-            formattedData.PowerUp.find(item => item.name === "Wins").black++;
-          }
-        } else if (isLoser) {
-          if (isWhite) {
-            formattedData.PowerUp.find(item => item.name === "Loses").white++;
-          } else {
-            formattedData.PowerUp.find(item => item.name === "Loses").black++;
-          }
-        } else if (isTie) {
-          if (isWhite) {
-            formattedData.PowerUp.find(item => item.name === "Ties").white++;
-          } else {
-            formattedData.PowerUp.find(item => item.name === "Ties").black++;
-          }
+      } else if (isTie) {
+        if (isWhite) {
+          modeData.find(item => item.name === "Ties").white++;
+        } else {
+          modeData.find(item => item.name === "Ties").black++;
         }
       }
-      
     });
 
     // Update state with the formatted data
@@ -161,57 +76,9 @@ const formatPastGamesData = async (userId, setGameModesData) => {
     if (error.response && error.response.status === 404) {
       // Create game data structure with all fields being 0
       const emptyData = {
-        Classic: [
-          { 
-            name: "Wins",
-            white: 0,
-            black: 0
-          },
-          { 
-            name: "Loses",
-            white: 0,
-            black: 0
-          },
-          { 
-            name: "Ties",
-            white: 0,
-            black: 0
-          },
-        ],
-        Blind: [
-          { 
-            name: "Wins",
-            white: 0,
-            black: 0
-          },
-          { 
-            name: "Loses",
-            white: 0,
-            black: 0
-          },
-          { 
-            name: "Ties",
-            white: 0,
-            black: 0
-          },
-        ],
-        PowerUp: [
-          { 
-            name: "Wins",
-            white: 0,
-            black: 0
-          },
-          { 
-            name: "Loses",
-            white: 0,
-            black: 0
-          },
-          { 
-            name: "Ties",
-            white: 0,
-            black: 0
-          },
-        ]
+        Classic: [{ name: "Wins", white: 0, black: 0 }, { name: "Loses", white: 0, black: 0 }, { name: "Ties", white: 0, black: 0 }],
+        Blind: [{ name: "Wins", white: 0, black: 0 }, { name: "Loses", white: 0, black: 0 }, { name: "Ties", white: 0, black: 0 }],
+        PowerUp: [{ name: "Wins", white: 0, black: 0 }, { name: "Loses", white: 0, black: 0 }, { name: "Ties", white: 0, black: 0 }]
       };
       // Update state with empty data
       setGameModesData(emptyData);

@@ -145,60 +145,46 @@ const Head2Head = ({ PlayerId }) => {
     
       let playerTotalWins = 0;
       let opponentTotalWins = 0;
+
+      const modeDataMap = {
+        Classic: playerData.Classic[0],
+        Blind: playerData.Blind[0],
+        PowerUp: playerData.PowerUp[0]
+      };
+    
+      const opponentModeDataMap = {
+        Classic: opponentData.Classic[0],
+        Blind: opponentData.Blind[0],
+        PowerUp: opponentData.PowerUp[0]
+      };
     
       // Loop through each game
       gamesData.forEach((game) => {
-        if (game.mode === "Classic") {
-          if (game.winner === userId) {
-            playerTotalWins++;
-            playerData.Classic[0].win++;
-            opponentData.Classic[0].lose++;
-          } else if (game.winner === opponentId) {
-            opponentTotalWins++;
-            playerData.Classic[0].lose++;
-            opponentData.Classic[0].win++;
-          } else if (game.tie && game.winner === null) {
-            playerData.Classic[0].tie++;
-            opponentData.Classic[0].tie++;
-          }
-        } else if (game.mode === "Blind") {
-          if (game.winner === userId) {
-            playerTotalWins++;
-            playerData.Blind[0].win++;
-            opponentData.Blind[0].lose++;
-          } else if (game.winner === opponentId) {
-            opponentTotalWins++;
-            playerData.Blind[0].lose++;
-            opponentData.Blind[0].win++;
-          } else if (game.tie && game.winner === null) {
-            playerData.Blind[0].tie++;
-            opponentData.Blind[0].tie++;
-          }
-        } else if (game.mode === "PowerUp") {
-          if (game.winner === userId) {
-            playerTotalWins++;
-            playerData.PowerUp[0].win++;
-            opponentData.PowerUp[0].lose++;
-          } else if (game.winner === opponentId) {
-            opponentTotalWins++;
-            playerData.PowerUp[0].lose++;
-            opponentData.PowerUp[0].win++;
-          } else if (game.tie && game.winner === null) {
-            playerData.PowerUp[0].tie++;
-            opponentData.PowerUp[0].tie++;
-          }
+        const modeData = modeDataMap[game.mode];
+        const opponentModeData = opponentModeDataMap[game.mode];
+
+        if (game.winner === userId) {
+          playerTotalWins++;
+          modeData.win++;
+          opponentModeData.lose++;
+        } else if (game.winner === opponentId) {
+          opponentTotalWins++;
+          modeData.lose++;
+          opponentModeData.win++;
+        } else if (game.tie && game.winner === null) {
+          modeData.tie++;
+          opponentModeData.tie++;
         }
       });
-    
+
+      // Update state with the formatted data
       setPlayerGameData(playerData);
       setOpponentGameData(opponentData);
       setPlayerTotalWins(playerTotalWins);
       setOpponentTotalWins(opponentTotalWins);
   
     } catch (error) {
-      // Handle errors if fetching past games information fails
       console.error("Error fetching past games:", error);
-      // You can handle errors appropriately here
     }
   }
 
