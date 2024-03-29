@@ -184,7 +184,24 @@ const Head2Head = ({ PlayerId }) => {
       setOpponentTotalWins(opponentTotalWins);
   
     } catch (error) {
+      // Handle errors if fetching past games information fails
       console.error("Error fetching past games:", error);
+      if (error.response && error.response.status === 404) {
+        // Create game data structure with all fields being 0
+        const emptyData = {
+          Classic: [{ win: 0, lose: 0, tie: 0 }],
+          Blind: [{ win: 0, lose: 0, tie: 0 }],
+          PowerUp: [{ win: 0, lose: 0, tie: 0 }]
+        };
+        // Update state with empty data
+        setPlayerGameData(emptyData);
+        setOpponentGameData(emptyData);
+        setPlayerTotalWins(0);
+        setOpponentTotalWins(0);
+      } else {
+        // Return null or handle the error appropriately
+        return null;
+      }
     }
   }
 
