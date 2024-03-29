@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MenuItem, Button, ButtonGroup, MenuList, Paper, Popper, Grow, ClickAwayListener } from '@mui/material';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts'; // Import from 'recharts' instead of '@mui/x-charts'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import styled from "styled-components";
+import { getPastGamesInformation } from '../api/pastGames';
 
 const PageContainer = styled.div`
   display: flex;
@@ -12,22 +13,120 @@ const PageContainer = styled.div`
   gap: 5vh;
 `;
 
+
+
 // Sample game mode data. Hard-coded. Once they finish with the API for the actual data, I'll implement them.
-const gameModesData = {
+const sampleGameModesData = {
   Classic: [
-    { win: 10, lose: 5, tie: 3 }
+    { 
+      name: "Wins",
+      white: 6,
+      black: 3
+    },
+    { 
+      name: "Loses",
+      white: 4,
+      black: 2
+    },
+    { 
+      name: "Ties",
+      white: 2,
+      black: 2
+    },
   ],
   Blind: [
-    { win: 7, lose: 8, tie: 2 }
+    { 
+      name: "Wins",
+      white: 3,
+      black: 6
+    },
+    { 
+      name: "Loses",
+      white: 7,
+      black: 1
+    },
+    { 
+      name: "Ties",
+      white: 5,
+      black: 11
+    },
   ],
   PowerUp: [
-    { win: 15, lose: 3, tie: 1 }
+    { 
+      name: "Wins",
+      white: 9,
+      black: 4
+    },
+    { 
+      name: "Loses",
+      white: 3,
+      black: 3
+    },
+    { 
+      name: "Ties",
+      white: 2,
+      black: 1
+    },
   ]
 };
 
-const GameStatistics = () => {
+
+
+const formatPastGamesData = async ({ userId }) => {
+  try {
+    // Retrieve past games information
+    const gamesRetrieved = await getPastGamesInformation(userId);
+
+    // Initialize an empty object to hold the formatted data
+    const gameModesData = {};
+
+    // Loop through each past game
+    gamesRetrieved.forEach((game) => {
+      // Check if the game mode exists in the formatted data
+      if (!gameModesData.hasOwnProperty(game.mode)) {
+        // If not, initialize an empty array for that game mode
+        gameModesData[game.mode] = [];
+      }
+
+      // Push objects representing wins, losses, and ties for each game mode
+      gameModesData[game.mode].push(
+        {
+          name: "Wins",
+          white: game.winner === userId && game.white === userId ? 1 : 0,
+          black: game.winner === userId && game.black === userId ? 1 : 0
+        },
+        {
+          name: "Loses",
+          white: game.winner !== userId && game.white === userId ? 1 : 0,
+          black: game.winner !== userId && game.black === userId ? 1 : 0
+        },
+        {
+          name: "Ties",
+          white: game.tie && game.winner === null ? 1 : 0,
+          black: game.tie && game.winner === null ? 1 : 0
+        }
+      );
+    });
+
+    return gameModesData;
+  } catch (error) {
+    // Handle errors if fetching past games information fails
+    console.error("Error fetching past games:", error);
+    return null; // Return null or handle the error appropriately
+  }
+};
+
+const GameStatistics = ({userId}) => {
   const [open, setOpen] = useState(false);
   const [selectedGameMode, setSelectedGameMode] = useState('Classic');
+  const [gameModesData, setGameModesData] = useState("");
+
+  useEffect(() => {
+    // setGameModesData(formatPastGamesData(userId));
+    setGameModesData(sampleGameModesData);
+  }, [userId]);
+
+
 
   const handleClick = () => {
     console.info(`You clicked ${selectedGameMode}`);
@@ -76,15 +175,14 @@ const GameStatistics = () => {
         data={selectedGameData}
         margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
       >
-
-        <XAxis dataKey="gameMode" />
+        <XAxis dataKey="name" />
         <YAxis />
-        <Tooltip content={<CustomTooltip />}/>
+        <Tooltip content={<CustomTooltip />} />
         <Legend />
-        <Bar dataKey="win" fill="black" name="Win" />
-        <Bar dataKey="lose" fill="white" name="Lose" />
-        <Bar dataKey="tie" fill="gray" name="Tie" />
+        <Bar dataKey="white" fill="white" name="White" stackId="white" />
+        <Bar dataKey="black" fill="black" name="Black" stackId="black" />
       </BarChart>
+
       <div>
         <ButtonGroup variant="contained" ref={anchorRef} aria-label="Button group with a nested menu">
           <Button onClick={handleClick}>{selectedGameMode}</Button>

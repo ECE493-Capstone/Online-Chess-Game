@@ -23,7 +23,6 @@ const PageContainer = styled.div`
 const ProfileInfo = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: stretch;
   ${'' /* background-color: black; */}
   width: 50%;
   gap: 10px;
@@ -60,6 +59,7 @@ const UserInfo = ({statistics, setIsLoggedIn}) => {
   const [openChangePassword, setOpenChangePassword] = useState(false);
   const [openChangeUsername, setOpenChangeUsername] = useState(false);
   const [isFocused, setIsFocused] = useState(true);
+  const [userId, setUserId] = useState("");
   // const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const longUsernameTest = "longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong"
@@ -85,6 +85,7 @@ const UserInfo = ({statistics, setIsLoggedIn}) => {
   const checkLoginStatus = async () => {
     try {
       const storedUserId = cookie.get("userId");
+      setUserId(storedUserId);
   
       if (storedUserId) {
         console.log('Retrieved user ID from cookie: ' + storedUserId);
@@ -138,6 +139,7 @@ const UserInfo = ({statistics, setIsLoggedIn}) => {
           wins={statistics.wins}
           losses={statistics.losses}
           draws={statistics.draws}
+          userId={userId}
         />
       </div>
       <Modal

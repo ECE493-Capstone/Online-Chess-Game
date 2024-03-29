@@ -1,5 +1,4 @@
 const express = require("express");
-const User = require("../models/OngoingGames");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcryptjs");
 const OngoingGames = require("../models/OngoingGames");
