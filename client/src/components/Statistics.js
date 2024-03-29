@@ -40,7 +40,7 @@ const formatPastGamesData = async (userId, setGameModesData) => {
 
     gamesRetrieved.forEach((game) => {
       const isWinner = game.winner === userId;
-      const isLoser = game.winner !== userId;
+      const isLoser = game.winner && game.winner !== userId;
       const isTie = game.tie && game.winner === null;
       const isWhite = game.white === userId;
     
