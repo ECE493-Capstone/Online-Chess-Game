@@ -27,7 +27,7 @@ const Head2Head = ({ PlayerId }) => {
         };
         
         getOtherPlayer();
-    }, [PlayerId]);
+    }, []);
 
     useEffect(() => {
         const getPlayerName = async (PlayerId) => {
@@ -58,7 +58,7 @@ const Head2Head = ({ PlayerId }) => {
             };
 
         getPlayerName(PlayerId);
-    }, [PlayerId]);
+    }, []);
 
     useEffect(() => {
         const getOpponentName = async (opponentId) => {
@@ -164,7 +164,7 @@ const Head2Head = ({ PlayerId }) => {
 
   setColor(getColorArray());
 
-}, [PlayerGameData, OpponentGameData]);
+}, []);
 
 const longUsernameTest = "longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong"
   

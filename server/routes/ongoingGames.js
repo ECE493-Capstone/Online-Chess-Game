@@ -8,12 +8,12 @@ const jsonParser = bodyParser.json();
 
 router.get("/byPlayer", jsonParser, async (req, res) => {
   const { player } = req.query;
-  console.log(req.query);
+  // console.log(req.query);
   const player1Game = await OngoingGames.findOne({ player1: player });
   const player2Game = await OngoingGames.findOne({ player2: player });
   if (player1Game || player2Game) {
     const game = player1Game || player2Game;
-    console.log("found player. Sending game.");
+    // console.log("found player. Sending game.");
     res.status(200);
     res.send(game);
   } else {

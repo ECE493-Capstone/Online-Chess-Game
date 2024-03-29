@@ -8,10 +8,11 @@ const jsonParser = bodyParser.json();
 router.get("/byPlayer", jsonParser, async (req, res) => {
   const { player } = req.query;
   console.log(req.query);
+//   player = "66048fbaa9cde3a65f01e1d6";
   try {
     const games = await OngoingGames.find({ $or: [{ black: player }, { white: player }] });
     if (games.length > 0) {
-      console.log("Found games for the player. Sending games.");
+      console.log("Found games for the player. Sending games: " + games);
       res.status(200);
       res.send(games);
     } else {

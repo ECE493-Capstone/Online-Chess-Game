@@ -13,9 +13,7 @@ const PageContainer = styled.div`
   gap: 5vh;
 `;
 
-
-
-// Sample game mode data. Hard-coded. Once they finish with the API for the actual data, I'll implement them.
+// Sample game mode data. Hard-coded.
 const sampleGameModesData = {
   Classic: [
     { 
@@ -71,44 +69,92 @@ const sampleGameModesData = {
 };
 
 
-
-const formatPastGamesData = async ({ userId }) => {
+// TODO: Huge nested if-else statements. Might want to switch to cases just to make it not this big.
+const formatPastGamesData = async (userId, setGameModesData) => {
   try {
-    // Retrieve past games information
+
     const gamesRetrieved = await getPastGamesInformation(userId);
 
-    // Initialize an empty object to hold the formatted data
-    const gameModesData = {};
+    const formattedData = {
+      Classic: [{ name: "Wins", white: 0, black: 0 }, { name: "Loses", white: 0, black: 0 }, { name: "Ties", white: 0, black: 0 }],
+      Blind: [{ name: "Wins", white: 0, black: 0 }, { name: "Loses", white: 0, black: 0 }, { name: "Ties", white: 0, black: 0 }],
+      PowerUp: [{ name: "Wins", white: 0, black: 0 }, { name: "Loses", white: 0, black: 0 }, { name: "Ties", white: 0, black: 0 }]
+    };
 
-    // Loop through each past game
+
     gamesRetrieved.forEach((game) => {
-      // Check if the game mode exists in the formatted data
-      if (!gameModesData.hasOwnProperty(game.mode)) {
-        // If not, initialize an empty array for that game mode
-        gameModesData[game.mode] = [];
-      }
+      const isWinner = game.winner === userId;
+      const isLoser = game.winner && game.winner !== userId;
+      const isTie = game.tie && game.winner === null;
+      const isWhite = game.white === userId;
 
-      // Push objects representing wins, losses, and ties for each game mode
-      gameModesData[game.mode].push(
-        {
-          name: "Wins",
-          white: game.winner === userId && game.white === userId ? 1 : 0,
-          black: game.winner === userId && game.black === userId ? 1 : 0
-        },
-        {
-          name: "Loses",
-          white: game.winner !== userId && game.white === userId ? 1 : 0,
-          black: game.winner !== userId && game.black === userId ? 1 : 0
-        },
-        {
-          name: "Ties",
-          white: game.tie && game.winner === null ? 1 : 0,
-          black: game.tie && game.winner === null ? 1 : 0
+      if (game.mode === "Classic") {
+        if (isWinner) {
+          if (isWhite) {
+            formattedData.Classic.find(item => item.name === "Wins").white++;
+          } else {
+            formattedData.Classic.find(item => item.name === "Wins").black++;
+          }
+        } else if (isLoser) {
+          if (isWhite) {
+            formattedData.Classic.find(item => item.name === "Loses").white++;
+          } else {
+            formattedData.Classic.find(item => item.name === "Loses").black++;
+          }
+        } else if (isTie) {
+          if (isWhite) {
+            formattedData.Classic.find(item => item.name === "Ties").white++;
+          } else {
+            formattedData.Classic.find(item => item.name === "Ties").black++;
+          }
         }
-      );
+      } else if (game.mode === "Blind") {
+        if (isWinner) {
+          if (isWhite) {
+            formattedData.Blind.find(item => item.name === "Wins").white++;
+          } else {
+            formattedData.Blind.find(item => item.name === "Wins").black++;
+          }
+        } else if (isLoser) {
+          if (isWhite) {
+            formattedData.Blind.find(item => item.name === "Loses").white++;
+          } else {
+            formattedData.Blind.find(item => item.name === "Loses").black++;
+          }
+        } else if (isTie) {
+          if (isWhite) {
+            formattedData.Blind.find(item => item.name === "Ties").white++;
+          } else {
+            formattedData.Blind.find(item => item.name === "Ties").black++;
+          }
+        }
+      } else if (game.mode === "PowerUp") {
+        if (isWinner) {
+          if (isWhite) {
+            formattedData.PowerUp.find(item => item.name === "Wins").white++;
+          } else {
+            formattedData.PowerUp.find(item => item.name === "Wins").black++;
+          }
+        } else if (isLoser) {
+          if (isWhite) {
+            formattedData.PowerUp.find(item => item.name === "Loses").white++;
+          } else {
+            formattedData.PowerUp.find(item => item.name === "Loses").black++;
+          }
+        } else if (isTie) {
+          if (isWhite) {
+            formattedData.PowerUp.find(item => item.name === "Ties").white++;
+          } else {
+            formattedData.PowerUp.find(item => item.name === "Ties").black++;
+          }
+        }
+      }
+      
     });
 
-    return gameModesData;
+    // Update state with the formatted data
+    setGameModesData(formattedData);
+
   } catch (error) {
     // Handle errors if fetching past games information fails
     console.error("Error fetching past games:", error);
@@ -116,14 +162,18 @@ const formatPastGamesData = async ({ userId }) => {
   }
 };
 
+
 const GameStatistics = ({userId}) => {
   const [open, setOpen] = useState(false);
   const [selectedGameMode, setSelectedGameMode] = useState('Classic');
   const [gameModesData, setGameModesData] = useState("");
 
   useEffect(() => {
-    // setGameModesData(formatPastGamesData(userId));
-    setGameModesData(sampleGameModesData);
+    if (userId !== "") {
+      console.log("Game statistics detect user id: " + userId);
+      formatPastGamesData(userId, setGameModesData);
+      // setGameModesData(sampleGameModesData);
+    }
   }, [userId]);
 
 
