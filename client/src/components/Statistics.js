@@ -158,7 +158,67 @@ const formatPastGamesData = async (userId, setGameModesData) => {
   } catch (error) {
     // Handle errors if fetching past games information fails
     console.error("Error fetching past games:", error);
-    return null; // Return null or handle the error appropriately
+    if (error.response && error.response.status === 404) {
+      // Create game data structure with all fields being 0
+      const emptyData = {
+        Classic: [
+          { 
+            name: "Wins",
+            white: 0,
+            black: 0
+          },
+          { 
+            name: "Loses",
+            white: 0,
+            black: 0
+          },
+          { 
+            name: "Ties",
+            white: 0,
+            black: 0
+          },
+        ],
+        Blind: [
+          { 
+            name: "Wins",
+            white: 0,
+            black: 0
+          },
+          { 
+            name: "Loses",
+            white: 0,
+            black: 0
+          },
+          { 
+            name: "Ties",
+            white: 0,
+            black: 0
+          },
+        ],
+        PowerUp: [
+          { 
+            name: "Wins",
+            white: 0,
+            black: 0
+          },
+          { 
+            name: "Loses",
+            white: 0,
+            black: 0
+          },
+          { 
+            name: "Ties",
+            white: 0,
+            black: 0
+          },
+        ]
+      };
+      // Update state with empty data
+      setGameModesData(emptyData);
+    } else {
+      // Return null or handle the error appropriately
+      return null;
+    }
   }
 };
 

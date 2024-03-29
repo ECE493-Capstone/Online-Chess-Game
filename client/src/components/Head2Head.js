@@ -3,13 +3,17 @@ import { getOngoingGameInformation } from '../api/ongoingGames';
 import { fetchUser } from "../api/fetchUser";
 import { AppBar, Toolbar, Typography, Divider } from '@mui/material';
 import styled from "styled-components";
-
+import { getPastGamesInformationWithOpponent } from '../api/pastGames';
 const Head2Head = ({ PlayerId }) => {
 
     const [opponentId, setOpponentId] = useState("");
     const [playerUsername, setPlayerUsername] = useState("");
     const [opponentUsername, setOpponentUsername] = useState("");
     const [color, setColor] = useState("");
+    const[playerGameData, setPlayerGameData] = useState("");
+    const[opponentGameData, setOpponentGameData] = useState("");
+    const[playerTotalWins, setPlayerTotalWins] = useState("");
+    const[opponentTotalWins, setOpponentTotalWins] = useState("");
 
     useEffect(() => {
         const getOtherPlayer = async () => {
@@ -96,7 +100,7 @@ const Head2Head = ({ PlayerId }) => {
 
   // TODO: When they finish with the schema for getting the game results between the players, I will implement it. For now, it is hard-coded.
 
-  const PlayerGameData = {
+  const samplePlayerGameData = {
     Classic: [
       { win: 1, lose: 5, tie: 3 }
     ],
@@ -108,7 +112,7 @@ const Head2Head = ({ PlayerId }) => {
     ]
   };
 
-  const OpponentGameData = {
+  const sampleOpponentGameData = {
     Classic: [
       { win: 1, lose: 5, tie: 3 }
     ],
@@ -120,15 +124,84 @@ const Head2Head = ({ PlayerId }) => {
     ]
   };
 
-  const playerTotalWins = Object.values(PlayerGameData).reduce((acc, gameModeData) => {
-    return acc + gameModeData[0].win;
-  }, 0);
+  const formatPastGamesResults = async (userId, opponentId, setPlayerGameData, setOpponentGameData, setPlayerTotalWins, setOpponentTotalWins) => {
 
-  const opponentTotalWins = Object.values(OpponentGameData).reduce((acc, gameModeData) => {
-    return acc + gameModeData[0].win;
-  }, 0);
+    try {
+      // Retrieve past games information
+      const gamesData = await getPastGamesInformationWithOpponent(userId, opponentId);
+    
+      // Process games data to separate player and opponent games
+      const playerData = {
+        Classic: [{ win: 0, lose: 0, tie: 0 }],
+        Blind: [{ win: 0, lose: 0, tie: 0 }],
+        PowerUp: [{ win: 0, lose: 0, tie: 0 }]
+      };
+    
+      const opponentData = {
+        Classic: [{ win: 0, lose: 0, tie: 0 }],
+        Blind: [{ win: 0, lose: 0, tie: 0 }],
+        PowerUp: [{ win: 0, lose: 0, tie: 0 }]
+      };
+    
+      let playerTotalWins = 0;
+      let opponentTotalWins = 0;
+    
+      // Loop through each game
+      gamesData.forEach((game) => {
+        if (game.mode === "Classic") {
+          if (game.winner === userId) {
+            playerTotalWins++;
+            playerData.Classic[0].win++;
+            opponentData.Classic[0].lose++;
+          } else if (game.winner === opponentId) {
+            opponentTotalWins++;
+            playerData.Classic[0].lose++;
+            opponentData.Classic[0].win++;
+          } else if (game.tie && game.winner === null) {
+            playerData.Classic[0].tie++;
+            opponentData.Classic[0].tie++;
+          }
+        } else if (game.mode === "Blind") {
+          if (game.winner === userId) {
+            playerTotalWins++;
+            playerData.Blind[0].win++;
+            opponentData.Blind[0].lose++;
+          } else if (game.winner === opponentId) {
+            opponentTotalWins++;
+            playerData.Blind[0].lose++;
+            opponentData.Blind[0].win++;
+          } else if (game.tie && game.winner === null) {
+            playerData.Blind[0].tie++;
+            opponentData.Blind[0].tie++;
+          }
+        } else if (game.mode === "PowerUp") {
+          if (game.winner === userId) {
+            playerTotalWins++;
+            playerData.PowerUp[0].win++;
+            opponentData.PowerUp[0].lose++;
+          } else if (game.winner === opponentId) {
+            opponentTotalWins++;
+            playerData.PowerUp[0].lose++;
+            opponentData.PowerUp[0].win++;
+          } else if (game.tie && game.winner === null) {
+            playerData.PowerUp[0].tie++;
+            opponentData.PowerUp[0].tie++;
+          }
+        }
+      });
+    
+      setPlayerGameData(playerData);
+      setOpponentGameData(opponentData);
+      setPlayerTotalWins(playerTotalWins);
+      setOpponentTotalWins(opponentTotalWins);
   
-  useEffect(() => {
+    } catch (error) {
+      // Handle errors if fetching past games information fails
+      console.error("Error fetching past games:", error);
+      // You can handle errors appropriately here
+    }
+  }
+
   const getColorArray = () => {
 
     const getColor = (playerValue, opponentValue) => {
@@ -144,16 +217,16 @@ const Head2Head = ({ PlayerId }) => {
     const colors = [];
   
     // Classic
-    colors.push(getColor(PlayerGameData.Classic[0].win, OpponentGameData.Classic[0].win));
-    colors.push(getColor(OpponentGameData.Classic[0].win, PlayerGameData.Classic[0].win));
+    colors.push(getColor(playerGameData.Classic[0].win, opponentGameData.Classic[0].win));
+    colors.push(getColor(opponentGameData.Classic[0].win, playerGameData.Classic[0].win));
   
     // Blind
-    colors.push(getColor(PlayerGameData.Blind[0].win, OpponentGameData.Blind[0].win));
-    colors.push(getColor(OpponentGameData.Blind[0].win, PlayerGameData.Blind[0].win));
+    colors.push(getColor(playerGameData.Blind[0].win, opponentGameData.Blind[0].win));
+    colors.push(getColor(opponentGameData.Blind[0].win, playerGameData.Blind[0].win));
   
     // PowerUp
-    colors.push(getColor(PlayerGameData.PowerUp[0].win, OpponentGameData.PowerUp[0].win));
-    colors.push(getColor(OpponentGameData.PowerUp[0].win, PlayerGameData.PowerUp[0].win));
+    colors.push(getColor(playerGameData.PowerUp[0].win, opponentGameData.PowerUp[0].win));
+    colors.push(getColor(opponentGameData.PowerUp[0].win, playerGameData.PowerUp[0].win));
   
     // Total wins
     colors.push(getColor(playerTotalWins, opponentTotalWins));
@@ -162,71 +235,82 @@ const Head2Head = ({ PlayerId }) => {
     return colors;
   };
 
-  setColor(getColorArray());
+useEffect(() => {
+  if (PlayerId !== "" && opponentId !== "") {
+    formatPastGamesResults(PlayerId, opponentId, setPlayerGameData, setOpponentGameData, setPlayerTotalWins, setOpponentTotalWins);
+  }
+}, [opponentId]);
 
-}, []);
+useEffect(() => {
+  if (playerGameData !== "" && opponentGameData !== "") {
+    setColor(getColorArray());
+  }
+}, [playerGameData, opponentGameData]);
 
 const longUsernameTest = "longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong"
   
   return (
     <div>
-      <AppBar position="static">
-        <Toolbar style={{ justifyContent: 'flex-end'}}>
-          <Typography variant="h6" style={{ 
-            borderRight: '0.1em solid white', 
-            padding: '0.5em',   
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            maxWidth: "75%",
-          }}>
-            <strong>{playerUsername}</strong>&nbsp;
-          </Typography>
-          <Typography variant="h6">&nbsp;Wins:&nbsp;</Typography>
-          <Typography variant="h6" style={{ color: color[0] }}>
-            Classic: {PlayerGameData.Classic[0].win}&nbsp;
-          </Typography>
-          <Typography variant="h6" style={{ color: color[2] }}>
-            &nbsp;Blind: {PlayerGameData.Blind[0].win}&nbsp;
-          </Typography>
-          <Typography variant="h6" style={{ borderRight: '0.1em solid white', padding: '0.5em', color: color[4] }}>
-            PowerUp: {PlayerGameData.PowerUp[0].win}
-          </Typography>
-          <Typography variant="h6" style={{ color: color[6] }}>
-            &nbsp;{playerTotalWins}
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      <AppBar position="static">
-        <Toolbar style={{ justifyContent: 'flex-end' }}>
-          <Typography variant="h6" style={{ 
-            borderRight: '0.1em solid white', 
-            padding: '0.5em',   
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            maxWidth: "75%",
-          }}>
-            <strong>{opponentUsername}</strong>&nbsp;
-          </Typography>
-          <Typography variant="h6">&nbsp;Wins:&nbsp;</Typography>
-          <Typography variant="h6" style={{ color: color[1] }}>
-            Classic: {OpponentGameData.Classic[0].win}&nbsp;
-          </Typography>
-          <Typography variant="h6" style={{ color: color[3] }}>
-            &nbsp;Blind: {OpponentGameData.Blind[0].win}&nbsp;
-          </Typography>
-          <Typography variant="h6" style={{ borderRight: '0.1em solid white', padding: '0.5em', color: color[5] }}>
-            PowerUp: {OpponentGameData.PowerUp[0].win}
-          </Typography>
-          <Typography variant="h6" style={{ color: color[7] }}>
-            &nbsp;{opponentTotalWins}
-          </Typography>
-        </Toolbar>
-      </AppBar>
+      {playerGameData && opponentGameData && color && (
+        <>
+          <AppBar position="static">
+            <Toolbar style={{ justifyContent: 'flex-end'}}>
+              <Typography variant="h6" style={{ 
+                borderRight: '0.1em solid white', 
+                padding: '0.5em',   
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                maxWidth: "75%",
+              }}>
+                <strong>{playerUsername}</strong>&nbsp;
+              </Typography>
+              <Typography variant="h6">&nbsp;Wins:&nbsp;</Typography>
+              <Typography variant="h6" style={{ color: color[0] }}>
+                Classic: {playerGameData.Classic[0].win}&nbsp;
+              </Typography>
+              <Typography variant="h6" style={{ color: color[2] }}>
+                &nbsp;Blind: {playerGameData.Blind[0].win}&nbsp;
+              </Typography>
+              <Typography variant="h6" style={{ borderRight: '0.1em solid white', padding: '0.5em', color: color[4] }}>
+                PowerUp: {playerGameData.PowerUp[0].win}
+              </Typography>
+              <Typography variant="h6" style={{ color: color[6] }}>
+                &nbsp;{playerTotalWins}
+              </Typography>
+            </Toolbar>
+          </AppBar>
+          <AppBar position="static">
+            <Toolbar style={{ justifyContent: 'flex-end' }}>
+              <Typography variant="h6" style={{ 
+                borderRight: '0.1em solid white', 
+                padding: '0.5em',   
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                maxWidth: "75%",
+              }}>
+                <strong>{opponentUsername}</strong>&nbsp;
+              </Typography>
+              <Typography variant="h6">&nbsp;Wins:&nbsp;</Typography>
+              <Typography variant="h6" style={{ color: color[1] }}>
+                Classic: {opponentGameData.Classic[0].win}&nbsp;
+              </Typography>
+              <Typography variant="h6" style={{ color: color[3] }}>
+                &nbsp;Blind: {opponentGameData.Blind[0].win}&nbsp;
+              </Typography>
+              <Typography variant="h6" style={{ borderRight: '0.1em solid white', padding: '0.5em', color: color[5] }}>
+                PowerUp: {opponentGameData.PowerUp[0].win}
+              </Typography>
+              <Typography variant="h6" style={{ color: color[7] }}>
+                &nbsp;{opponentTotalWins}
+              </Typography>
+            </Toolbar>
+          </AppBar>
+        </>
+      )}
     </div>
   );
-  
 };
 
 export default Head2Head;
