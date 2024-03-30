@@ -16,6 +16,14 @@ const Container = styled.div`
   display: flex;
   max-width: 350px;
   max-height: 75vh;
+
+  .black {
+    color: gray;
+  }
+
+  .move {
+    color: orange
+  }
 `;
 
 function convertToSquare(row, col) {
@@ -58,16 +66,16 @@ const MoveHistory = ({ history }) => {
         <Table stickyHeader>
           <TableHead>
             <TableRow>
-              <TableCell >Move </TableCell>
+              <TableCell className="move">Move </TableCell>
               <TableCell colSpan={2}>White</TableCell>
-              <TableCell colSpan={2}>Black</TableCell>
+              <TableCell colSpan={2} className="black">Black</TableCell>
             </TableRow>
             <TableRow>
               <TableCell></TableCell>
               <TableCell>From</TableCell>
               <TableCell>To</TableCell>
-              <TableCell>From</TableCell>
-              <TableCell>To</TableCell>
+              <TableCell className="black">From</TableCell>
+              <TableCell className="black">To</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -77,7 +85,7 @@ const MoveHistory = ({ history }) => {
 
               return (
                 <TableRow hover key={turn.move}>
-                  <TableCell>{turn.move}</TableCell>
+                  <TableCell className="move">{turn.move}</TableCell>
                   <TableCell>
                     {convertToSquare(wMove.from[0], wMove.from[1])}
                   </TableCell>
@@ -87,10 +95,10 @@ const MoveHistory = ({ history }) => {
                         `=${wMove.promotion}`
                       : convertToSquare(wMove.to[0], wMove.to[1])}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="black">
                     {convertToSquare(bMove.from[0], bMove.from[0])}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="black">
                     {convertToSquare(bMove.to[1], bMove.to[1])}
                   </TableCell>
                 </TableRow>

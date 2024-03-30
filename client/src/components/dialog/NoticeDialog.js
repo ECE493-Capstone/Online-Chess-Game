@@ -6,7 +6,7 @@ const DialogContainer = styled.div`
   border: 1px solid white;
   background-color: black;
   border-radius: 10px;
-  max-width: 350px;
+  max-width: 400px;
   padding: 10px 0;
 
   .header {
@@ -14,31 +14,28 @@ const DialogContainer = styled.div`
     justify-content: space-between;
     align-items: center;
     padding: 0 20px;
-
-  }
-
-  .headerContent {
-    color: white;
-    margin: 5px 0;
+    .headerContent {
+      margin: 5px 0;
+    }
   }
 
   .body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 5px 20px;
-
+    padding: 20px;
   }
 `;
 
-
-
-const NoticeDialog = ({ content="Waiting for opponent to reconnect...", showSpinner=true }) => {
+const NoticeDialog = ({
+  content = "Waiting for opponent to reconnect...",
+  showSpinner = true,
+}) => {
   return (
     <DialogContainer>
       <div className="header">
         <h2 className="headerContent">Notice</h2>
-        {showSpinner && <CircularProgress size={30}/>}
+        {showSpinner && <CircularProgress size={30} />}
       </div>
       <hr />
       <div className="body">{content}</div>
