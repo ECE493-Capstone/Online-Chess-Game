@@ -6,14 +6,12 @@ import styled from "styled-components";
 
 const ButtonContainer = styled.div`
   .button {
-    margin: 10px 15px;
+    margin: 10px 12px;
   }
   .group {
-    align-content: center;
-    max-width: 300px;
+    /* display: flex; */
+    /* justify-content: center; */
   }
-
-  max-width: 300px;
 `;
 
 const RequestButtons = ({
@@ -24,7 +22,7 @@ const RequestButtons = ({
 }) => {
   return (
     <ButtonContainer>
-      <ButtonGroup className="group" disabled={isDisabled} color="inherit">
+      <ButtonGroup className="group" disabled={isDisabled} color="warning">
         <Button className="button" variant="contained" onClick={onUndoClicked}>
           Undo
         </Button>
