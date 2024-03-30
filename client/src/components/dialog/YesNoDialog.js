@@ -1,5 +1,6 @@
 import React, { useReducer, useState } from "react";
-import CircularProgress from "@mui/material/CircularProgress";
+import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
+import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import styled from "styled-components";
 import { Button } from "@mui/material";
 
@@ -50,8 +51,22 @@ const YesNoDialog = ({
       <div className="body">
         {content}
         <div className="buttons">
-          <Button onClick={onYesClicked} variant="outlined" color="success">{yesButtonText}</Button>
-          <Button onClick={onNoClicked} variant="outlined" color="error">{noButtonText}</Button>
+          <Button
+            onClick={onYesClicked}
+            variant="outlined"
+            color="success"
+            startIcon={<CheckOutlinedIcon />}
+          >
+            {yesButtonText}
+          </Button>
+          <Button
+            onClick={onNoClicked}
+            variant="outlined"
+            color="error"
+            startIcon={<CloseOutlinedIcon />}
+          >
+            {noButtonText}
+          </Button>
         </div>
       </div>
     </DialogContainer>

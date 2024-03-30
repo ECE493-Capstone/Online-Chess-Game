@@ -2,6 +2,9 @@ import { ButtonGroup, Table } from "@mui/material";
 import React, { useReducer, useState } from "react";
 import Button from "@mui/material/Button";
 import { WHITE, BLACK } from "../../models/Chessboard.js";
+import UndoOutlinedIcon from "@mui/icons-material/UndoOutlined";
+import HandshakeOutlinedIcon from "@mui/icons-material/HandshakeOutlined";
+import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined';
 import styled from "styled-components";
 
 const ButtonContainer = styled.div`
@@ -23,11 +26,21 @@ const RequestButtons = ({
   return (
     <ButtonContainer>
       <ButtonGroup className="group" disabled={isDisabled} color="warning">
-        <Button className="button" variant="contained" onClick={onUndoClicked}>
+        <Button
+          className="button"
+          variant="contained"
+          onClick={onUndoClicked}
+          startIcon={<UndoOutlinedIcon />}
+        >
           Undo
         </Button>
 
-        <Button className="button" variant="contained" onClick={onDrawClicked}>
+        <Button
+          className="button"
+          variant="contained"
+          onClick={onDrawClicked}
+          startIcon={<HandshakeOutlinedIcon />}
+        >
           Draw
         </Button>
 
@@ -35,6 +48,7 @@ const RequestButtons = ({
           className="button"
           variant="contained"
           onClick={onResignClicked}
+          startIcon={<FlagOutlinedIcon />}
         >
           Resign
         </Button>

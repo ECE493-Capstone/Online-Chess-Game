@@ -1,5 +1,6 @@
 import React, { useReducer, useState } from "react";
 import CircularProgress from "@mui/material/CircularProgress";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import styled from "styled-components";
 
 const DialogContainer = styled.div`
@@ -16,6 +17,9 @@ const DialogContainer = styled.div`
     padding: 0 20px;
     .headerContent {
       margin: 5px 0;
+    }
+    div {
+      display: flex;
     }
   }
 
@@ -34,7 +38,10 @@ const NoticeDialog = ({
   return (
     <DialogContainer>
       <div className="header">
-        <h2 className="headerContent">Notice</h2>
+        <div>
+          <h2 className="headerContent">Notice</h2>
+          <InfoOutlinedIcon />
+        </div>
         {showSpinner && <CircularProgress size={30} />}
       </div>
       <hr />
