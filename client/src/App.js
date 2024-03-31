@@ -11,8 +11,8 @@ import PrivateRoute from "./components/PrivateRoute";
 import GameSelect from "./components/GameSelection";
 import TimeSelect from "./components/TimeSelect";
 import { socket } from "./app/socket";
-import PlayType from "./components/PlayType";
 import Profile from "./components/pages/Profile";
+import { Toaster } from "react-hot-toast";
 
 const darkTheme = createTheme({
   palette: {
@@ -28,13 +28,15 @@ const App = () => {
   });
   return (
     <ThemeProvider theme={darkTheme}>
+      <div>
+        <Toaster />
+      </div>
       <CssBaseline />
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/gameselect" element={<GameSelect />} />
           <Route path="/timeselect" element={<TimeSelect />} />
-          <Route path="/play-game" element={<PlayType />} />
           <Route path="/test" element={<Test />} />
           <Route path="/test-join" element={<TestJoin />} />
           <Route
