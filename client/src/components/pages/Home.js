@@ -177,69 +177,6 @@ const Home = () => {
 
   return (
     <Header>
-<<<<<<< HEAD
-      <PageContainer>
-        <ButtonContainer>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <LeftButton
-              variant="contained"
-              onClick={handleQuickPlayClick}
-              style={{
-                backgroundColor: "black",
-                border: "2px solid white",
-                borderRadius: "8px",
-              }}
-            >
-              <ButtonContent>
-                <Title>Quick Play</Title>
-                <Subtitle>Standard, blind, or power up chess</Subtitle>
-              </ButtonContent>
-            </LeftButton>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "5px",
-                padding: "4px",
-              }}
-            >
-              <RightButton
-                variant="contained"
-                onClick={handleCreateGameClick}
-                style={{
-                  backgroundColor: "black",
-                  border: "2px solid white",
-                  borderRadius: "8px",
-                }}
-              >
-                <Title>Create Game</Title>
-              </RightButton>
-              <RightButton
-                variant="contained"
-                onClick={handleJoinGame}
-                style={{
-                  backgroundColor: "black",
-                  border: "2px solid white",
-                  borderRadius: "8px",
-                }}
-              >
-                <Title>Join Game</Title>
-              </RightButton>
-              
-              {/* Uncomment this to test the head2head */}
-              <Button
-                variant="contained"
-                onClick={handleTestClick}
-                style={{
-                  backgroundColor: "black",
-                  border: "2px solid white",
-                  borderRadius: "8px",
-                }}
-              >
-                <Title>Test Head2Head</Title>
-              </Button>
-            </div>
-=======
       <PageContainer direction={String(-direction * 100) + "vw"}>
         <div className="selection-container">
           <div className="select-container game-create">
@@ -254,7 +191,6 @@ const Home = () => {
               handleCloseModal={handleCloseModal}
               submitClicked={submitClicked}
             />
->>>>>>> f992b5dca06342f895ae0daf9afa371159219f36
           </div>
           <div className="select-container game-select">
             <div className="back-icon">
