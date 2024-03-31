@@ -61,19 +61,24 @@ const Registration = ({ onClose }) => {
   const handleSubmit = (e) => {
     setIsSubmitting(true);
     dispatch({ type: "SET_ERROR", payload: "" });
-
+  
     e.preventDefault();
+  
+    if (!email.trim()) {
+      dispatch({ type: "SET_ERROR", payload: "Email is required." });
+      setIsSubmitting(false);
+      return;
+    }
+  
     // make a post call to the server to register the user and check response to see if the user was registered
     registerUser(username, email, password)
       .then((res) => {
         setIsSubmitting(false);
+        console.log("bruh");
         if (res.status === 200) {
           console.log("User registered successfully");
-          // route to the login page then return empty promise
-
           // route to the previous page the user was on
           onClose();
-          // navigate(-1);
           return Promise.resolve(undefined);
         }
         return res.json();
@@ -82,7 +87,9 @@ const Registration = ({ onClose }) => {
         if (data === undefined) return;
         dispatch({ type: "SET_ERROR", payload: data.message });
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        dispatch({ type: "SET_ERROR", payload: err.response.data.message });
+      });
   };
 
   return (

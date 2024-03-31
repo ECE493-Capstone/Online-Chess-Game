@@ -29,12 +29,12 @@ router.post("/", jsonParser, async (req, res) => {
   if (userByEmail) {
     res.status(409);
     res.send({
-      message: "An account exists with that email. Please Sign in.",
+      message: "An account exists with that email.",
     });
   } else if (userByUsername) {
     res.status(409);
     res.send({
-      message: "An account exists with that username. Please Sign in.",
+      message: "An account exists with that username.",
     });
   } else {
     const hashedPassword = await hashPassword(password);

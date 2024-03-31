@@ -87,7 +87,7 @@ const ChangePassword = ({ onClose, setIsFocused }) => {
 
     try {
       const userEmail = await fetchEmail(); // Wait for fetchEmail to complete
-
+    
       if (userEmail) {
         const res = await fetch(`${SERVER_URL}/changepassword`, {
           method: "POST",
@@ -100,7 +100,7 @@ const ChangePassword = ({ onClose, setIsFocused }) => {
             newPassword: newPassword,
           }),
         });
-
+    
         if (res.status === 200) {
           console.log("Password changed successfully!");
           setIsFocused(true);
@@ -109,18 +109,24 @@ const ChangePassword = ({ onClose, setIsFocused }) => {
           // navigate(-1);
           return Promise.resolve(undefined);
         }
-
+    
         const data = await res.json();
-        dispatch({ type: "SET_ERROR", payload: data.message });
+        if (res.status === 400 && data.error === "Incorrect old password.") {
+          dispatch({ type: "SET_ERROR", payload: data.error });
+        } else {
+          dispatch({ type: "SET_ERROR", payload: data.message });
+        }
       } else {
         console.log('Error. Email not found in cookie');
         dispatch({ type: "SET_ERROR", payload: "Error finding user's email in cookie. Are you logged in?" });
       }
     } catch (err) {
-      console.log(err);
+      console.log("Error encountered.");
+      dispatch({ type: "SET_ERROR", payload: err.response.data.message });
     } finally {
       setIsSubmitting(false);
     }
+    
   };
 
   return (
