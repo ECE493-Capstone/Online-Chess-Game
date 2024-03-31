@@ -11,10 +11,14 @@ const { handleDisconnection } = require("./events/gameUtils");
 const listen = (io, socket) => {
   // Logic for handling a new game join
   socket.on("join quick play", async (gameInfo) => {
-    const { userId, mode, side, type, timeControl } = gameInfo;
-    const game = await findGameInQueue(mode, timeControl, side, type);
+    const { mode, type, timeControl } = gameInfo;
+    const game = await findGameInQueue(mode, timeControl, type);
     if (game) {
-      handleGameJoin(io, socket, game, gameInfo);
+      const newGameInfo = {
+        ...gameInfo,
+        side: game.side === "w" ? "b" : "w",
+      };
+      handleGameJoin(io, socket, game, newGameInfo);
     } else {
       handleCreateGame(socket, gameInfo);
     }

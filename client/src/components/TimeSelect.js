@@ -1,17 +1,16 @@
 import { Button } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 import Cookies from "universal-cookie";
 import { useNavigate } from "react-router-dom";
-import { setGameInfo } from "../features/userSlice";
-import { socket } from "../app/socket";
 import { TimeControlCategories } from "../app/constant";
 
 const StyledTimeControlDiv = styled.div`
   display: flex;
   align-items: center;
   flex-direction: column;
+  margin-bottom: 20px;
   .tc-row {
     display: flex;
     .tc-box {
@@ -25,7 +24,6 @@ const StyledTimeControlDiv = styled.div`
       min-width: 150px;
       min-height: 125px;
       margin: 5px;
-      background-color: #404040;
       h1 {
         margin: 0px;
       }
@@ -33,17 +31,18 @@ const StyledTimeControlDiv = styled.div`
   }
   .selected {
     background-color: #00abe3 !important;
+    opacity: 1 !important;
   }
 `;
 
-const TimeSelect = ({ handleTcSelect, tcId }) => {
-  const cookies = new Cookies();
-  const userId = cookies.get("userId");
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+const TimeSelect = ({ handleTimeControlClick }) => {
+  const [tcId, setTcId] = useState(0);
   const handleButtonClick = (e) => {
     const tcId = parseInt(e.currentTarget.value) - 1;
-    handleTcSelect(tcId);
+    handleTimeControlClick(
+      TimeControlCategories[Math.floor(tcId / 3)][tcId % 3].tc
+    );
+    setTcId(tcId);
   };
   return (
     <StyledTimeControlDiv>
@@ -55,6 +54,8 @@ const TimeSelect = ({ handleTcSelect, tcId }) => {
               value={tcCat.id}
               onClick={handleButtonClick}
               key={tcCat.id}
+              variant="filled"
+              style={{ backgroundColor: "black" }}
             >
               <h1>{tcCat.tc}</h1>
               <span>{tcCat.name}</span>
