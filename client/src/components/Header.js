@@ -3,8 +3,8 @@ import { Button, Modal, Box, Menu, MenuItem } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Login from "./Login";
 import Registration from "./Registration";
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import styled from 'styled-components';
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import styled from "styled-components";
 import Cookies from "universal-cookie";
 import { fetchUser } from "../api/fetchUser";
 
@@ -14,13 +14,20 @@ const StyledHeader = styled.div`
   left: 0;
   right: 0;
   z-index: 1000;
-  background-color: #f0f0f0;
   padding: 10px;
   display: flex;
   justify-content: flex-end;
+  background-image: linear-gradient(
+    to right bottom,
+    rgba(0, 0, 0, 0.5),
+    rgba(0, 0, 0, 0.4),
+    rgba(0, 0, 0, 0.3),
+    rgba(0, 0, 0, 0.2),
+    rgba(0, 0, 0, 0)
+  );
 `;
 
-const HeaderElements = ({setOthersIsLoggedIn}) => {
+const HeaderElements = ({ setOthersIsLoggedIn }) => {
   const navigate = useNavigate();
   const [openlogin, setOpenLogin] = useState(false);
   const [openregister, setOpenRegister] = useState(false);
@@ -35,20 +42,27 @@ const HeaderElements = ({setOthersIsLoggedIn}) => {
   const checkLoginStatus = async () => {
     try {
       const storedUserId = cookie.get("userId");
-  
+
       if (storedUserId) {
-        console.log('Retrieved user ID from cookie: ' + storedUserId);
+        console.log("Retrieved user ID from cookie: " + storedUserId);
         setIsLoggedIn(true);
         setOthersIsLoggedIn(true);
-        
+
         const response = await fetchUser(storedUserId);
         const userData = response.data;
-  
+
         if (response.status === 200) {
           const { username, email } = userData;
           setUsername(username);
           setEmail(email);
-          console.log("HEADER DETECTS LOGIN: userID: " + JSON.stringify(storedUserId) + " username: " + JSON.stringify(username) + " email: " + JSON.stringify(email));
+          console.log(
+            "HEADER DETECTS LOGIN: userID: " +
+              JSON.stringify(storedUserId) +
+              " username: " +
+              JSON.stringify(username) +
+              " email: " +
+              JSON.stringify(email)
+          );
         } else {
           console.log("Failed to fetch user data");
         }
@@ -63,14 +77,13 @@ const HeaderElements = ({setOthersIsLoggedIn}) => {
       console.log(error);
     }
   };
-  
+
   useEffect(() => {
     if (isFocused) {
       checkLoginStatus();
       setIsFocused(false);
     }
   }, [isFocused]);
-  
 
   const handleSignInClick = () => {
     setOpenLogin(true);
@@ -98,7 +111,7 @@ const HeaderElements = ({setOthersIsLoggedIn}) => {
 
   const handleProfileClick = () => {
     setAnchorEl(null);
-    navigate('/profile');
+    navigate("/profile");
   };
 
   const handleLogoutClick = () => {
@@ -113,14 +126,21 @@ const HeaderElements = ({setOthersIsLoggedIn}) => {
 
   return (
     <>
-      <div style={{ backgroundColor: "#f0f0f0", padding: "10px", display: "flex", justifyContent: "flex-end" }}>
+      <div
+        style={{
+          // backgroundColor: "#f0f0f0",
+          padding: "10px",
+          display: "flex",
+          justifyContent: "flex-end",
+        }}
+      >
         {isLoggedIn ? (
           <>
             <Button
               style={{ marginRight: "5px", textTransform: "none" }}
               onClick={handleUserIconClick}
             >
-              <AccountCircleIcon fontSize="medium" style={{ color: 'black'}}/>
+              <AccountCircleIcon fontSize="medium" style={{ color: "black" }} />
             </Button>
             <Menu
               anchorEl={anchorEl}
@@ -135,14 +155,26 @@ const HeaderElements = ({setOthersIsLoggedIn}) => {
           <>
             <Button
               variant="contained"
-              style={{ backgroundColor: "transparent", marginRight: "5px", textTransform: "none" }}
+              style={{
+                color: "white",
+                fontSize: "18px",
+                backgroundColor: "transparent",
+                marginRight: "5px",
+                textTransform: "none",
+              }}
               onClick={handleSignInClick}
             >
               Sign in
             </Button>
             <Button
               variant="contained"
-              style={{ backgroundColor: "red", marginRight: "5px", textTransform: "none" }}
+              style={{
+                color: "white",
+                backgroundColor: "red",
+                marginRight: "5px",
+                fontSize: "18px",
+                textTransform: "none",
+              }}
               onClick={handleRegisterClick}
             >
               Sign up
@@ -170,7 +202,7 @@ const HeaderElements = ({setOthersIsLoggedIn}) => {
             backgroundColor: "transparent",
           }}
         >
-          <Login onClose={handleCloseLogin} setIsFocused={setIsFocused}/>
+          <Login onClose={handleCloseLogin} setIsFocused={setIsFocused} />
         </Box>
       </Modal>
       <Modal
@@ -193,7 +225,7 @@ const HeaderElements = ({setOthersIsLoggedIn}) => {
             backgroundColor: "transparent",
           }}
         >
-          <Registration onClose={handleCloseRegister}/>
+          <Registration onClose={handleCloseRegister} />
         </Box>
       </Modal>
     </>
@@ -203,9 +235,9 @@ const HeaderElements = ({setOthersIsLoggedIn}) => {
 const Header = ({ children, setOthersIsLoggedIn }) => {
   return (
     <div>
-        <StyledHeader>
-          <HeaderElements setOthersIsLoggedIn = {setOthersIsLoggedIn}/>
-        </StyledHeader>
+      <StyledHeader>
+        <HeaderElements setOthersIsLoggedIn={setOthersIsLoggedIn} />
+      </StyledHeader>
       <div>{children}</div>
     </div>
   );
