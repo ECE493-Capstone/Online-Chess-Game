@@ -5,10 +5,9 @@ const { handleUserDisconnect } = require("../user/userSocketHandler");
 const { createRoom } = require("../rooms/roomUtils");
 const { emitToRoom } = require("../emittors");
 
-const findGameInQueue = async (mode, tc, side, type) => {
-  console.log("MODE", mode, "TC", tc, "SIDE", side, "TYPE", type);
+const findGameInQueue = async (mode, tc, type) => {
   const game = await Queue.findOne(
-    { mode: mode, type: type, timeControl: tc, side: { $ne: side } },
+    { mode: mode, type: type, timeControl: tc },
     null,
     {
       sort: { joinTime: 1 },
@@ -47,6 +46,7 @@ const handleGameJoin = (io, socket, existingGame, newGame) => {
   // add to active game
   // join a room
   socket.join(existingGame.room);
+  console.log(existingGame.side, newGame.side);
   addToOngoingGames({
     player1: existingGame.side === "w" ? existingGame.userId : userId,
     player2: existingGame.side === "b" ? existingGame.userId : userId,

@@ -38,6 +38,7 @@ const Match = () => {
       await getOngoingGameInformation(userId).then((data) => {
         orientation = data.player1 === userId ? WHITE : BLACK;
         const chessboard = new Chessboard(orientation);
+        console.log(orientation);
         dispatch(setGame(chessboard));
       });
     };
