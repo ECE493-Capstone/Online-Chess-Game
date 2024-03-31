@@ -4,13 +4,14 @@ import ChangePassword  from '../ChangePassword';
 import ChangeUsername  from '../ChangeUsername';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
-import { Button } from "@mui/material";
+import { Button, Popover, Typography } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import Cookies from "universal-cookie";
 import { fetchUser } from "../../api/fetchUser";
 import GameStatistics from "../Statistics";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import GameHistory from '../GameHistory';
 
 const PageContainer = styled.div`
   display: flex;
@@ -60,6 +61,7 @@ const UserInfo = ({statistics, setIsLoggedIn}) => {
   const [openChangeUsername, setOpenChangeUsername] = useState(false);
   const [isFocused, setIsFocused] = useState(true);
   const [userId, setUserId] = useState("");
+  const [anchorEl, setAnchorEl] = useState(false);
   // const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const longUsernameTest = "longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong"
@@ -81,6 +83,16 @@ const UserInfo = ({statistics, setIsLoggedIn}) => {
   const handleCloseChangeUsername = () => {
     setOpenChangeUsername(false);
   };
+
+  const handlePopoverOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
 
   const checkLoginStatus = async () => {
     try {
@@ -126,22 +138,49 @@ const UserInfo = ({statistics, setIsLoggedIn}) => {
     <div style={{ display: "flex" }}>
       <div style={{ paddingTop: "80px", paddingLeft: "10px", width:  "20%"}}>
         <ProfileInfo>
-          <AccountCircleIcon fontSize="large" />
+          <Popover
+            open={open}
+            anchorEl={anchorEl}
+            onClose={handlePopoverClose}
+            anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'left',
+            }}
+            sx={{
+              pointerEvents: "none",
+            }}
+          >
+            <div style={{ padding: '10px' }}>
+              <Typography variant="h6">{username}</Typography>
+              <Typography variant="subtitle1">({email})</Typography>
+            </div>
+          </Popover>
+          <AccountCircleIcon fontSize="large" onMouseEnter={handlePopoverOpen} onMouseLeave={handlePopoverClose}/>
           <Title>{username}</Title>
           <Subtitle>({email})</Subtitle>
           <StyledButton variant="contained" onClick={handleOpenChangeUsername}>Change Username</StyledButton>
           <StyledButton variant="contained" onClick={handleOpenChangePassword}>Change Password</StyledButton>
         </ProfileInfo>
       </div>
-      <div style={{ maxWidth:  "70%", padding: "10px", paddingTop: "60px"}}>
-        <GameStatistics
-          gamesPlayed={statistics.gamesPlayed}
-          wins={statistics.wins}
-          losses={statistics.losses}
-          draws={statistics.draws}
-          userId={userId}
-        />
+      <div style={{ display: "flex", justifyContent: "flex-end", borderRadius: "10px", paddingTop: "60px", gap: "10vw"}}>
+        <div style={{ width:  "70%", padding: "10px"}}>
+          <GameStatistics
+            gamesPlayed={statistics.gamesPlayed}
+            wins={statistics.wins}
+            losses={statistics.losses}
+            draws={statistics.draws}
+            userId={userId}
+          />
+        </div>
+        <div style={{ width: "20vw", padding: "10px"}}>
+          <GameHistory userId = {userId} username = {username}/>
+        </div>
       </div>
+
       <Modal
         open={openChangePassword}
         onClose={handleCloseChangePassword}
@@ -222,17 +261,20 @@ const Profile = () => {
     <Header setOthersIsLoggedIn={setIsLoggedIn}>
       <PageContainer>
         {isLoggedIn ? (
+          <>
+            <UserInfo
+              // username={username}
+              // email={email}
+            statistics={sampleStatistics}
+            setIsLoggedIn={setIsLoggedIn}
+            />
+            {/* <GameHistory/> */}
+          </>
 
-              <UserInfo
-                // username={username}
-                // email={email}
-                statistics={sampleStatistics}
-                setIsLoggedIn={setIsLoggedIn}
-              />
 
         ) : (
 
-          <div style={{ paddingTop: "80px", alignItems: "center", textAlign: "center"}}>
+          <div style={{ paddingTop: "80px", paddingLeft: "10px" }}>
               <h1>Please Log in to View this Page.</h1>
             </div>
         )}
