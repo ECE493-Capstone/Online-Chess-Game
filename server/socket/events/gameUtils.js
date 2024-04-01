@@ -92,6 +92,10 @@ const deleteOneFromQueue = async (query) => {
   const result = await Queue.deleteOne(query);
 };
 
+const deleteOngoingGames = async (query) => {
+  const result = await OngoingGames.deleteMany(query);
+};
+
 const handleDisconnection = async (socketId) => {
   await deleteOneFromQueue({ socketId });
   await handleUserDisconnect(socketId);
@@ -101,6 +105,7 @@ module.exports = {
   addToOngoingGames,
   findGameInQueue,
   deleteOneFromQueue,
+  deleteOngoingGames,
   handleDisconnection,
   findPrivateGame,
   handlePrivateGameJoin,
