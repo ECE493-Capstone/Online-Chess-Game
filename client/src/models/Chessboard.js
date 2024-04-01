@@ -24,7 +24,7 @@ export class Chessboard {
     this._pinnedDirections = {}; // dictionary of squares with their pinned directions (CAUTION: key is _hash(row,col))
 
     if (fen) {
-      this._initFromFEN(fen);
+      this._initFromFEN2(fen);
     } else {
       this._turn = WHITE;
       this._halfMove = 0; // use to check for fifty move rule
@@ -100,6 +100,58 @@ export class Chessboard {
     return this._board;
   }
 
+  _initFromFEN2(fen) {
+    const board = [];
+    const fenParts = fen.split(" ");
+    const [
+      boardPart,
+      turn,
+      castlingRights,
+      enPassantSquare,
+      halfMove,
+      fullMove,
+    ] = fenParts;
+    const fenRows = boardPart.split("/");
+
+    for (let i = 0; i < 8; i++) {
+      const row = [];
+      let fenRow = fenRows[i];
+      for (let j = 0; j < fenRow.length; j++) {
+        const char = fenRow.charAt(j);
+        if (!isNaN(char)) {
+          for (let k = 0; k < parseInt(char); k++) {
+            row.push(null);
+          }
+        } else {
+          row.push(char);
+        }
+      }
+      board.push(row);
+    }
+
+    this._board = board;
+    this._turn = turn;
+    this._castlingRights = {
+      [WHITE]: [],
+      [BLACK]: [],
+    };
+    if (castlingRights !== "-") {
+      for (const right of castlingRights) {
+        if (right === "k") {
+          this._castlingRights[WHITE].push(KING_SIDE_CASTLE);
+        } else if (right === "q") {
+          this._castlingRights[WHITE].push(QUEEN_SIDE_CASTLE);
+        } else if (right === "K") {
+          this._castlingRights[BLACK].push(KING_SIDE_CASTLE);
+        } else if (right === "Q") {
+          this._castlingRights[BLACK].push(QUEEN_SIDE_CASTLE);
+        }
+      }
+    }
+    this._enPassantSquare = enPassantSquare !== "-" ? enPassantSquare : null;
+    this._halfMove = parseInt(halfMove);
+    this._fullMove = parseInt(fullMove);
+  }
   _initFromFEN(fen) {
     const [board, turn, castlingRights, enPassantSquare, halfMove, fullMove] =
       fen.split(" ");
@@ -126,6 +178,47 @@ export class Chessboard {
     this._enPassantSquare = enPassantSquare !== "-" ? enPassantSquare : null;
     this._halfMove = parseInt(halfMove);
     this._fullMove = parseInt(fullMove);
+  }
+  convertToFEN2() {
+    let fen = "";
+    for (let row = 0; row < 8; row++) {
+      let emptySquares = 0;
+      for (let col = 0; col < 8; col++) {
+        const piece = this.getPiece(row, col);
+        if (piece === null) {
+          emptySquares++;
+        } else {
+          if (emptySquares > 0) {
+            fen += emptySquares;
+            emptySquares = 0;
+          }
+          fen += piece;
+        }
+      }
+      if (emptySquares > 0) {
+        fen += emptySquares;
+      }
+      if (row < 7) {
+        fen += "/";
+      }
+    }
+
+    // Add the side to move
+    fen += " w"; // Assuming it's white's turn to move
+
+    // Add castling availability
+    fen += " -"; // Assuming no castling is available
+
+    // Add en passant square
+    fen += " -"; // Assuming no en passant square available
+
+    // Add halfmove clock
+    fen += " 0"; // Assuming no halfmove clock
+
+    // Add fullmove number
+    fen += " 1"; // Assuming the current move number is 1
+
+    return fen;
   }
 
   convertToFEN() {
@@ -916,7 +1009,7 @@ export class Chessboard {
     const { fromRow, fromCol, toRow, toCol } = move;
     const piece = this.getPiece(fromRow, fromCol);
     if (piece === null) return false;
-
+    console.log(this._legalMoves, this._turn);
     return this._legalMoves[this._hash(fromRow, fromCol)].some(
       ([r, c]) => r === toRow && c === toCol
     );
