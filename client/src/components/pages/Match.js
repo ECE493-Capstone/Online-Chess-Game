@@ -5,10 +5,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { setGame } from "../../features/boardSlice";
 import { getOngoingGameInformationByGameId } from "../../api/ongoingGames";
 import Cookies from "universal-cookie";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { socket } from "../../app/socket";
 import toast from "react-hot-toast";
 import NoticeDialog from "../dialog/NoticeDialog";
+import { setIsPlayer } from "../../features/userSlice";
 
 const Match = () => {
   const game = useSelector((state) => state.board.game);
@@ -17,7 +18,6 @@ const Match = () => {
   const cookies = new Cookies();
   const userId = cookies.get("userId");
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const { gameId } = useParams();
   console.log(game);
   useEffect(() => {
@@ -49,20 +49,19 @@ const Match = () => {
         toast.error("Opponent Abandoned the game!");
       });
     }
-    // if (!userId) {
-    //   navigate("/test");
-    // }
     let orientation = WHITE;
     const fetchGame = async () => {
       if (gameId) {
         await getOngoingGameInformationByGameId(gameId).then((data) => {
+          const isPlayer =
+            userId && (data.player1 === userId || data.player2 === userId);
           orientation = !userId || data.player1 === userId ? WHITE : BLACK;
-          console.log(data.fen[data.fen.length - 1]);
           const chessboard = new Chessboard(
             orientation,
             data.mode,
             data.fen[data.fen.length - 1]
           );
+          dispatch(setIsPlayer(isPlayer));
           dispatch(setGame(chessboard));
         });
       }
