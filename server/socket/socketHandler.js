@@ -11,5 +11,6 @@ const handleSocket = (server) => {
   io.on("connection", (socket) => {
     listen(io, socket);
   });
+  return io;
 };
 module.exports = handleSocket;

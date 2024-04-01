@@ -26,9 +26,14 @@ const Square = ({ piece, rowIndex, colIndex, game }) => {
   };
   const handleMovePiece = (move) => {
     const gameCopy = game.copy();
+    console.log(gameCopy.convertToFEN());
     gameCopy.playYourMove(move);
     dispatch(setGame(gameCopy));
-    socket.emit("move piece", { gameRoom: gameId, input: move });
+    socket.emit("move piece", {
+      gameRoom: gameId,
+      input: move,
+      fen: gameCopy.convertToFEN(),
+    });
   };
   const handleClick = () => {
     if (game.isSameTurn(game.side)) {

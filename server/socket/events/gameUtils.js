@@ -1,6 +1,11 @@
 const OngoingGames = require("../../models/OngoingGames");
 const Queue = require("../../models/Queue");
-const { addSocket, addActiveGame } = require("../../data");
+const {
+  addSocket,
+  addActiveGame,
+  getActiveUsers,
+  getActiveGames,
+} = require("../../data");
 const { handleUserDisconnect } = require("../user/userSocketHandler");
 const { createRoom } = require("../rooms/roomUtils");
 const { emitToRoom } = require("../emittors");
@@ -46,14 +51,13 @@ const handleGameJoin = (io, socket, existingGame, newGame) => {
   // add to active game
   // join a room
   socket.join(existingGame.room);
-  console.log(existingGame.side, newGame.side);
   addToOngoingGames({
     player1: existingGame.side === "w" ? existingGame.userId : userId,
     player2: existingGame.side === "b" ? existingGame.userId : userId,
     mode,
     timeControl,
     room: existingGame.room,
-    pgn: "",
+    fen: [],
   });
   addSocket(existingGame.userId, existingGame.socketId);
   addSocket(userId, socket.id);
@@ -74,7 +78,7 @@ const handlePrivateGameJoin = (io, socket, existingGame, userId) => {
     mode: existingGame.mode,
     timeControl: existingGame.timeControl,
     room: existingGame.room,
-    pgn: "",
+    fen: [],
   });
   addSocket(existingGame.userId, existingGame.socketId);
   addSocket(userId, socket.id);
@@ -88,6 +92,10 @@ const addToOngoingGames = async (data) => {
   await newGame.save();
 };
 
+const updateOngoingGames = async (query, action) => {
+  const result = await OngoingGames.findOneAndUpdate(query, action);
+};
+
 const deleteOneFromQueue = async (query) => {
   const result = await Queue.deleteOne(query);
 };
@@ -96,9 +104,9 @@ const deleteOngoingGames = async (query) => {
   const result = await OngoingGames.deleteMany(query);
 };
 
-const handleDisconnection = async (socketId) => {
+const handleDisconnection = async (socketId, io) => {
   await deleteOneFromQueue({ socketId });
-  await handleUserDisconnect(socketId);
+  await handleUserDisconnect(socketId, io);
 };
 
 module.exports = {
@@ -111,4 +119,5 @@ module.exports = {
   handlePrivateGameJoin,
   handleGameJoin,
   handleCreateGame,
+  updateOngoingGames,
 };
