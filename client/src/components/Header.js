@@ -7,7 +7,6 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import styled from "styled-components";
 import Cookies from "universal-cookie";
 import { fetchUser } from "../api/fetchUser";
-
 const StyledHeader = styled.div`
   position: fixed;
   top: 0;
@@ -17,6 +16,10 @@ const StyledHeader = styled.div`
   padding: 10px;
   display: flex;
   justify-content: flex-end;
+  svg {
+    stroke: #22a186;
+    stroke-width: 0.5;
+  }
   background-image: linear-gradient(
     to right bottom,
     rgba(0, 0, 0, 0.5),
@@ -140,7 +143,7 @@ const HeaderElements = ({ setOthersIsLoggedIn }) => {
               style={{ marginRight: "5px", textTransform: "none" }}
               onClick={handleUserIconClick}
             >
-              <AccountCircleIcon fontSize="medium" style={{ color: "black" }} />
+              <AccountCircleIcon fontSize="large" style={{ color: "black" }} />
             </Button>
             <Menu
               anchorEl={anchorEl}
