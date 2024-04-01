@@ -11,14 +11,13 @@ import GameCreation from "../GameCreation";
 import GameSelect from "../GameSelection";
 import { FaChevronCircleLeft } from "react-icons/fa";
 import TypeSubmit from "../TypeSubmit";
-import { TimeControlCategories } from "../../app/constant";
 import toast from "react-hot-toast";
 
 const PageContainer = styled.div`
   display: flex;
   background-image: url(${img});
   background-size: cover;
-  backgroun-position: 50% 50%;
+  background-position: 50% 50%;
   text-align: center;
   min-height: 100vh;
   overflow: hidden;
@@ -171,7 +170,8 @@ const Home = () => {
   };
 
   return (
-    <Header>
+    <>
+      <Header />
       <PageContainer direction={String(-direction * 100) + "vw"}>
         <div className="selection-container">
           <div className="select-container game-create">
@@ -219,7 +219,7 @@ const Home = () => {
           </div>
         </div>
       </PageContainer>
-    </Header>
+    </>
   );
 };
 

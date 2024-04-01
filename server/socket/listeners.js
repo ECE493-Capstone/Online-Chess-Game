@@ -5,10 +5,16 @@ const {
   handleGameJoin,
   handleCreateGame,
   findPrivateGame,
+  updateOngoingGames,
 } = require("./events/gameUtils");
 const { emitToRoom } = require("./emittors");
 const { handleDisconnection } = require("./events/gameUtils");
+const { handleUserConnect } = require("./user/userSocketHandler");
 const listen = (io, socket) => {
+  socket.on("user connect", (userId) => {
+    handleUserConnect(userId, socket, io);
+  });
+
   // Logic for handling a new game join
   socket.on("join quick play", async (gameInfo) => {
     const { mode, type, timeControl } = gameInfo;
@@ -25,11 +31,9 @@ const listen = (io, socket) => {
   });
 
   socket.on("join private game", async (gameInfo) => {
-    console.log("WHAT");
     const { userId, mode, side, type, timeControl, room } = gameInfo;
     // INSTEAD FIND GAME ROOM IN QUEUE
     const game = await findPrivateGame(room);
-    console.log("GAME", game);
     if (game) {
       handleGameJoin(io, socket, game, gameInfo);
     } else {
@@ -43,7 +47,8 @@ const listen = (io, socket) => {
   });
 
   socket.on("move piece", (move) => {
-    const { gameRoom, input } = move;
+    const { gameRoom, input, fen } = move;
+    updateOngoingGames({ room: gameRoom }, { $push: { fen: fen } });
     emitToRoom(socket, gameRoom, "oppMove", input);
   });
 
@@ -74,8 +79,7 @@ const listen = (io, socket) => {
   });
 
   socket.on("disconnect", async () => {
-    console.log("DISCONNEct", socket.id);
-    await handleDisconnection(socket.id);
+    await handleDisconnection(socket.id, io);
   });
 };
 
