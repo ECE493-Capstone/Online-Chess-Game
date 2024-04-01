@@ -5,21 +5,36 @@ import { getH2HRecord } from "../../api/util.js";
 
 const Container = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: space-between;
   border: 1px solid orange;
   background-color: black;
   border-radius: 10px;
-  max-width: 250px;
+  margin: 10px;
+  width: fit-content;
+  min-width: 400px;
 
   .divider {
+    margin: 0;
     border-color: orange;
-    width: 100%;
   }
 
   .player-info {
     display: flex;
     justify-content: space-between;
-    padding: 10px 20px;
+    margin: 0 10px;
+
+    div {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+
+      hr {
+        margin: 0 10px;
+        border: 1px solid;
+        height: 100%;
+      }
+    }
   }
   .player-info.winner {
     color: green;
@@ -30,7 +45,7 @@ const Container = styled.div`
   }
 
   .player-info.loser {
-    opacity: 0.4;
+    opacity: 0.2;
 
     color: red;
 
@@ -99,9 +114,11 @@ const H2H = ({
                 : ""
             }`}
           >
-            <h2 className="name">{state.player1.name}</h2>
-            <hr />
-            <h2>{state.player1.wins}</h2>
+            <div>
+              <h3>{state.player1.wins}</h3>
+              <hr />
+            </div>
+            <h3 className="name">{state.player1.name}</h3>
           </div>
           <hr className="divider" />
           <div
@@ -113,9 +130,11 @@ const H2H = ({
                 : ""
             }`}
           >
-            <h2 className="name">{state.player2.name}</h2>
-            <hr />
-            <h2>{state.player2.wins}</h2>
+            <h3 className="name">{state.player2.name}</h3>
+            <div>
+              <hr />
+              <h3>{state.player2.wins}</h3>
+            </div>
           </div>
         </Container>
       )}
