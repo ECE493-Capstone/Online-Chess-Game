@@ -1,25 +1,38 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const OngoingGames = require("../models/PastGames");
+const pastGames = require("../models/PastGames");
 
 const router = express.Router();
 const jsonParser = bodyParser.json();
 
-router.get("/byPlayer", jsonParser, async (req, res) => {
-  const { player } = req.query;
+router.get("/h2h", jsonParser, async (req, res) => {
+  const { player1, player2 } = req.query;
   console.log(req.query);
   try {
-    const games = await OngoingGames.find({
-      $or: [{ black: player }, { white: player }],
+    const games = await pastGames.find({
+      $or: [
+        { $and: [{ black: player1 }, { white: player2 }] }, // player1 as black, player2 as white
+        { $and: [{ white: player1 }, { black: player2 }] }, // player1 as white, player2 as black
+      ],
     });
+
     if (games.length > 0) {
-      console.log("Found games for the player. Sending games: " + games);
-      res.status(200);
-      res.send(games);
+      // find the number of games won by player1
+      const player1Wins = games.filter(
+        (game) => game.winner === player1
+      ).length;
+      const player2Wins = games.filter(
+        (game) => game.winner === player2
+      ).length;
+      res.send({
+        [player1]: player1Wins,
+        [player2]: player2Wins,
+      });
     } else {
-      console.log("404 status: No games found for the player.");
-      res.status(404);
-      res.send({ message: "No past games found for the player." });
+      res.send({
+        [player1]: 0,
+        [player2]: 0,
+      });
     }
   } catch (error) {
     console.error("Error retrieving games:", error);
@@ -27,34 +40,4 @@ router.get("/byPlayer", jsonParser, async (req, res) => {
     res.send({ message: "Internal server error" });
   }
 });
-
-router.get("/byPlayerOpponent", jsonParser, async (req, res) => {
-  const { player, opponent } = req.query;
-  console.log("THIS IS THE PLAYER: " + JSON.stringify(player));
-  console.log("THIS IS THE OPPONENT: " + JSON.stringify(opponent));
-  try {
-    const games = await OngoingGames.find({
-      $or: [
-        { $and: [{ black: player }, { white: opponent }] }, // player as black, opponent as white
-        { $and: [{ white: player }, { black: opponent }] }, // player as white, opponent as black
-      ],
-    });
-
-    if (games.length > 0) {
-      console.log(
-        "Found games where player vs opponent. Sending games: " + games
-      );
-      res.status(200).send(games);
-    } else {
-      console.log("404 status: No games found for the player vs opponent.");
-      res.status(404).send({
-        message: "No past games found for the player against the opponent.",
-      });
-    }
-  } catch (error) {
-    console.error("Error retrieving games:", error);
-    res.status(500).send({ message: "Internal server error" });
-  }
-});
-
 module.exports = router;

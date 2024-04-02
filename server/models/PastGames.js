@@ -10,7 +10,7 @@ const pastGamesSchema = mongoose.Schema(
     mode: String,
     timeControl: String,
     room: String,
-    fen: [String],
+    fen: [String], // stores the moves (I guess?) Still discussing how this will be implemented. Don't need it for now.
     winner: String, // display the name of the winner. Null of tie
   },
   { collection: "pastGames" }
