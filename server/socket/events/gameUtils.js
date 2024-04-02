@@ -1,4 +1,5 @@
 const OngoingGames = require("../../models/OngoingGames");
+const PastGames = require("../../models/PastGames");
 const Queue = require("../../models/Queue");
 const { addSocket, addActiveGame } = require("../../data");
 const { handleUserDisconnect } = require("../user/userSocketHandler");
@@ -97,6 +98,27 @@ const handleDisconnection = async (socketId) => {
   await handleUserDisconnect(socketId);
 };
 
+const convertOngoingGameToPastGame = async (roomId, winnerId) => {
+  const gameToSave = await OngoingGames.findOne({ room: roomId });
+  if (!gameToSave) {
+    console.log(`Game not found for room: ${roomId}`);
+    return;
+  }
+  const newPastGame = new PastGames({
+    player1: gameToSave.player1,
+    player2: gameToSave.player2,
+    mode: gameToSave.mode,
+    timeControl: gameToSave.timeControl,
+    room: gameToSave.room,
+    fen: gameToSave.fen,
+    winner: winnerId ? winnerId : null,
+  });
+  await newPastGame.save();
+  console.log(`${gameToSave.room} saved to past games`);
+
+  await OngoingGames.deleteOne({ room: roomId });
+};
+
 module.exports = {
   addToOngoingGames,
   findGameInQueue,
@@ -106,4 +128,5 @@ module.exports = {
   handlePrivateGameJoin,
   handleGameJoin,
   handleCreateGame,
+  convertOngoingGameToPastGame,
 };

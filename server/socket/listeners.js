@@ -5,6 +5,7 @@ const {
   handleGameJoin,
   handleCreateGame,
   findPrivateGame,
+  convertOngoingGameToPastGame,
 } = require("./events/gameUtils");
 const { emitToRoom } = require("./emittors");
 const { handleDisconnection } = require("./events/gameUtils");
@@ -76,6 +77,12 @@ const listen = (io, socket) => {
   socket.on("disconnect", async () => {
     console.log("DISCONNEct", socket.id);
     await handleDisconnection(socket.id);
+  });
+
+  socket.on("resign", async (gameInfo) => {
+    const { gameRoom, winnerId } = gameInfo;
+    await convertOngoingGameToPastGame(gameRoom, winnerId);
+    io.to(gameRoom).emit("game result", winnerId);
   });
 };
 

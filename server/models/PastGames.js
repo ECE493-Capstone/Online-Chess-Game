@@ -3,9 +3,8 @@ const mongoose = require("mongoose");
 const pastGamesSchema = mongoose.Schema(
   // This model will be to display all the moves of a given game.
   {
-    black: String, // black player id
-    white: String, // white player id
-    moves: String, // a list of moves made by the players. Chess Notation
+    player1: String,
+    player2: String,
     mode: String,
     timeControl: String,
     room: String,

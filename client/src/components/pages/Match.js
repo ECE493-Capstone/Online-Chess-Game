@@ -110,6 +110,8 @@ const MatchReducer = (state, action) => {
       return { ...state, opponentTime: action.payload };
     case "BTN_DISABLED":
       return { ...state, btnDisabled: action.payload };
+    case "END_GAME":
+      return { ...state, endGameInfo: action.payload };
     default:
       return state;
   }
@@ -130,6 +132,7 @@ const Match = () => {
     opponentTime: null,
     increment: null,
     btnDisabled: false,
+    endGameInfo: null,
   });
   const cookies = new Cookies();
   const userId = cookies.get("userId");
@@ -148,6 +151,19 @@ const Match = () => {
     socket.on("oppMove", (input) => {
       console.log("input", input);
       setInput(input);
+    });
+    socket.on("game result", (winnerId) => {
+      if (winnerId === null) {
+        matchDispatch({
+          type: "END_GAME",
+          payload: "Draw",
+        });
+      } else {
+        matchDispatch({
+          type: "END_GAME",
+          payload: winnerId === userId ? "You won!" : "You lost!",
+        });
+      }
     });
     if (!userId) {
       navigate("/test");
@@ -174,12 +190,12 @@ const Match = () => {
         type: "INIT",
         payload: {
           player: {
-            ...playerInfo,
             id: userId,
+            ...playerInfo,
           },
           opponent: {
-            ...opponentInfo,
             id: opponentId,
+            ...opponentInfo,
           },
           playerTime: initTimeInMs,
           opponentTime: initTimeInMs,
@@ -216,12 +232,11 @@ const Match = () => {
 
   const onResignBtnClicked = () => {
     console.log("Resign clicked");
-    // matchDispatch({ type: "BTN_DISABLED", payload: true });
-    // socket.emit("resign", {
-    //   gameRoom: gameId,
-    //   fromPlayerId: matchState.player.id,
-    //   toPlayerId: matchState.opponent.id,
-    // });
+    matchDispatch({ type: "BTN_DISABLED", payload: true });
+    socket.emit("resign", {
+      gameRoom: gameId,
+      winnerId: matchState.opponent.id,
+    });
   };
 
   const onPlayerTimeout = () => {
@@ -251,36 +266,42 @@ const Match = () => {
                 <h3>{numSpectators}</h3>
               </div>
             )} */}
-            <div className="info">
-              <h2>{matchState.opponent?.username}</h2>
-              {matchState.opponentTime !== null && (
-                <Timer
-                  initTimeInMs={matchState.opponentTime}
-                  isActive={!game.isSameTurn(game.side)}
-                  onTimeoutCb={onOpponentTimeout}
-                />
-              )}
-            </div>
-            <Board game={game} />
-            <div className="info">
-              <h2>{matchState.player?.username}</h2>
-              {matchState.playerTime !== null && (
-                <Timer
-                  initTimeInMs={matchState.playerTime}
-                  isActive={game.isSameTurn(game.side)}
-                  onTimeoutCb={onPlayerTimeout}
-                />
-              )}
-            </div>
-            <div className="share-btn">
-              <Button
-                onClick={copyUrlToClipboard}
-                variant="contained"
-                color="info"
-              >
-                {<ShareIcon />}
-              </Button>
-            </div>
+            {matchState.endGameInfo === null ? (
+              <>
+                <div className="info">
+                  <h2>{matchState.opponent?.username}</h2>
+                  {matchState.opponentTime !== null && (
+                    <Timer
+                      initTimeInMs={matchState.opponentTime}
+                      isActive={!game.isSameTurn(game.side)}
+                      onTimeoutCb={onOpponentTimeout}
+                    />
+                  )}
+                </div>
+                <Board game={game} />
+                <div className="info">
+                  <h2>{matchState.player?.username}</h2>
+                  {matchState.playerTime !== null && (
+                    <Timer
+                      initTimeInMs={matchState.playerTime}
+                      isActive={game.isSameTurn(game.side)}
+                      onTimeoutCb={onPlayerTimeout}
+                    />
+                  )}
+                </div>
+                <div className="share-btn">
+                  <Button
+                    onClick={copyUrlToClipboard}
+                    variant="contained"
+                    color="info"
+                  >
+                    {<ShareIcon />}
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div>{matchState.endGameInfo}</div>
+            )}
           </div>
         ) : (
           <NoticeDialog content="Waiting for opponent..." />
