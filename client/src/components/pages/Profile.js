@@ -11,6 +11,8 @@ import Cookies from "universal-cookie";
 import { fetchUser } from "../../api/fetchUser";
 import GameStatistics from "../Statistics";
 import img from "../../assets/profile.svg";
+import { getPastGamesInformation } from "../../api/pastGames";
+import GameReview from "../GameReview";
 
 const StyledUserInfoContainer = styled.div`
   display: flex;
@@ -24,6 +26,9 @@ const StyledUserInfoContainer = styled.div`
   .games-info {
     min-width: 70vw;
     min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 `;
 const PageContainer = styled.div`
@@ -67,11 +72,36 @@ const Subtitle = styled.div`
 
 const UserInfo = ({ statistics, setIsLoggedIn }) => {
   const cookie = new Cookies();
+  const storedUserId = cookie.get("userId");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [openChangePassword, setOpenChangePassword] = useState(false);
   const [openChangeUsername, setOpenChangeUsername] = useState(false);
   const [isFocused, setIsFocused] = useState(true);
+  const dummyData = [
+    {
+      gameId: 1,
+      black: "usera",
+      white: "white",
+      moves: "moves",
+      mode: "mode",
+      timeControl: "timeControl",
+      room: "room",
+      fen: ["fen"],
+      winner: storedUserId,
+    },
+    {
+      gameId: 1,
+      black: "black",
+      white: "usera",
+      moves: "moves",
+      mode: "mode",
+      timeControl: "timeControl",
+      room: "room",
+      fen: ["fen"],
+      winner: "black",
+    },
+  ];
   // const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleOpenChangePassword = () => {
@@ -92,8 +122,6 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
 
   const checkLoginStatus = async () => {
     try {
-      const storedUserId = cookie.get("userId");
-
       if (storedUserId) {
         console.log("Retrieved user ID from cookie: " + storedUserId);
 
@@ -134,6 +162,15 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
       setIsFocused(false);
     }
   }, [isFocused]);
+  useEffect(() => {
+    getPastGamesInformation(storedUserId)
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
 
   return (
     <StyledUserInfoContainer>
@@ -167,6 +204,7 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
           losses={statistics.losses}
           draws={statistics.draws}
         />
+        <GameReview data={dummyData} />
       </div>
       <Modal
         open={openChangePassword}
