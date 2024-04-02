@@ -98,7 +98,7 @@ const H2H = ({
         },
       });
     };
-    fetchH2HRecord();
+    if (player1Id && player2Id) fetchH2HRecord();
   }, [player1Id, player2Id]);
 
   return (
