@@ -14,15 +14,14 @@ const Container = styled.div`
   border: 1px solid white;
   border-radius: 5px;
   display: flex;
-  max-width: 350px;
-  max-height: 75vh;
+  max-height: 70vh;
 
   .black {
     color: gray;
   }
 
   .move {
-    color: orange
+    color: orange;
   }
 `;
 
@@ -68,7 +67,9 @@ const MoveHistory = ({ history }) => {
             <TableRow>
               <TableCell className="move">Move </TableCell>
               <TableCell colSpan={2}>White</TableCell>
-              <TableCell colSpan={2} className="black">Black</TableCell>
+              <TableCell colSpan={2} className="black">
+                Black
+              </TableCell>
             </TableRow>
             <TableRow>
               <TableCell></TableCell>

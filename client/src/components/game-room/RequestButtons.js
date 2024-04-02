@@ -4,16 +4,16 @@ import Button from "@mui/material/Button";
 import { WHITE, BLACK } from "../../models/Chessboard.js";
 import UndoOutlinedIcon from "@mui/icons-material/UndoOutlined";
 import HandshakeOutlinedIcon from "@mui/icons-material/HandshakeOutlined";
-import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined';
+import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
 import styled from "styled-components";
 
 const ButtonContainer = styled.div`
+  max-width: 100%;
   .button {
     margin: 10px 12px;
   }
   .group {
-    /* display: flex; */
-    /* justify-content: center; */
+    max-width: 100%;
   }
 `;
 
