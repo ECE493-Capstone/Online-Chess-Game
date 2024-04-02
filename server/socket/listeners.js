@@ -84,6 +84,21 @@ const listen = (io, socket) => {
     await convertOngoingGameToPastGame(gameRoom, winnerId);
     io.to(gameRoom).emit("game result", winnerId);
   });
+
+  socket.on("draw request", (info) => {
+    const { gameRoom } = info;
+    emitToRoom(socket, gameRoom, "oppDrawRequest");
+  });
+
+  socket.on("reply draw request", async (info) => {
+    const { gameRoom, accepted } = info;
+    if (accepted) {
+      await convertOngoingGameToPastGame(gameRoom, null);
+      io.to(gameRoom).emit("game result", null);
+    } else {
+      emitToRoom(socket, gameRoom, "drawRejected");
+    }
+  });
 };
 
 module.exports = listen;

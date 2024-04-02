@@ -19,6 +19,7 @@ import RequestButtons from "../game-room/RequestButtons";
 import { fetchUser } from "../../api/fetchUser";
 import H2H from "../game-room/H2H";
 import Header from "../Header";
+import YesNoDialog from "../dialog/YesNoDialog";
 
 const Container = styled.div`
   /* border: 1px solid white;
@@ -112,6 +113,8 @@ const MatchReducer = (state, action) => {
       return { ...state, btnDisabled: action.payload };
     case "END_GAME":
       return { ...state, endGameInfo: action.payload };
+    case "DRAW_DIALOG":
+      return { ...state, openDrawDialog: action.payload };
     default:
       return state;
   }
@@ -133,6 +136,7 @@ const Match = () => {
     increment: null,
     btnDisabled: false,
     endGameInfo: null,
+    openDrawDialog: false,
   });
   const cookies = new Cookies();
   const userId = cookies.get("userId");
@@ -148,11 +152,14 @@ const Match = () => {
       }
       return;
     }
+
+    // ----------------- socket listeners -----------------
     socket.on("oppMove", (input) => {
       console.log("input", input);
       setInput(input);
     });
     socket.on("game result", (winnerId) => {
+      matchDispatch({ type: "BTN_DISABLED", payload: true });
       if (winnerId === null) {
         matchDispatch({
           type: "END_GAME",
@@ -165,6 +172,16 @@ const Match = () => {
         });
       }
     });
+    socket.on("oppDrawRequest", () => {
+      matchDispatch({ type: "DRAW_DIALOG", payload: true });
+    });
+
+    socket.on("drawRejected", () => {
+      matchDispatch({ type: "BTN_DISABLED", payload: false });
+    });
+
+    // ----------------------------------------------------
+
     if (!userId) {
       navigate("/test");
     }
@@ -224,10 +241,17 @@ const Match = () => {
 
   const onUndoBtnClicked = () => {
     console.log("Undo clicked");
+    // matchDispatch({ type: "BTN_DISABLED", payload: true });
+    // socket.emit("undo request", {
+    //   gameRoom: gameId,
+    //   toPlayerId: matchState.opponent.id,
+    // });
   };
 
   const onDrawBtnClicked = () => {
     console.log("Draw clicked");
+    matchDispatch({ type: "BTN_DISABLED", payload: true });
+    socket.emit("draw request", { gameRoom: gameId });
   };
 
   const onResignBtnClicked = () => {
@@ -257,6 +281,7 @@ const Match = () => {
           message="URL copied to clipboard"
         />
       )}
+
       <div className="lhs">
         {game ? (
           <div className="board">
@@ -298,6 +323,26 @@ const Match = () => {
                     {<ShareIcon />}
                   </Button>
                 </div>
+                {matchState.openDrawDialog && (
+                  <YesNoDialog
+                    title="Draw Request"
+                    content={`${matchState.opponent.username} has requested a draw. Do you accept?`}
+                    onYesClicked={() => {
+                      socket.emit("reply draw request", {
+                        gameRoom: gameId,
+                        accepted: true,
+                      });
+                      matchDispatch({ type: "DRAW_DIALOG", payload: false });
+                    }}
+                    onNoClicked={() => {
+                      socket.emit("reply draw request", {
+                        gameRoom: gameId,
+                        accepted: false,
+                      });
+                      matchDispatch({ type: "DRAW_DIALOG", payload: false });
+                    }}
+                  ></YesNoDialog>
+                )}
               </>
             ) : (
               <div>{matchState.endGameInfo}</div>
