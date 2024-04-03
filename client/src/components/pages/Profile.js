@@ -1,42 +1,67 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import Header from "../Header";
-import ChangePassword  from '../ChangePassword';
-import ChangeUsername  from '../ChangeUsername';
-import Modal from '@mui/material/Modal';
-import Box from '@mui/material/Box';
+import ChangePassword from "../ChangePassword";
+import ChangeUsername from "../ChangeUsername";
+import Modal from "@mui/material/Modal";
+import Box from "@mui/material/Box";
 import { Button } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import Cookies from "universal-cookie";
 import { fetchUser } from "../../api/fetchUser";
 import GameStatistics from "../Statistics";
-import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import img from "../../assets/profile.svg";
+import { getPastGamesInformation } from "../../api/pastGames";
+import GameReview from "../GameReview";
 
+const StyledUserInfoContainer = styled.div`
+  display: flex;
+  margin: 100px;
+  .section {
+    display: flex;
+    justify-content: center;
+    background-color: #191d28;
+    margin: 30px;
+  }
+  .games-info {
+    min-width: 70vw;
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: scroll;
+  }
+`;
 const PageContainer = styled.div`
   display: flex;
-  background-color: rgb(184, 184, 184);
-  min-height: 100vh;
+  align-items: center;
+  background-color: #12121b;
+  max-height: 100vh;
+  overflow: hidden;
   flex-direction: column;
-
 `;
 
 const ProfileInfo = styled.div`
   display: flex;
+  padding: 50px;
   flex-direction: column;
-  align-items: stretch;
-  ${'' /* background-color: black; */}
-  width: 40%;
-  min-width: 40%;
+  align-items: center;
+  justify-content: center;
+  // align-items: stretch;
+  min-width: 20vw;
   gap: 10px;
+  button {
+    margin-bottom: 20px;
+    width: 200px;
+  }
 `;
 
 const StyledButton = styled(Button)`
   width: 70%;
-
 `;
 
 const Title = styled.div`
-  font-size: 20px;
+  font-size: 32px;
   color: white;
 `;
 
@@ -46,18 +71,48 @@ const Subtitle = styled.div`
   color: white;
 `;
 
-const cookie = new Cookies();
-
-const UserInfo = ({statistics, setIsLoggedIn}) => {
-
+const UserInfo = ({ statistics, setIsLoggedIn }) => {
+  const cookie = new Cookies();
+  const storedUserId = cookie.get("userId");
   const [username, setUsername] = useState("");
+  const dummyData = [
+    {
+      gameId: 1,
+      player2: username,
+      player1: "white",
+      mode: "Standard",
+      timeControl: "timeControl",
+      room: "room",
+      fen: ["fen"],
+      winner: username,
+    },
+    {
+      gameId: 1,
+      player2: username,
+      player1: "white",
+      mode: "Blind",
+      timeControl: "timeControl",
+      room: "room",
+      fen: ["fen"],
+      winner: username,
+    },
+    {
+      gameId: 1,
+      player2: "black",
+      player1: username,
+      mode: "PowerUp",
+      timeControl: "timeControl",
+      room: "room",
+      fen: ["fen"],
+      winner: "black",
+    },
+  ];
   const [email, setEmail] = useState("");
   const [openChangePassword, setOpenChangePassword] = useState(false);
   const [openChangeUsername, setOpenChangeUsername] = useState(false);
   const [isFocused, setIsFocused] = useState(true);
+  const [data, setData] = useState(dummyData);
   // const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  const navigate = useNavigate();
 
   const handleOpenChangePassword = () => {
     setOpenChangePassword(true);
@@ -77,19 +132,24 @@ const UserInfo = ({statistics, setIsLoggedIn}) => {
 
   const checkLoginStatus = async () => {
     try {
-      const storedUserId = cookie.get("userId");
-  
       if (storedUserId) {
-        console.log('Retrieved user ID from cookie: ' + storedUserId);
-  
+        console.log("Retrieved user ID from cookie: " + storedUserId);
+
         const response = await fetchUser(storedUserId);
         const userData = response.data;
-  
+
         if (response.status === 200) {
           const { username, email } = userData;
           setUsername(username);
           setEmail(email);
-          console.log("HEADER DETECTS LOGIN: userID: " + JSON.stringify(storedUserId) + " username: " + JSON.stringify(username) + " email: " + JSON.stringify(email));
+          console.log(
+            "HEADER DETECTS LOGIN: userID: " +
+              JSON.stringify(storedUserId) +
+              " username: " +
+              JSON.stringify(username) +
+              " email: " +
+              JSON.stringify(email)
+          );
           setIsLoggedIn(true);
         } else {
           console.log("Failed to fetch user data");
@@ -105,33 +165,67 @@ const UserInfo = ({statistics, setIsLoggedIn}) => {
       console.log(error);
     }
   };
-  
+
+  const handleSetData = (mode) => {
+    if (mode === "All") {
+      setData(dummyData);
+      return;
+    }
+    console.log("Setting data for mode: " + mode);
+    setData(dummyData.filter((data) => data.mode === mode));
+  };
   useEffect(() => {
     if (isFocused) {
       checkLoginStatus();
       setIsFocused(false);
     }
   }, [isFocused]);
-
+  useEffect(() => {
+    getPastGamesInformation(storedUserId)
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
 
   return (
-    <div style={{ display: "flex" }}>
-      <div style={{ flex: "20%", paddingTop: "80px", paddingLeft: "10px"}}>
-        <ProfileInfo>
-          <AccountCircleOutlinedIcon fontSize="large" />
+    <StyledUserInfoContainer>
+      <div
+        style={{
+          flex: "20%",
+          display: "flex",
+          justifyContent: "flex-start",
+          width: "100%",
+        }}
+      >
+        <ProfileInfo className="section">
+          <img src={img} alt="profile" style={{ width: "175px" }} />
           <Title>{username}</Title>
           <Subtitle>({email})</Subtitle>
-          <StyledButton variant="contained" onClick={handleOpenChangeUsername}>Change Username</StyledButton>
-          <StyledButton variant="contained" onClick={handleOpenChangePassword}>Change Password</StyledButton>
+          <StyledButton variant="contained" onClick={handleOpenChangeUsername}>
+            Change Username
+          </StyledButton>
+          <StyledButton variant="contained" onClick={handleOpenChangePassword}>
+            Change Password
+          </StyledButton>
         </ProfileInfo>
       </div>
-      <div style={{ flex: "75%", padding: "10px", paddingTop: "60px"}}>
+      <div
+        className="section games-info"
+        style={{ flex: "75%", padding: "10px", paddingTop: "60px" }}
+      >
         <GameStatistics
           gamesPlayed={statistics.gamesPlayed}
           wins={statistics.wins}
           losses={statistics.losses}
           draws={statistics.draws}
+          handleSetData={handleSetData}
+          data={data}
+          username={username}
         />
+        <GameReview data={data} username={username} />
       </div>
       <Modal
         open={openChangePassword}
@@ -139,7 +233,7 @@ const UserInfo = ({statistics, setIsLoggedIn}) => {
         aria-labelledby="change-password-modal"
         aria-describedby="change-password-form"
       >
-        <Box          
+        <Box
           sx={{
             position: "absolute",
             top: "50%",
@@ -152,9 +246,12 @@ const UserInfo = ({statistics, setIsLoggedIn}) => {
             maxWidth: "90vw",
             maxHeight: "90vh",
             overflow: "auto",
-            }}
-          >
-          <ChangePassword onClose={handleCloseChangePassword} setIsFocused={setIsFocused}/>
+          }}
+        >
+          <ChangePassword
+            onClose={handleCloseChangePassword}
+            setIsFocused={setIsFocused}
+          />
         </Box>
       </Modal>
       <Modal
@@ -163,7 +260,7 @@ const UserInfo = ({statistics, setIsLoggedIn}) => {
         aria-labelledby="change-username-modal"
         aria-describedby="change-username-form"
       >
-        <Box          
+        <Box
           sx={{
             position: "absolute",
             top: "50%",
@@ -176,12 +273,15 @@ const UserInfo = ({statistics, setIsLoggedIn}) => {
             maxWidth: "90vw",
             maxHeight: "90vh",
             overflow: "auto",
-            }}
-          >
-          <ChangeUsername onClose={handleCloseChangeUsername} setIsFocused={setIsFocused}/>
+          }}
+        >
+          <ChangeUsername
+            onClose={handleCloseChangeUsername}
+            setIsFocused={setIsFocused}
+          />
         </Box>
       </Modal>
-    </div>
+    </StyledUserInfoContainer>
   );
 };
 
@@ -203,35 +303,31 @@ const Profile = () => {
     gamesPlayed: 10,
     wins: 5,
     losses: 5,
-    draws: 0
-  }
-  const location = useLocation();
+    draws: 0,
+  };
   // const { username, email, userId } = location.state;
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   return (
-    <Header setOthersIsLoggedIn={setIsLoggedIn}>
+    <>
+      <Header setOthersIsLoggedIn={setIsLoggedIn} />
       <PageContainer>
         {isLoggedIn ? (
-            <div>
-              <UserInfo
-                // username={username}
-                // email={email}
-                statistics={sampleStatistics}
-                setIsLoggedIn={setIsLoggedIn}
-              />
-            </div>
+          <div>
+            <UserInfo
+              // username={username}
+              // email={email}
+              statistics={sampleStatistics}
+              setIsLoggedIn={setIsLoggedIn}
+            />
+          </div>
         ) : (
-
-          <div style={{ paddingTop: "80px", alignItems: "center"}}>
-              <h1>Please Log in to View this Page.</h1>
-
-            </div>
-
-        )
-        }
+          <div style={{ paddingTop: "80px", alignItems: "center" }}>
+            <h1>Please Log in to View this Page.</h1>
+          </div>
+        )}
       </PageContainer>
-    </Header>
+    </>
   );
 };
 

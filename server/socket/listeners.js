@@ -5,7 +5,10 @@ const {
   handleGameJoin,
   handleCreateGame,
   findPrivateGame,
-  updateOngoingGames,
+  convertOngoingGameToPastGame,
+  addFen,
+  popFen,
+  getLastFen,
 } = require("./events/gameUtils");
 const { emitToRoom } = require("./emittors");
 const { handleDisconnection } = require("./events/gameUtils");
@@ -46,14 +49,17 @@ const listen = (io, socket) => {
     // Logic for starting the game
   });
 
-  socket.on("move piece", (move) => {
+  socket.on("move piece", async (move) => {
     const { gameRoom, input, fen } = move;
-    updateOngoingGames({ room: gameRoom }, { $push: { fen: fen } });
+    await addFen(gameRoom, fen);
     emitToRoom(socket, gameRoom, "oppMove", input);
   });
 
-  socket.on("game end", () => {
-    // Logic for ending the game
+  socket.on("game end", async (gameInfo) => {
+    // exactly the same as resign
+    const { gameRoom, winnerId } = gameInfo;
+    await convertOngoingGameToPastGame(gameRoom, winnerId);
+    io.to(gameRoom).emit("game result", winnerId);
   });
 
   socket.on("create room", (roomId) => {
@@ -80,6 +86,44 @@ const listen = (io, socket) => {
 
   socket.on("disconnect", async () => {
     await handleDisconnection(socket.id, io);
+  });
+
+  socket.on("resign", async (gameInfo) => {
+    const { gameRoom, winnerId } = gameInfo;
+    await convertOngoingGameToPastGame(gameRoom, winnerId);
+    io.to(gameRoom).emit("game result", winnerId);
+  });
+
+  socket.on("draw request", (info) => {
+    const { gameRoom } = info;
+    emitToRoom(socket, gameRoom, "oppDrawRequest");
+  });
+
+  socket.on("reply draw request", async (info) => {
+    const { gameRoom, accepted } = info;
+    if (accepted) {
+      await convertOngoingGameToPastGame(gameRoom, null);
+      io.to(gameRoom).emit("game result", null);
+    } else {
+      emitToRoom(socket, gameRoom, "drawRejected");
+    }
+  });
+
+  socket.on("undo request", (info) => {
+    const { gameRoom } = info;
+    emitToRoom(socket, gameRoom, "oppUndoRequest");
+  });
+
+  socket.on("reply undo request", async (info) => {
+    const { gameRoom, accepted } = info;
+    if (accepted) {
+      await popFen(gameRoom);
+      const lastFen = await getLastFen(gameRoom);
+      io.to(gameRoom).emit("undoBoard", lastFen);
+      console.log(`$Fen for undo: ${lastFen}`);
+    } else {
+      emitToRoom(socket, gameRoom, "undoRejected");
+    }
   });
 };
 

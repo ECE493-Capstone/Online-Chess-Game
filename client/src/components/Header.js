@@ -7,7 +7,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import styled from "styled-components";
 import Cookies from "universal-cookie";
 import { fetchUser } from "../api/fetchUser";
-
+import { ReactComponent as Logo } from "../assets/logo.svg";
 const StyledHeader = styled.div`
   position: fixed;
   top: 0;
@@ -17,6 +17,19 @@ const StyledHeader = styled.div`
   padding: 10px;
   display: flex;
   justify-content: flex-end;
+  svg {
+    stroke: #22a186;
+    stroke-width: 0.5;
+  }
+  .logo {
+    width: 40px;
+    height: 40px;
+    fill: #22a186;
+    margin-left: 10px;
+    cursor: pointer;
+  }
+  img {
+  }
   background-image: linear-gradient(
     to right bottom,
     rgba(0, 0, 0, 0.5),
@@ -39,6 +52,9 @@ const HeaderElements = ({ setOthersIsLoggedIn }) => {
 
   const cookie = new Cookies();
 
+  const handleLogoClick = () => {
+    navigate("/");
+  };
   const checkLoginStatus = async () => {
     try {
       const storedUserId = cookie.get("userId");
@@ -131,56 +147,63 @@ const HeaderElements = ({ setOthersIsLoggedIn }) => {
           // backgroundColor: "#f0f0f0",
           padding: "10px",
           display: "flex",
-          justifyContent: "flex-end",
+          justifyContent: "space-between",
+          width: "100%",
         }}
       >
-        {isLoggedIn ? (
-          <>
-            <Button
-              style={{ marginRight: "5px", textTransform: "none" }}
-              onClick={handleUserIconClick}
-            >
-              <AccountCircleIcon fontSize="medium" style={{ color: "black" }} />
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleMenuClose}
-            >
-              <MenuItem onClick={handleProfileClick}>Profile</MenuItem>
-              <MenuItem onClick={handleLogoutClick}>Logout</MenuItem>
-            </Menu>
-          </>
-        ) : (
-          <>
-            <Button
-              variant="contained"
-              style={{
-                color: "white",
-                fontSize: "18px",
-                backgroundColor: "transparent",
-                marginRight: "5px",
-                textTransform: "none",
-              }}
-              onClick={handleSignInClick}
-            >
-              Sign in
-            </Button>
-            <Button
-              variant="contained"
-              style={{
-                color: "white",
-                backgroundColor: "red",
-                marginRight: "5px",
-                fontSize: "18px",
-                textTransform: "none",
-              }}
-              onClick={handleRegisterClick}
-            >
-              Sign up
-            </Button>
-          </>
-        )}
+        <Logo className="logo" onClick={handleLogoClick} />
+        <div className="right-buttons">
+          {isLoggedIn ? (
+            <>
+              <Button
+                style={{ marginRight: "5px", textTransform: "none" }}
+                onClick={handleUserIconClick}
+              >
+                <AccountCircleIcon
+                  fontSize="large"
+                  style={{ color: "black" }}
+                />
+              </Button>
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+              >
+                <MenuItem onClick={handleProfileClick}>Profile</MenuItem>
+                <MenuItem onClick={handleLogoutClick}>Logout</MenuItem>
+              </Menu>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="contained"
+                style={{
+                  color: "white",
+                  fontSize: "18px",
+                  backgroundColor: "transparent",
+                  marginRight: "5px",
+                  textTransform: "none",
+                }}
+                onClick={handleSignInClick}
+              >
+                Sign in
+              </Button>
+              <Button
+                variant="contained"
+                style={{
+                  color: "white",
+                  backgroundColor: "red",
+                  marginRight: "5px",
+                  fontSize: "18px",
+                  textTransform: "none",
+                }}
+                onClick={handleRegisterClick}
+              >
+                Sign up
+              </Button>
+            </>
+          )}
+        </div>
       </div>
       <Modal
         open={openlogin}

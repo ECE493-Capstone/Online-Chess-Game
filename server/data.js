@@ -1,3 +1,5 @@
+const { deleteOngoingGames } = require("./socket/events/gameUtils");
+
 const activeUsers = {};
 const activeGames = {};
 
@@ -59,9 +61,13 @@ const removeSocket = (socketId, io) => {
             console.log(player);
             io.to(activeUsers[player].socket).emit("opponent abandoned");
           }
+          const result = deleteOngoingGames({
+            $or: [{ player1: user }, { player2: user }],
+          });
+          console.log(result);
           // handleUserDisconnect(player);
         }
-      }, 8000);
+      }, 45000);
     }
   });
 };
