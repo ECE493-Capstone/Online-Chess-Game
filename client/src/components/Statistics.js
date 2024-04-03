@@ -1,19 +1,6 @@
 import React, { useState } from "react";
-import {
-  MenuItem,
-  Button,
-  ButtonGroup,
-  MenuList,
-  Paper,
-  Popper,
-  Grow,
-  ClickAwayListener,
-  FormControl,
-  InputLabel,
-  Select,
-} from "@mui/material";
+import { MenuItem, FormControl, InputLabel, Select } from "@mui/material";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts"; // Import from 'recharts' instead of '@mui/x-charts'
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import styled from "styled-components";
 
 const PageContainer = styled.div`
@@ -29,40 +16,26 @@ const PageContainer = styled.div`
 `;
 
 // Sample game mode data. Hard-coded. Once they finish with the API for the actual data, I'll implement them.
-const gameModesData = {
-  Classic: [{ win: 10, lose: 5, tie: 3 }],
-  Blind: [{ win: 7, lose: 8, tie: 2 }],
-  PowerUp: [{ win: 15, lose: 3, tie: 1 }],
-};
+const GameStatistics = ({ handleSetData, data, username }) => {
+  const [selectedGameMode, setSelectedGameMode] = useState("All");
+  const handleGraphData = () => {
+    let winCount = 0;
+    let tieCount = 0;
+    let lossCount = 0;
 
-const GameStatistics = () => {
-  const [open, setOpen] = useState(false);
-  const [selectedGameMode, setSelectedGameMode] = useState("Classic");
+    data.forEach((entry) => {
+      if (entry.winner === username) {
+        winCount++;
+      } else if (entry.winner === null) {
+        tieCount++;
+      } else {
+        lossCount++;
+      }
+    });
 
-  const handleClick = () => {
-    console.info(`You clicked ${selectedGameMode}`);
+    return [{ win: winCount, tie: tieCount, lose: lossCount }];
   };
-
-  const handleMenuItemClick = (gameMode) => {
-    setSelectedGameMode(gameMode);
-    setOpen(false);
-  };
-
-  const handleToggle = () => {
-    setOpen((prevOpen) => !prevOpen);
-  };
-
-  const handleClose = (event) => {
-    if (anchorRef.current && anchorRef.current.contains(event.target)) {
-      return;
-    }
-    setOpen(false);
-  };
-
-  const anchorRef = React.useRef(null);
-
-  const selectedGameData = gameModesData[selectedGameMode];
-
+  const graphData = handleGraphData();
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
@@ -91,7 +64,7 @@ const GameStatistics = () => {
       <BarChart
         width={400}
         height={300}
-        data={selectedGameData}
+        data={graphData}
         margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
       >
         <XAxis dataKey="gameMode" />
@@ -109,9 +82,13 @@ const GameStatistics = () => {
           id="demo-simple-select"
           value={selectedGameMode}
           label="Game mode"
-          onChange={(e) => setSelectedGameMode(e.target.value)}
+          onChange={(e) => {
+            setSelectedGameMode(e.target.value);
+            handleSetData(e.target.value);
+          }}
         >
-          <MenuItem value={"Classic"}>Classic</MenuItem>
+          <MenuItem value={"All"}>All</MenuItem>
+          <MenuItem value={"Standard"}>Standard</MenuItem>
           <MenuItem value={"Blind"}>Blind</MenuItem>
           <MenuItem value={"PowerUp"}>PowerUp</MenuItem>
         </Select>

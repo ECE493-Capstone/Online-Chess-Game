@@ -25,10 +25,11 @@ const StyledUserInfoContainer = styled.div`
   }
   .games-info {
     min-width: 70vw;
-    min-height: 80vh;
+    height: 80vh;
     display: flex;
     flex-direction: column;
     align-items: center;
+    overflow: scroll;
   }
 `;
 const PageContainer = styled.div`
@@ -74,34 +75,46 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
   const cookie = new Cookies();
   const storedUserId = cookie.get("userId");
   const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [openChangePassword, setOpenChangePassword] = useState(false);
-  const [openChangeUsername, setOpenChangeUsername] = useState(false);
-  const [isFocused, setIsFocused] = useState(true);
   const dummyData = [
     {
       gameId: 1,
-      black: "usera",
+      black: username,
       white: "white",
       moves: "moves",
-      mode: "mode",
+      mode: "Standard",
       timeControl: "timeControl",
       room: "room",
       fen: ["fen"],
-      winner: storedUserId,
+      winner: username,
+    },
+    {
+      gameId: 1,
+      black: username,
+      white: "white",
+      moves: "Blind",
+      mode: "Blind",
+      timeControl: "timeControl",
+      room: "room",
+      fen: ["fen"],
+      winner: username,
     },
     {
       gameId: 1,
       black: "black",
-      white: "usera",
+      white: username,
       moves: "moves",
-      mode: "mode",
+      mode: "PowerUp",
       timeControl: "timeControl",
       room: "room",
       fen: ["fen"],
       winner: "black",
     },
   ];
+  const [email, setEmail] = useState("");
+  const [openChangePassword, setOpenChangePassword] = useState(false);
+  const [openChangeUsername, setOpenChangeUsername] = useState(false);
+  const [isFocused, setIsFocused] = useState(true);
+  const [data, setData] = useState(dummyData);
   // const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleOpenChangePassword = () => {
@@ -156,6 +169,14 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
     }
   };
 
+  const handleSetData = (mode) => {
+    if (mode === "All") {
+      setData(dummyData);
+      return;
+    }
+    console.log("Setting data for mode: " + mode);
+    setData(dummyData.filter((data) => data.mode === mode));
+  };
   useEffect(() => {
     if (isFocused) {
       checkLoginStatus();
@@ -203,8 +224,11 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
           wins={statistics.wins}
           losses={statistics.losses}
           draws={statistics.draws}
+          handleSetData={handleSetData}
+          data={data}
+          username={username}
         />
-        <GameReview data={dummyData} />
+        <GameReview data={data} />
       </div>
       <Modal
         open={openChangePassword}
