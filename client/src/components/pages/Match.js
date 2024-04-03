@@ -152,6 +152,17 @@ const Match = () => {
         gameCopy.playOpponentMove(input);
         dispatch(setGame(gameCopy));
         setInput(null);
+
+        if (gameCopy.isEnded) {
+          socket.emit("game end", {
+            gameRoom: gameId,
+            winnerId: gameCopy.winner
+              ? gameCopy.winner === gameCopy.side
+                ? matchState.player.id
+                : matchState.opponent.id
+              : null,
+          });
+        }
       }
       socket.on("undoBoard", (fen) => {
         const gameFromFen = new Chessboard(game.side, game.gameMode, fen);

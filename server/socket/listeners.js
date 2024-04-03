@@ -53,8 +53,11 @@ const listen = (io, socket) => {
     emitToRoom(socket, gameRoom, "oppMove", input);
   });
 
-  socket.on("game end", () => {
-    // Logic for ending the game
+  socket.on("game end", async (gameInfo) => {
+    // exactly the same as resign
+    const { gameRoom, winnerId } = gameInfo;
+    await convertOngoingGameToPastGame(gameRoom, winnerId);
+    io.to(gameRoom).emit("game result", winnerId);
   });
 
   socket.on("create room", (roomId) => {
