@@ -24,7 +24,7 @@ export class Chessboard {
     this._pinnedDirections = {}; // dictionary of squares with their pinned directions (CAUTION: key is _hash(row,col))
 
     if (fen) {
-      this._initFromFEN(fen);
+      this._initFromFEN2(fen);
     } else {
       this._turn = WHITE;
       this._halfMove = 0; // use to check for fifty move rule
@@ -96,6 +96,10 @@ export class Chessboard {
     return this._legalMoves;
   }
 
+  get gameMode() {
+    return this._gameMode;
+  }
+
   getBoard() {
     return this._board;
   }
@@ -105,6 +109,59 @@ export class Chessboard {
       fen.split(" ");
     const rows = board.split("/");
     this._board = rows.map((row) => row.split(""));
+    this._turn = turn;
+    this._castlingRights = {
+      [WHITE]: [],
+      [BLACK]: [],
+    };
+    if (castlingRights !== "-") {
+      for (const right of castlingRights) {
+        if (right === "k") {
+          this._castlingRights[WHITE].push(KING_SIDE_CASTLE);
+        } else if (right === "q") {
+          this._castlingRights[WHITE].push(QUEEN_SIDE_CASTLE);
+        } else if (right === "K") {
+          this._castlingRights[BLACK].push(KING_SIDE_CASTLE);
+        } else if (right === "Q") {
+          this._castlingRights[BLACK].push(QUEEN_SIDE_CASTLE);
+        }
+      }
+    }
+    this._enPassantSquare = enPassantSquare !== "-" ? enPassantSquare : null;
+    this._halfMove = parseInt(halfMove);
+    this._fullMove = parseInt(fullMove);
+  }
+
+  _initFromFEN2(fen) {
+    const board = [];
+    const fenParts = fen.split(" ");
+    const [
+      boardPart,
+      turn,
+      castlingRights,
+      enPassantSquare,
+      halfMove,
+      fullMove,
+    ] = fenParts;
+    const fenRows = boardPart.split("/");
+
+    for (let i = 0; i < 8; i++) {
+      const row = [];
+      let fenRow = fenRows[i];
+      for (let j = 0; j < fenRow.length; j++) {
+        const char = fenRow.charAt(j);
+        if (!isNaN(char)) {
+          for (let k = 0; k < parseInt(char); k++) {
+            row.push(null);
+          }
+        } else {
+          row.push(char);
+        }
+      }
+      board.push(row);
+    }
+
+    this._board = board;
     this._turn = turn;
     this._castlingRights = {
       [WHITE]: [],

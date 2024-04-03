@@ -6,6 +6,10 @@ const {
   handleCreateGame,
   findPrivateGame,
   convertOngoingGameToPastGame,
+  updateFen,
+  addFen,
+  popFen,
+  getLastFen,
 } = require("./events/gameUtils");
 const { emitToRoom } = require("./emittors");
 const { handleDisconnection } = require("./events/gameUtils");
@@ -43,8 +47,9 @@ const listen = (io, socket) => {
     // Logic for starting the game
   });
 
-  socket.on("move piece", (move) => {
-    const { gameRoom, input } = move;
+  socket.on("move piece", async (move) => {
+    const { gameRoom, input, fen } = move;
+    await addFen(gameRoom, fen);
     emitToRoom(socket, gameRoom, "oppMove", input);
   });
 
@@ -97,6 +102,23 @@ const listen = (io, socket) => {
       io.to(gameRoom).emit("game result", null);
     } else {
       emitToRoom(socket, gameRoom, "drawRejected");
+    }
+  });
+
+  socket.on("undo request", (info) => {
+    const { gameRoom } = info;
+    emitToRoom(socket, gameRoom, "oppUndoRequest");
+  });
+
+  socket.on("reply undo request", async (info) => {
+    const { gameRoom, accepted } = info;
+    if (accepted) {
+      await popFen(gameRoom);
+      const lastFen = await getLastFen(gameRoom);
+      io.to(gameRoom).emit("undoBoard", lastFen);
+      console.log(`$Fen for undo: ${lastFen}`);
+    } else {
+      emitToRoom(socket, gameRoom, "undoRejected");
     }
   });
 };

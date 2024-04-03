@@ -115,6 +115,8 @@ const MatchReducer = (state, action) => {
       return { ...state, endGameInfo: action.payload };
     case "DRAW_DIALOG":
       return { ...state, openDrawDialog: action.payload };
+    case "UNDO_DIALOG":
+      return { ...state, openUndoDialog: action.payload };
     default:
       return state;
   }
@@ -137,6 +139,7 @@ const Match = () => {
     btnDisabled: false,
     endGameInfo: null,
     openDrawDialog: false,
+    openUndoDialog: false,
   });
   const cookies = new Cookies();
   const userId = cookies.get("userId");
@@ -150,14 +153,22 @@ const Match = () => {
         dispatch(setGame(gameCopy));
         setInput(null);
       }
+      socket.on("undoBoard", (fen) => {
+        const gameFromFen = new Chessboard(game.side, game.gameMode, fen);
+        dispatch(setGame(gameFromFen));
+        matchDispatch({ type: "BTN_DISABLED", payload: false });
+      });
+
       return;
     }
 
     // ----------------- socket listeners -----------------
+    // opponent move
     socket.on("oppMove", (input) => {
       console.log("input", input);
       setInput(input);
     });
+    // end game
     socket.on("game result", (winnerId) => {
       matchDispatch({ type: "BTN_DISABLED", payload: true });
       if (winnerId === null) {
@@ -172,6 +183,8 @@ const Match = () => {
         });
       }
     });
+
+    // draw stuff
     socket.on("oppDrawRequest", () => {
       matchDispatch({ type: "DRAW_DIALOG", payload: true });
     });
@@ -180,6 +193,14 @@ const Match = () => {
       matchDispatch({ type: "BTN_DISABLED", payload: false });
     });
 
+    // undo stuff
+    socket.on("oppUndoRequest", () => {
+      matchDispatch({ type: "UNDO_DIALOG", payload: true });
+    });
+
+    socket.on("undoRejected", () => {
+      matchDispatch({ type: "BTN_DISABLED", payload: false });
+    });
     // ----------------------------------------------------
 
     if (!userId) {
@@ -192,6 +213,17 @@ const Match = () => {
       const chessboard = new Chessboard(orientation);
       console.log(orientation);
       dispatch(setGame(chessboard));
+
+      // handle undo when game variable is not set (a.k.a. 1st move)
+      socket.on("undoBoard", (fen) => {
+        const gameFromFen = new Chessboard(
+          chessboard.side,
+          chessboard.gameMode,
+          fen
+        );
+        dispatch(setGame(gameFromFen));
+        matchDispatch({ type: "BTN_DISABLED", payload: false });
+      });
 
       const opponentId =
         gameInfoData.player1 === userId
@@ -241,11 +273,10 @@ const Match = () => {
 
   const onUndoBtnClicked = () => {
     console.log("Undo clicked");
-    // matchDispatch({ type: "BTN_DISABLED", payload: true });
-    // socket.emit("undo request", {
-    //   gameRoom: gameId,
-    //   toPlayerId: matchState.opponent.id,
-    // });
+    matchDispatch({ type: "BTN_DISABLED", payload: true });
+    socket.emit("undo request", {
+      gameRoom: gameId,
+    });
   };
 
   const onDrawBtnClicked = () => {
@@ -340,6 +371,26 @@ const Match = () => {
                         accepted: false,
                       });
                       matchDispatch({ type: "DRAW_DIALOG", payload: false });
+                    }}
+                  ></YesNoDialog>
+                )}
+                {matchState.openUndoDialog && (
+                  <YesNoDialog
+                    title="Undo Request"
+                    content={`${matchState.opponent.username} has requested an undo. Do you accept?`}
+                    onYesClicked={() => {
+                      socket.emit("reply undo request", {
+                        gameRoom: gameId,
+                        accepted: true,
+                      });
+                      matchDispatch({ type: "UNDO_DIALOG", payload: false });
+                    }}
+                    onNoClicked={() => {
+                      socket.emit("reply undo request", {
+                        gameRoom: gameId,
+                        accepted: false,
+                      });
+                      matchDispatch({ type: "UNDO_DIALOG", payload: false });
                     }}
                   ></YesNoDialog>
                 )}

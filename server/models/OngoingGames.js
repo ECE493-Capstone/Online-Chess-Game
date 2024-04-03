@@ -7,6 +7,7 @@ const ongoingGamesSchema = mongoose.Schema(
     mode: String,
     timeControl: String,
     room: String,
+    fen: [String],
     pgn: String,
   },
   { collection: "ongoingGames" }
