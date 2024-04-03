@@ -67,7 +67,7 @@ const removeSocket = (socketId, io) => {
           console.log(result);
           // handleUserDisconnect(player);
         }
-      }, 8000);
+      }, 45000);
     }
   });
 };
