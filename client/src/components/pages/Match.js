@@ -20,6 +20,7 @@ import RequestButtons from "../game-room/RequestButtons";
 import { fetchUser } from "../../api/fetchUser";
 import H2H from "../game-room/H2H";
 import Header from "../Header";
+import YesNoDialog from "../dialog/YesNoDialog";
 
 const Container = styled.div`
   /* border: 1px solid white;
@@ -111,6 +112,12 @@ const MatchReducer = (state, action) => {
       return { ...state, opponentTime: action.payload };
     case "BTN_DISABLED":
       return { ...state, btnDisabled: action.payload };
+    case "END_GAME":
+      return { ...state, endGameInfo: action.payload };
+    case "DRAW_DIALOG":
+      return { ...state, openDrawDialog: action.payload };
+    case "UNDO_DIALOG":
+      return { ...state, openUndoDialog: action.payload };
     default:
       return state;
   }
@@ -132,6 +139,9 @@ const Match = () => {
     opponentTime: null,
     increment: null,
     btnDisabled: false,
+    endGameInfo: null,
+    openDrawDialog: false,
+    openUndoDialog: false,
   });
   const cookies = new Cookies();
   const userId = cookies.get("userId");
@@ -144,10 +154,28 @@ const Match = () => {
         gameCopy.playOpponentMove(input);
         dispatch(setGame(gameCopy));
         setInput(null);
+
+        if (gameCopy.isEnded) {
+          socket.emit("game end", {
+            gameRoom: gameId,
+            winnerId: gameCopy.winner
+              ? gameCopy.winner === gameCopy.side
+                ? matchState.player.id
+                : matchState.opponent.id
+              : null,
+          });
+        }
       }
+      socket.on("undoBoard", (fen) => {
+        const gameFromFen = new Chessboard(game.side, game.gameMode, fen);
+        dispatch(setGame(gameFromFen));
+        matchDispatch({ type: "BTN_DISABLED", payload: false });
+      });
+
       return;
     }
     if (userId) {
+      // ----------------- socket listeners -----------------
       socket.on("oppMove", (input) => {
         console.log("input", input);
         setInput(input);
@@ -165,6 +193,39 @@ const Match = () => {
         setIsOpponentDisconnected(false);
         toast.error("Opponent Abandoned the game!");
       });
+      socket.on("game result", (winnerId) => {
+        matchDispatch({ type: "BTN_DISABLED", payload: true });
+        if (winnerId === null) {
+          matchDispatch({
+            type: "END_GAME",
+            payload: "Draw",
+          });
+        } else {
+          matchDispatch({
+            type: "END_GAME",
+            payload: winnerId === userId ? "You won!" : "You lost!",
+          });
+        }
+      });
+
+      // draw stuff
+      socket.on("oppDrawRequest", () => {
+        matchDispatch({ type: "DRAW_DIALOG", payload: true });
+      });
+
+      socket.on("drawRejected", () => {
+        matchDispatch({ type: "BTN_DISABLED", payload: false });
+      });
+
+      // undo stuff
+      socket.on("oppUndoRequest", () => {
+        matchDispatch({ type: "UNDO_DIALOG", payload: true });
+      });
+
+      socket.on("undoRejected", () => {
+        matchDispatch({ type: "BTN_DISABLED", payload: false });
+      });
+      // ----------------------------------------------------
     }
     // if (!userId) {
     //   navigate("/test");
@@ -179,6 +240,18 @@ const Match = () => {
         gameInfoData.fen[gameInfoData.fen.length - 1]
       );
       dispatch(setGame(chessboard));
+
+      // handle undo when game variable is not set (a.k.a. 1st move)
+      socket.on("undoBoard", (fen) => {
+        const gameFromFen = new Chessboard(
+          chessboard.side,
+          chessboard.gameMode,
+          fen
+        );
+        dispatch(setGame(gameFromFen));
+        matchDispatch({ type: "BTN_DISABLED", payload: false });
+      });
+
       const opponentId =
         gameInfoData.player1 === userId
           ? gameInfoData.player2
@@ -193,12 +266,12 @@ const Match = () => {
         type: "INIT",
         payload: {
           player: {
-            ...playerInfo,
             id: userId,
+            ...playerInfo,
           },
           opponent: {
-            ...opponentInfo,
             id: opponentId,
+            ...opponentInfo,
           },
           playerTime: initTimeInMs,
           opponentTime: initTimeInMs,
@@ -227,20 +300,25 @@ const Match = () => {
 
   const onUndoBtnClicked = () => {
     console.log("Undo clicked");
+    matchDispatch({ type: "BTN_DISABLED", payload: true });
+    socket.emit("undo request", {
+      gameRoom: gameId,
+    });
   };
 
   const onDrawBtnClicked = () => {
     console.log("Draw clicked");
+    matchDispatch({ type: "BTN_DISABLED", payload: true });
+    socket.emit("draw request", { gameRoom: gameId });
   };
 
   const onResignBtnClicked = () => {
     console.log("Resign clicked");
-    // matchDispatch({ type: "BTN_DISABLED", payload: true });
-    // socket.emit("resign", {
-    //   gameRoom: gameId,
-    //   fromPlayerId: matchState.player.id,
-    //   toPlayerId: matchState.opponent.id,
-    // });
+    matchDispatch({ type: "BTN_DISABLED", payload: true });
+    socket.emit("resign", {
+      gameRoom: gameId,
+      winnerId: matchState.opponent.id,
+    });
   };
 
   const onPlayerTimeout = () => {
@@ -261,6 +339,7 @@ const Match = () => {
           message="URL copied to clipboard"
         />
       )}
+
       <div className="lhs">
         {game ? (
           <div className="board">
@@ -270,36 +349,82 @@ const Match = () => {
                 <h3>{numSpectators}</h3>
               </div>
             )} */}
-            <div className="info">
-              <h2>{matchState.opponent?.username}</h2>
-              {matchState.opponentTime !== null && (
-                <Timer
-                  initTimeInMs={matchState.opponentTime}
-                  isActive={!game.isSameTurn(game.side)}
-                  onTimeoutCb={onOpponentTimeout}
-                />
-              )}
-            </div>
-            <Board game={game} />
-            <div className="info">
-              <h2>{matchState.player?.username}</h2>
-              {matchState.playerTime !== null && (
-                <Timer
-                  initTimeInMs={matchState.playerTime}
-                  isActive={game.isSameTurn(game.side)}
-                  onTimeoutCb={onPlayerTimeout}
-                />
-              )}
-            </div>
-            <div className="share-btn">
-              <Button
-                onClick={copyUrlToClipboard}
-                variant="contained"
-                color="info"
-              >
-                {<ShareIcon />}
-              </Button>
-            </div>
+            {matchState.endGameInfo === null ? (
+              <>
+                <div className="info">
+                  <h2>{matchState.opponent?.username}</h2>
+                  {matchState.opponentTime !== null && (
+                    <Timer
+                      initTimeInMs={matchState.opponentTime}
+                      isActive={!game.isSameTurn(game.side)}
+                      onTimeoutCb={onOpponentTimeout}
+                    />
+                  )}
+                </div>
+                <Board game={game} />
+                <div className="info">
+                  <h2>{matchState.player?.username}</h2>
+                  {matchState.playerTime !== null && (
+                    <Timer
+                      initTimeInMs={matchState.playerTime}
+                      isActive={game.isSameTurn(game.side)}
+                      onTimeoutCb={onPlayerTimeout}
+                    />
+                  )}
+                </div>
+                <div className="share-btn">
+                  <Button
+                    onClick={copyUrlToClipboard}
+                    variant="contained"
+                    color="info"
+                  >
+                    {<ShareIcon />}
+                  </Button>
+                </div>
+                {matchState.openDrawDialog && (
+                  <YesNoDialog
+                    title="Draw Request"
+                    content={`${matchState.opponent.username} has requested a draw. Do you accept?`}
+                    onYesClicked={() => {
+                      socket.emit("reply draw request", {
+                        gameRoom: gameId,
+                        accepted: true,
+                      });
+                      matchDispatch({ type: "DRAW_DIALOG", payload: false });
+                    }}
+                    onNoClicked={() => {
+                      socket.emit("reply draw request", {
+                        gameRoom: gameId,
+                        accepted: false,
+                      });
+                      matchDispatch({ type: "DRAW_DIALOG", payload: false });
+                    }}
+                  ></YesNoDialog>
+                )}
+                {matchState.openUndoDialog && (
+                  <YesNoDialog
+                    title="Undo Request"
+                    content={`${matchState.opponent.username} has requested an undo. Do you accept?`}
+                    onYesClicked={() => {
+                      socket.emit("reply undo request", {
+                        gameRoom: gameId,
+                        accepted: true,
+                      });
+                      matchDispatch({ type: "UNDO_DIALOG", payload: false });
+                    }}
+                    onNoClicked={() => {
+                      socket.emit("reply undo request", {
+                        gameRoom: gameId,
+                        accepted: false,
+                      });
+                      matchDispatch({ type: "UNDO_DIALOG", payload: false });
+                    }}
+                  ></YesNoDialog>
+                )}
+              </>
+            ) : (
+              <div>{matchState.endGameInfo}</div>
+            )}
           </div>
         ) : (
           <NoticeDialog content="Waiting for opponent..." />

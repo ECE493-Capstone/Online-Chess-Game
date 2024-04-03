@@ -78,9 +78,8 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
   const dummyData = [
     {
       gameId: 1,
-      black: username,
-      white: "white",
-      moves: "moves",
+      player2: username,
+      player1: "white",
       mode: "Standard",
       timeControl: "timeControl",
       room: "room",
@@ -89,9 +88,8 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
     },
     {
       gameId: 1,
-      black: username,
-      white: "white",
-      moves: "Blind",
+      player2: username,
+      player1: "white",
       mode: "Blind",
       timeControl: "timeControl",
       room: "room",
@@ -100,9 +98,8 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
     },
     {
       gameId: 1,
-      black: "black",
-      white: username,
-      moves: "moves",
+      player2: "black",
+      player1: username,
       mode: "PowerUp",
       timeControl: "timeControl",
       room: "room",
@@ -228,7 +225,7 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
           data={data}
           username={username}
         />
-        <GameReview data={data} />
+        <GameReview data={data} username={username} />
       </div>
       <Modal
         open={openChangePassword}

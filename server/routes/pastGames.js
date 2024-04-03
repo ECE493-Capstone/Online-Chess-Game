@@ -11,8 +11,8 @@ router.get("/h2h", jsonParser, async (req, res) => {
   try {
     const games = await pastGames.find({
       $or: [
-        { $and: [{ black: player1 }, { white: player2 }] }, // player1 as black, player2 as white
-        { $and: [{ white: player1 }, { black: player2 }] }, // player1 as white, player2 as black
+        { $and: [{ player1: player1 }, { player2: player2 }] },
+        { $and: [{ player2: player1 }, { player1: player2 }] },
       ],
     });
 

@@ -4,7 +4,6 @@ import {
   TableBody,
   TableCell,
   TableContainer,
-  TableHead,
   TableRow,
 } from "@mui/material";
 import React from "react";
@@ -51,16 +50,9 @@ const StyledGameReview = styled.div`
     align-items: center;
   }
 `;
-const GameReview = ({ data }) => {
+const GameReview = ({ data, username }) => {
   return (
     <StyledGameReview>
-      {/* //{" "}
-      <div key={index}>
-        // <span>{game.white}</span>
-        // <span>{game.winner === game.white ? 1 : 0}</span>
-        // <span>{game.black}</span>
-        // <span>{game.winner === game.black}</span>
-        //{" "} */}
       <TableContainer component={Paper}>
         <Table stickyHeader>
           <TableBody>
@@ -68,16 +60,17 @@ const GameReview = ({ data }) => {
               <TableCell className="title">Completed games</TableCell>
             </TableRow>
             {data.map((game) => {
-              console.log(game);
+              const player1 = game.player1 === "" ? username : game.player1;
+              const player2 = game.player2 === "" ? username : game.player2;
               return (
                 <TableRow hover key={game.move}>
                   <TableCell className="data users" rowSpan={2}>
-                    <span>{game.white}</span>
-                    <span>{game.black}</span>
+                    <span>{player1}</span>
+                    <span>{player2}</span>
                   </TableCell>
                   <TableCell className="data scores" rowSpan={2}>
-                    <span>{game.winner === game.white ? 1 : 0}</span>
-                    <span>{game.winner === game.black ? 1 : 0}</span>
+                    <span>{game.winner === player1 ? 1 : 0}</span>
+                    <span>{game.winner === player2 ? 1 : 0}</span>
                   </TableCell>
                   <TableCell className="data link" rowSpan={2}>
                     <a href="/">Review</a>
