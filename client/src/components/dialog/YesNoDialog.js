@@ -10,6 +10,8 @@ const DialogContainer = styled.div`
   border-radius: 10px;
   max-width: 400px;
   padding: 10px 0;
+  margin: 20px 0;
+  z-index: 1000;
 
   .header {
     display: flex;
@@ -17,19 +19,19 @@ const DialogContainer = styled.div`
     align-items: center;
     padding: 0 20px;
     .headerContent {
-      margin: 5px 0;
+      margin: 2px 0;
     }
   }
 
   .body {
     display: flex;
     flex-direction: column;
-    padding: 20px;
+    padding: 5px 20px;
 
     .buttons {
       display: flex;
       justify-content: space-evenly;
-      margin-top: 20px;
+      margin-top: 10px;
     }
   }
 `;
@@ -45,7 +47,7 @@ const YesNoDialog = ({
   return (
     <DialogContainer>
       <div className="header">
-        <h2 className="headerContent">{title}</h2>
+        <h3 className="headerContent">{title}</h3>
       </div>
       <hr />
       <div className="body">

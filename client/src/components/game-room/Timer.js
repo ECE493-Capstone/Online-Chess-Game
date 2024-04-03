@@ -1,9 +1,9 @@
 import React, { useEffect, useReducer, useState } from "react";
 import styled from "styled-components";
 
-const Container = styled.div`
+const TimerContainer = styled.div`
   border: 1px solid white;
-  background-color: black;
+  background-color: ${(props) => (props.isActive ? "#555555" : "black")};
   border-radius: 10px;
   max-width: fit-content;
   padding: 10px 10px;
@@ -15,33 +15,50 @@ const Container = styled.div`
   }
 `;
 
-const Timer = ({ seconds }) => {
-  const [time, setTime] = useState(seconds); // in seconds
+const Timer = ({ initTimeInMs, isActive, onTimeoutCb, newTime = -1 }) => {
+  const DISPLAY_MS_THRESHOLD = 10000; // 10s
+
+  const [time, setTime] = useState(initTimeInMs); // in milliseconds
 
   useEffect(() => {
+    // if < 10s, update every 10ms, else every 1s
+    if (newTime > time) {
+      setTime(newTime);
+      return;
+    }
+
+    if (!isActive) return;
+
+    const delay = time < DISPLAY_MS_THRESHOLD ? 10 : 1000;
     const interval = setInterval(() => {
       setTime((prevTime) => {
-        if (prevTime === 0) {
+        if (prevTime <= 0) {
           clearInterval(interval);
+          onTimeoutCb();
           return 0;
         }
-        return prevTime - 1;
+        return prevTime - delay;
       });
-    }, 1000);
+    }, delay);
 
     return () => clearInterval(interval);
-  }, [seconds]);
+  }, [isActive, initTimeInMs, onTimeoutCb, time, newTime]);
 
-  const formatTime = (time) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = time % 60;
-    return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
+  const formatTime = (ms) => {
+    if (ms < DISPLAY_MS_THRESHOLD) {
+      const seconds = (ms % 60000) / 1000;
+      return `${seconds.toFixed(2)}`;
+    } else {
+      const minutes = Math.floor(ms / 60000);
+      const seconds = Math.floor((ms % 60000) / 1000);
+      return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+    }
   };
 
   return (
-    <Container>
+    <TimerContainer isActive={isActive}>
       <h3>{formatTime(time)}</h3>
-    </Container>
+    </TimerContainer>
   );
 };
 

@@ -5,9 +5,9 @@ import { IconButton } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 import styled from "styled-components";
 import Typography from "@mui/material/Typography";
-import StandardChessImage from "../img/Standard_Chess.png";
-import BlindChessImage from "../img/Blind_Chess.png";
-import PowerUpChessImage from "../img/Power_Up_Chess.png";
+import StandardChessImage from "../assets/standardChess.jpg";
+import BlindChessImage from "../assets/blindChess.jpg";
+import PowerUpChessImage from "../assets/duckChess.jpg";
 
 const GameContainer = styled.div`
   border: 1px solid white;
