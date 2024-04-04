@@ -91,7 +91,7 @@ const Container = styled.div`
   .rhs {
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
+    justify-content: center;
     align-items: center;
     width: 40vw;
     height: 100vh;
@@ -479,19 +479,54 @@ const Match = () => {
               player2Id={matchState.opponent?.id}
             />
           </div>
-          <div className="move-history">
-            <MoveHistory />
-          </div>
-          {isPlayer && (
-            <div className="request-btns">
-              <RequestButtons
-                onUndoClicked={onUndoBtnClicked}
-                onDrawClicked={onDrawBtnClicked}
-                onResignClicked={onResignBtnClicked}
-                isDisabled={matchState.btnDisabled}
-              />
-            </div>
+          {matchState.openDrawDialog && (
+            <YesNoDialog
+              title="Draw Request"
+              content={`${matchState.opponent.username} has requested a draw. Do you accept?`}
+              onYesClicked={() => {
+                socket.emit("reply draw request", {
+                  gameRoom: gameId,
+                  accepted: true,
+                });
+                matchDispatch({ type: "DRAW_DIALOG", payload: false });
+              }}
+              onNoClicked={() => {
+                socket.emit("reply draw request", {
+                  gameRoom: gameId,
+                  accepted: false,
+                });
+                matchDispatch({ type: "DRAW_DIALOG", payload: false });
+              }}
+            ></YesNoDialog>
           )}
+          {matchState.openUndoDialog && (
+            <YesNoDialog
+              title="Undo Request"
+              content={`${matchState.opponent.username} has requested an undo. Do you accept?`}
+              onYesClicked={() => {
+                socket.emit("reply undo request", {
+                  gameRoom: gameId,
+                  accepted: true,
+                });
+                matchDispatch({ type: "UNDO_DIALOG", payload: false });
+              }}
+              onNoClicked={() => {
+                socket.emit("reply undo request", {
+                  gameRoom: gameId,
+                  accepted: false,
+                });
+                matchDispatch({ type: "UNDO_DIALOG", payload: false });
+              }}
+            ></YesNoDialog>
+          )}
+          <div className="request-btns">
+            <RequestButtons
+              onUndoClicked={onUndoBtnClicked}
+              onDrawClicked={onDrawBtnClicked}
+              onResignClicked={onResignBtnClicked}
+              isDisabled={matchState.btnDisabled}
+            />
+          </div>
         </div>
       )}
     </Container>

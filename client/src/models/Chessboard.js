@@ -2,14 +2,14 @@ export const WHITE = "w";
 export const BLACK = "b";
 export const GAME_MODE = {
   STANDARD: "standard",
-  POWER_UP_DUCK: "power-up-duck",
+  POWER_UP_DUCK: "Power-up Duck",
 };
 
 const KING_SIDE_CASTLE = "O-O";
 const QUEEN_SIDE_CASTLE = "O-O-O";
-const EVOLVE_SYMBOL = "*";
+export const EVOLVE_SYMBOL = "*";
 const PROGRESS_SYMBOL = "+";
-const DUCK = "DD";
+export const DUCK = "D";
 
 export class Chessboard {
   constructor(side, gameMode, fen = null) {
@@ -224,60 +224,6 @@ export class Chessboard {
 
     return fen;
   }
-
-  _initFromFEN2(fen) {
-    const board = [];
-    const fenParts = fen.split(" ");
-    const [
-      boardPart,
-      turn,
-      castlingRights,
-      enPassantSquare,
-      halfMove,
-      fullMove,
-    ] = fenParts;
-    const fenRows = boardPart.split("/");
-
-    for (let i = 0; i < 8; i++) {
-      const row = [];
-      let fenRow = fenRows[i];
-      for (let j = 0; j < fenRow.length; j++) {
-        const char = fenRow.charAt(j);
-        if (!isNaN(char)) {
-          for (let k = 0; k < parseInt(char); k++) {
-            row.push(null);
-          }
-        } else {
-          row.push(char);
-        }
-      }
-      board.push(row);
-    }
-
-    this._board = board;
-    this._turn = turn;
-    this._castlingRights = {
-      [WHITE]: [],
-      [BLACK]: [],
-    };
-    if (castlingRights !== "-") {
-      for (const right of castlingRights) {
-        if (right === "k") {
-          this._castlingRights[WHITE].push(KING_SIDE_CASTLE);
-        } else if (right === "q") {
-          this._castlingRights[WHITE].push(QUEEN_SIDE_CASTLE);
-        } else if (right === "K") {
-          this._castlingRights[BLACK].push(KING_SIDE_CASTLE);
-        } else if (right === "Q") {
-          this._castlingRights[BLACK].push(QUEEN_SIDE_CASTLE);
-        }
-      }
-    }
-    this._enPassantSquare = enPassantSquare !== "-" ? enPassantSquare : null;
-    this._halfMove = parseInt(halfMove);
-    this._fullMove = parseInt(fullMove);
-  }
-
   convertToFEN() {
     let fen = "";
     for (let row = 0; row < 8; row++) {
@@ -406,7 +352,7 @@ export class Chessboard {
       this._isEnded = true;
       this._winner = null;
       console.log("Draw! (no kings)");
-    } else if (numKingsAlive === 1) {
+    } else if (numKingsAlive.length === 1) {
       const king = numKingsAlive[0];
       if (this._isSameSide(king)) {
         this._isEnded = true;
@@ -656,6 +602,16 @@ export class Chessboard {
     }
   }
 
+  _findPiece(symbol) {
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        if (this.getPiece(row, col) === symbol) {
+          return [row, col];
+        }
+      }
+    }
+  }
+
   _isEnemyPiece(piece) {
     return piece && !this._isDuckPiece(piece) && !this._isSameSide(piece);
   }
@@ -755,8 +711,21 @@ export class Chessboard {
     }
 
     if (this._isRook(piece) && this._isEvolvedPiece(piece)) {
-      const standardRookMoves = this._getStandardRookMoves(fromRow, fromCol);
-      const globalCastleMoves = this._getGlobalCastleMoves(fromRow, fromCol);
+      let standardRookMoves, globalCastleMoves;
+
+      if (this._turn === this._side) {
+        standardRookMoves = this._getStandardRookMoves(fromRow, fromCol);
+        globalCastleMoves = this._getGlobalCastleMoves(fromRow, fromCol);
+      } else {
+        standardRookMoves = this._getOpponentStandardRookMoves(
+          fromRow,
+          fromCol
+        );
+        globalCastleMoves = this._getOpponentGlobalCastleMoves(
+          fromRow,
+          fromCol
+        );
+      }
       if (
         !standardRookMoves.some(([r, c]) => r === toRow && c === toCol) &&
         globalCastleMoves.some(([r, c]) => r === toRow && c === toCol)
@@ -877,7 +846,7 @@ export class Chessboard {
   }
 
   _updatePawnEvolveProgress(piece, row, col) {
-    const EVOLVE_THRESHOLD = 3;
+    const EVOLVE_THRESHOLD = 2;
     const newPawn = piece + PROGRESS_SYMBOL;
     this.add(row, col, newPawn);
     // if new piece has 3 progress symbols, evolve it
@@ -1172,10 +1141,14 @@ export class Chessboard {
     const knightMoves = this._getKnightDirections();
     for (const [dx, dy] of knightMoves) {
       const newRow = this._isEvolvedPiece(this.getPiece(fromRow, fromCol))
-        ? (fromRow + dx) % 8
+        ? (fromRow + dx) % 8 < 0
+          ? 8 + ((fromRow + dx) % 8)
+          : (fromRow + dx) % 8
         : fromRow + dx;
       const newCol = this._isEvolvedPiece(this.getPiece(fromRow, fromCol))
-        ? (fromCol + dy) % 8
+        ? (fromCol + dy) % 8 < 0
+          ? 8 + ((fromCol + dy) % 8)
+          : (fromCol + dy) % 8
         : fromCol + dy;
       if (newRow >= 0 && newRow <= 7 && newCol >= 0 && newCol <= 7) {
         if (
@@ -1226,6 +1199,35 @@ export class Chessboard {
     }
     return possibleMoves;
   }
+
+  _getOpponentGlobalCastleMoves(fromRow, fromCol) {
+    const possibleMoves = [];
+    const piece = this.getPiece(fromRow, fromCol);
+
+    if (
+      this._isRook(piece) &&
+      this._isEvolvedPiece(piece) &&
+      this._isEnemyPiece(piece)
+    ) {
+      const opponentKingSymbol = this._side === WHITE ? "K" : "k";
+      const [kingRow, kingCol] = this._findPiece(opponentKingSymbol);
+      const kingDirections = this._getKingDirections();
+
+      for (const [dx, dy] of kingDirections) {
+        const newRow = kingRow + dx;
+        const newCol = kingCol + dy;
+        if (newRow >= 0 && newRow <= 7 && newCol >= 0 && newCol <= 7) {
+          if (
+            this._isEmptySquare(newRow, newCol) ||
+            this._isSameSide(this.getPiece(newRow, newCol))
+          )
+            possibleMoves.push([newRow, newCol]);
+        }
+      }
+    }
+    return possibleMoves;
+  }
+
   _getRookMoves(fromRow, fromCol) {
     const possibleMoves = this._getStandardRookMoves(fromRow, fromCol);
     const globalCastleMoves = this._getGlobalCastleMoves(fromRow, fromCol);
@@ -1258,6 +1260,28 @@ export class Chessboard {
               possibleMoves.push([currRow, currCol]);
             break;
           }
+        }
+        currRow += dx;
+        currCol += dy;
+      }
+    }
+    return possibleMoves;
+  }
+
+  _getOpponentStandardRookMoves(fromRow, fromCol) {
+    const possibleMoves = [];
+    const rookDirections = this._getRookDirections();
+    for (const [dx, dy] of rookDirections) {
+      let currRow = fromRow + dx;
+      let currCol = fromCol + dy;
+      while (currRow >= 0 && currRow <= 7 && currCol >= 0 && currCol <= 7) {
+        if (this._isEmptySquare(currRow, currCol)) {
+          possibleMoves.push([currRow, currCol]);
+        } else {
+          if (this._isSameSide(this.getPiece(currRow, currCol))) {
+            possibleMoves.push([currRow, currCol]);
+          }
+          break;
         }
         currRow += dx;
         currCol += dy;

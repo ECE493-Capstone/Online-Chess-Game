@@ -8,6 +8,7 @@ import Typography from "@mui/material/Typography";
 import StandardChessImage from "../assets/standardChess.jpg";
 import BlindChessImage from "../assets/blindChess.jpg";
 import PowerUpChessImage from "../assets/duckChess.jpg";
+import { GAME_MODE } from "../models/Chessboard";
 
 const GameContainer = styled.div`
   border: 1px solid white;
@@ -115,7 +116,7 @@ const GameSelect = ({ handleGameSelectHome }) => {
       </GameContainer>
       <GameContainer
         style={{ position: "relative" }}
-        onClick={() => handleGameSelect("Power-up Duck")}
+        onClick={() => handleGameSelect(GAME_MODE.POWER_UP_DUCK)}
       >
         <img
           src={PowerUpChessImage}
