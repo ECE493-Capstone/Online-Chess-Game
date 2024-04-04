@@ -1,12 +1,7 @@
 const OngoingGames = require("../../models/OngoingGames");
 const PastGames = require("../../models/PastGames");
 const Queue = require("../../models/Queue");
-const {
-  addSocket,
-  addActiveGame,
-  getActiveUsers,
-  getActiveGames,
-} = require("../../data");
+const { addSocket, addActiveGame, resetUser } = require("../../data");
 const { handleUserDisconnect } = require("../user/userSocketHandler");
 const { createRoom } = require("../rooms/roomUtils");
 const { emitToRoom } = require("../emittors");
@@ -128,7 +123,8 @@ const convertOngoingGameToPastGame = async (roomId, winnerId) => {
   });
   await newPastGame.save();
   console.log(`${gameToSave.room} saved to past games`);
-
+  resetUser(gameToSave.player1);
+  resetUser(gameToSave.player2);
   await OngoingGames.deleteOne({ room: roomId });
 };
 

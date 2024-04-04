@@ -20,7 +20,6 @@ import MoveHistory from "../game-room/MoveHistory";
 import RequestButtons from "../game-room/RequestButtons";
 import { fetchUser } from "../../api/fetchUser";
 import H2H from "../game-room/H2H";
-import Header from "../Header";
 import YesNoDialog from "../dialog/YesNoDialog";
 
 const Container = styled.div`
@@ -132,7 +131,7 @@ const Match = () => {
   const { gameId } = useParams();
   const [showShareToast, setShowShareToast] = useState(false);
   const dispatch = useDispatch();
-
+  const isPlayer = useSelector((state) => state.user.isPlayer);
   const [matchState, matchDispatch] = useReducer(MatchReducer, {
     player: null,
     opponent: null,
@@ -146,36 +145,11 @@ const Match = () => {
   });
   const cookies = new Cookies();
   const userId = cookies.get("userId");
-  const navigate = useNavigate();
-  console.log(game);
+  console.log("ISPLAYER", isPlayer);
   useEffect(() => {
-    if (game) {
-      if (input !== null) {
-        const gameCopy = game.copy();
-        gameCopy.playOpponentMove(input);
-        dispatch(setGame(gameCopy));
-        setInput(null);
-
-        if (gameCopy.isEnded) {
-          socket.emit("game end", {
-            gameRoom: gameId,
-            winnerId: gameCopy.winner
-              ? gameCopy.winner === gameCopy.side
-                ? matchState.player.id
-                : matchState.opponent.id
-              : null,
-          });
-        }
-      }
-      socket.on("undoBoard", (fen) => {
-        const gameFromFen = new Chessboard(game.side, game.gameMode, fen);
-        dispatch(setGame(gameFromFen));
-        matchDispatch({ type: "BTN_DISABLED", payload: false });
-      });
-
-      return;
-    }
-    if (userId) {
+    console.log("TEST", isPlayer);
+    if (isPlayer) {
+      console.log("PLAYER");
       // ----------------- socket listeners -----------------
       socket.on("oppMove", (input) => {
         console.log("input", input);
@@ -227,12 +201,46 @@ const Match = () => {
         matchDispatch({ type: "BTN_DISABLED", payload: false });
       });
       // ----------------------------------------------------
+    } else if (isPlayer === false) {
+      socket.emit("join room", gameId);
+      socket.on("spectatorMove", (fen) => {
+        console.log("SPECTATOR");
+        dispatch(setGame(new Chessboard(WHITE, game.gameMode, fen)));
+      });
+    }
+  }, [isPlayer]);
+  useEffect(() => {
+    if (game) {
+      if (input !== null) {
+        const gameCopy = game.copy();
+        gameCopy.playOpponentMove(input);
+        dispatch(setGame(gameCopy));
+        setInput(null);
+
+        if (gameCopy.isEnded) {
+          socket.emit("game end", {
+            gameRoom: gameId,
+            winnerId: gameCopy.winner
+              ? gameCopy.winner === gameCopy.side
+                ? matchState.player.id
+                : matchState.opponent.id
+              : null,
+          });
+        }
+      }
+      socket.on("undoBoard", (fen) => {
+        const gameFromFen = new Chessboard(game.side, game.gameMode, fen);
+        dispatch(setGame(gameFromFen));
+        matchDispatch({ type: "BTN_DISABLED", payload: false });
+      });
+
+      return;
     }
     let orientation = WHITE;
     const fetchGame = async () => {
       const gameInfoData = await getOngoingGameInformationByGameId(gameId);
-      const isPlayer =
-        userId &&
+      const isPlayerVal =
+        userId !== undefined &&
         (gameInfoData.player1 === userId || gameInfoData.player2 === userId);
       orientation = !userId || gameInfoData.player1 === userId ? WHITE : BLACK;
       const chessboard = new Chessboard(
@@ -240,7 +248,8 @@ const Match = () => {
         gameInfoData.mode,
         gameInfoData.fen[gameInfoData.fen.length - 1]
       );
-      dispatch(setIsPlayer(isPlayer));
+      console.log("Set player", isPlayerVal);
+      dispatch(setIsPlayer(isPlayerVal));
       dispatch(setGame(chessboard));
 
       // handle undo when game variable is not set (a.k.a. 1st move)
@@ -258,9 +267,16 @@ const Match = () => {
         gameInfoData.player1 === userId
           ? gameInfoData.player2
           : gameInfoData.player1;
-      const opponentInfo = (await fetchUser(opponentId)).data;
-      console.log(opponentInfo);
-      const playerInfo = (await fetchUser(userId)).data;
+      console.log(opponentId);
+      let opponentInfo, playerInfo;
+      if (isPlayerVal) {
+        opponentInfo = (await fetchUser(opponentId)).data;
+        playerInfo = (await fetchUser(userId)).data;
+      } else {
+        opponentInfo = (await fetchUser(gameInfoData.player1)).data;
+        playerInfo = (await fetchUser(gameInfoData.player2)).data;
+        console.log(gameInfoData, opponentInfo, playerInfo);
+      }
       const tc = gameInfoData.timeControl.split(" ");
       const initTimeInMs = parseInt(tc[0]) * 1000 * 60;
       const incrementInMs = parseInt(tc[2]) * 1000;
@@ -345,88 +361,81 @@ const Match = () => {
       <div className="lhs">
         {game ? (
           <div className="board">
-            {/* {numSpectators > 0 && (
-              <div className="spectator">
-                <VisibilityIcon />
-                <h3>{numSpectators}</h3>
-              </div>
-            )} */}
-            {matchState.endGameInfo === null ? (
-              <>
-                <div className="info">
-                  <h2>{matchState.opponent?.username}</h2>
-                  {matchState.opponentTime !== null && (
-                    <Timer
-                      initTimeInMs={matchState.opponentTime}
-                      isActive={!game.isSameTurn(game.side)}
-                      onTimeoutCb={onOpponentTimeout}
-                    />
-                  )}
-                </div>
-                <Board game={game} />
-                <div className="info">
-                  <h2>{matchState.player?.username}</h2>
-                  {matchState.playerTime !== null && (
-                    <Timer
-                      initTimeInMs={matchState.playerTime}
-                      isActive={game.isSameTurn(game.side)}
-                      onTimeoutCb={onPlayerTimeout}
-                    />
-                  )}
-                </div>
-                <div className="share-btn">
-                  <Button
-                    onClick={copyUrlToClipboard}
-                    variant="contained"
-                    color="info"
-                  >
-                    {<ShareIcon />}
-                  </Button>
-                </div>
-                {matchState.openDrawDialog && (
-                  <YesNoDialog
-                    title="Draw Request"
-                    content={`${matchState.opponent.username} has requested a draw. Do you accept?`}
-                    onYesClicked={() => {
-                      socket.emit("reply draw request", {
-                        gameRoom: gameId,
-                        accepted: true,
-                      });
-                      matchDispatch({ type: "DRAW_DIALOG", payload: false });
-                    }}
-                    onNoClicked={() => {
-                      socket.emit("reply draw request", {
-                        gameRoom: gameId,
-                        accepted: false,
-                      });
-                      matchDispatch({ type: "DRAW_DIALOG", payload: false });
-                    }}
-                  ></YesNoDialog>
-                )}
-                {matchState.openUndoDialog && (
-                  <YesNoDialog
-                    title="Undo Request"
-                    content={`${matchState.opponent.username} has requested an undo. Do you accept?`}
-                    onYesClicked={() => {
-                      socket.emit("reply undo request", {
-                        gameRoom: gameId,
-                        accepted: true,
-                      });
-                      matchDispatch({ type: "UNDO_DIALOG", payload: false });
-                    }}
-                    onNoClicked={() => {
-                      socket.emit("reply undo request", {
-                        gameRoom: gameId,
-                        accepted: false,
-                      });
-                      matchDispatch({ type: "UNDO_DIALOG", payload: false });
-                    }}
-                  ></YesNoDialog>
-                )}
-              </>
-            ) : (
+            {matchState.endGameInfo === null && (
               <div>{matchState.endGameInfo}</div>
             )}
+            <>
+              <div className="info">
+                <h2>{matchState.opponent?.username}</h2>
+                {matchState.opponentTime !== null && (
+                  <Timer
+                    initTimeInMs={matchState.opponentTime}
+                    isActive={!game.isSameTurn(game.side)}
+                    onTimeoutCb={onOpponentTimeout}
+                  />
+                )}
+              </div>
+              <Board game={game} />
+              <div className="info">
+                <h2>{matchState.player?.username}</h2>
+                {matchState.playerTime !== null && (
+                  <Timer
+                    initTimeInMs={matchState.playerTime}
+                    isActive={game.isSameTurn(game.side)}
+                    onTimeoutCb={onPlayerTimeout}
+                  />
+                )}
+              </div>
+              <div className="share-btn">
+                <Button
+                  onClick={copyUrlToClipboard}
+                  variant="contained"
+                  color="info"
+                >
+                  {<ShareIcon />}
+                </Button>
+              </div>
+              {matchState.openDrawDialog && (
+                <YesNoDialog
+                  title="Draw Request"
+                  content={`${matchState.opponent.username} has requested a draw. Do you accept?`}
+                  onYesClicked={() => {
+                    socket.emit("reply draw request", {
+                      gameRoom: gameId,
+                      accepted: true,
+                    });
+                    matchDispatch({ type: "DRAW_DIALOG", payload: false });
+                  }}
+                  onNoClicked={() => {
+                    socket.emit("reply draw request", {
+                      gameRoom: gameId,
+                      accepted: false,
+                    });
+                    matchDispatch({ type: "DRAW_DIALOG", payload: false });
+                  }}
+                ></YesNoDialog>
+              )}
+              {matchState.openUndoDialog && (
+                <YesNoDialog
+                  title="Undo Request"
+                  content={`${matchState.opponent.username} has requested an undo. Do you accept?`}
+                  onYesClicked={() => {
+                    socket.emit("reply undo request", {
+                      gameRoom: gameId,
+                      accepted: true,
+                    });
+                    matchDispatch({ type: "UNDO_DIALOG", payload: false });
+                  }}
+                  onNoClicked={() => {
+                    socket.emit("reply undo request", {
+                      gameRoom: gameId,
+                      accepted: false,
+                    });
+                    matchDispatch({ type: "UNDO_DIALOG", payload: false });
+                  }}
+                ></YesNoDialog>
+              )}
+            </>
           </div>
         ) : (
           <NoticeDialog content="Waiting for opponent..." />
@@ -443,17 +452,17 @@ const Match = () => {
               player2Id={matchState.opponent?.id}
             />
           </div>
-          <div className="move-history">
-            <MoveHistory />
-          </div>
-          <div className="request-btns">
-            <RequestButtons
-              onUndoClicked={onUndoBtnClicked}
-              onDrawClicked={onDrawBtnClicked}
-              onResignClicked={onResignBtnClicked}
-              isDisabled={matchState.btnDisabled}
-            />
-          </div>
+          <div className="move-history">{/* <MoveHistory /> */}</div>
+          {isPlayer && (
+            <div className="request-btns">
+              <RequestButtons
+                onUndoClicked={onUndoBtnClicked}
+                onDrawClicked={onDrawBtnClicked}
+                onResignClicked={onResignBtnClicked}
+                isDisabled={matchState.btnDisabled}
+              />
+            </div>
+          )}
         </div>
       )}
     </Container>

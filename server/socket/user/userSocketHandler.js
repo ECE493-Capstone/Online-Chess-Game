@@ -14,7 +14,6 @@ const handleUserConnect = async (userId, socket, io) => {
   // });
   // const result = await userSocket.save();
   if (!getUserActiveGame(userId)) {
-    console.log("NEW USER", userId);
     return;
   }
   handleUserReconnect(userId, socket, io);

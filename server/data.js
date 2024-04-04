@@ -1,4 +1,4 @@
-const { deleteOngoingGames } = require("./socket/events/gameUtils");
+const OngoingGames = require("./models/OngoingGames");
 
 const activeUsers = {};
 const activeGames = {};
@@ -12,6 +12,13 @@ const addSocket = (userId, socketId) => {
       socket: socketId,
     };
   }
+};
+
+const resetUser = (userId) => {
+  activeUsers[userId] = {
+    activeGame: null,
+    socket: null,
+  };
 };
 
 const getActiveUsers = () => {
@@ -38,7 +45,6 @@ const getPlayerFromRoom = (roomId, notUser = null) => {
 
 const removeSocket = (socketId, io) => {
   Object.keys(activeUsers).forEach((user) => {
-    console.log(activeUsers[user].socket, socketId);
     if (activeUsers[user].socket === socketId) {
       activeUsers[user].socket = null;
       const player = getPlayerFromRoom(activeUsers[user].activeGame, user);
@@ -49,7 +55,7 @@ const removeSocket = (socketId, io) => {
         removeUser(user);
         removeUser(player);
       }
-      setTimeout(() => {
+      setTimeout(async () => {
         if (!activeUsers[user]?.socket) {
           removeUser(user);
           console.log(
@@ -61,11 +67,10 @@ const removeSocket = (socketId, io) => {
             console.log(player);
             io.to(activeUsers[player].socket).emit("opponent abandoned");
           }
-          const result = deleteOngoingGames({
+          const result = await OngoingGames.deleteMany({
             $or: [{ player1: user }, { player2: user }],
           });
           console.log(result);
-          // handleUserDisconnect(player);
         }
       }, 45000);
     }
@@ -97,4 +102,5 @@ module.exports = {
   removeSocket,
   getActiveGames,
   getActiveUsers,
+  resetUser,
 };
