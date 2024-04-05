@@ -1,13 +1,15 @@
-import React, { useState } from "react";
-import { MenuItem, FormControl, InputLabel, Select } from "@mui/material";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts"; // Import from 'recharts' instead of '@mui/x-charts'
+import React, { useState, useEffect } from 'react';
+import { MenuItem, Button, ButtonGroup, MenuList, Paper, Popper, Grow, ClickAwayListener, FormControl, InputLabel, Select } from '@mui/material';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts'; // Import from 'recharts' instead of '@mui/x-charts'
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import styled from "styled-components";
+import { getPastGamesInformation } from '../api/pastGames';
 
 const PageContainer = styled.div`
   display: flex;
   align-items: center;
   flex-direction: column;
-  width: 30vw;
+  width: 100%;
   gap: 5vh;
   .select-form {
     width: 40%;
@@ -17,25 +19,68 @@ const PageContainer = styled.div`
 
 // Sample game mode data. Hard-coded. Once they finish with the API for the actual data, I'll implement them.
 const GameStatistics = ({ handleSetData, data, username }) => {
+  // console.log("Data retreived into stats: " + JSON.stringify(data));
   const [selectedGameMode, setSelectedGameMode] = useState("All");
-  const handleGraphData = () => {
-    let winCount = 0;
-    let tieCount = 0;
-    let lossCount = 0;
+  const [formattedData, setFormattedData] = useState([]);
 
-    data.forEach((entry) => {
-      if (entry.winner === username) {
-        winCount++;
-      } else if (entry.winner === null) {
-        tieCount++;
-      } else {
-        lossCount++;
-      }
-    });
+  useEffect(() => {
 
-    return [{ win: winCount, tie: tieCount, lose: lossCount }];
-  };
-  const graphData = handleGraphData();
+    const handleGraphData = () => {
+      let winCountWhite = 0;
+      let winCountBlack = 0;
+      let tieCountWhite = 0;
+      let tieCountBlack = 0;
+      let lossCountWhite = 0;
+      let lossCountBlack = 0;
+  
+  
+      data.forEach((entry) => {
+        if (entry.winner === username) {
+          if (entry.player1 === username) {
+            winCountWhite++;
+          }
+          else {
+            winCountBlack++;
+          }
+        } else if (entry.winner === null) {
+          if (entry.player1 === username) {
+            tieCountWhite++;
+          }
+          else {
+            tieCountBlack++;
+          }
+        } else {
+          if (entry.player1 === username) {
+            lossCountWhite++;
+          }
+          else {
+            lossCountBlack++;
+          }
+        }
+      });
+      
+      // console.log("Final values attained: " + win)
+      return [{ winWhite: winCountWhite, winBlack: winCountBlack, tieWhite: tieCountWhite, tieBlack: tieCountBlack, loseWhite: lossCountWhite, loseBlack: lossCountBlack }];
+    };
+
+    const formatGameData = (gameData) => {
+      // console.log("gamedata: " + JSON.stringify(gameData[0]));
+      const formattedData = [
+          { name: "Wins", white: gameData[0].winWhite, black: gameData[0].winBlack },
+          { name: "Losses", white: gameData[0].loseWhite, black: gameData[0].loseBlack },
+          { name: "Ties", white: gameData[0].tieWhite, black: gameData[0].tieBlack }
+      ];
+  
+      setFormattedData(formattedData);
+    }
+
+    const graphData = handleGraphData();
+    
+    formatGameData(graphData);
+    
+
+  }, [data]);
+
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
@@ -64,16 +109,15 @@ const GameStatistics = ({ handleSetData, data, username }) => {
       <BarChart
         width={400}
         height={300}
-        data={graphData}
+        data={formattedData}
         margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
       >
-        <XAxis dataKey="gameMode" />
+        <XAxis dataKey="name" />
         <YAxis />
         <Tooltip content={<CustomTooltip />} />
         <Legend />
-        <Bar dataKey="win" fill="#22a186" name="Win" />
-        <Bar dataKey="tie" fill="#D3D3D3" name="Tie" />
-        <Bar dataKey="lose" fill="#d54f68" name="Lose" />
+        <Bar dataKey="white" fill="white" name="White" stackId="white" />
+        <Bar dataKey="black" fill="#9e9fa0" name="Black" stackId="black" />
       </BarChart>
       <FormControl className="select-form">
         <InputLabel id="demo-simple-select-label">Game Mode</InputLabel>
