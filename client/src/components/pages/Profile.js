@@ -13,7 +13,7 @@ import GameStatistics from "../Statistics";
 import img from "../../assets/profile.svg";
 import { getPastGamesInformation } from "../../api/pastGames";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import GameReview from "../GameReview";
+import GameReview from "../GameHistory";
 
 const StyledUserInfoContainer = styled.div`
   display: flex;
