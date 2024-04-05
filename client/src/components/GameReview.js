@@ -9,7 +9,7 @@ import {
 import React, {useState, useEffect} from "react";
 import styled from "styled-components";
 import { fetchUser } from "../api/fetchUser";
-
+import { useNavigate } from "react-router-dom";
 
 const StyledGameReview = styled.div`
   width: 70%;
@@ -60,6 +60,14 @@ const GameReview = ({ data, username, userId }) => {
   const [player1, setPlayer1] = useState("");
   const [player2, setPlayer2] = useState("");
   const [updatedData, setUpdatedData] = useState([]);
+
+  const navigate = useNavigate();
+
+  const handleListItemSelect = (game) => {
+    console.log('Navigating to game reivew with: ' + game.mode);
+    // Navigate to GameReview component and pass selected game as a prop
+    navigate('/profile/gamemovesreview', { state: { game } });
+  };
 
   const getOpponentName = async (opponentId) => {
     try {
@@ -145,7 +153,7 @@ const GameReview = ({ data, username, userId }) => {
                     <span>{game.winner === game.player2 ? 1 : 0}</span>
                   </TableCell>
                   <TableCell className="data link" rowSpan={2}>
-                    <a href="/">Review</a>
+                    <a onClick={() => handleListItemSelect(game)}>Review</a>
                   </TableCell>
                 </TableRow>
               ))

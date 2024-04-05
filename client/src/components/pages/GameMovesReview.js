@@ -10,11 +10,11 @@ import { WHITE, BLACK } from "../../models/Chessboard.js";
 
 const PageContainer = styled.div`
   display: flex;
-  background-color: rgb(184, 184, 184);
+  background-color: #12121b;
   min-height: 100vh;
 `;
 
-const GameReview = () => {
+const GameMovesReview = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const { game } = useLocation().state;
     const [currentMove, setCurrentMove] = useState("");
@@ -132,4 +132,4 @@ const GameReview = () => {
     );
 };
 
-export default GameReview;
+export default GameMovesReview;

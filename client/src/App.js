@@ -13,7 +13,7 @@ import TimeSelect from "./components/TimeSelect";
 import { socket } from "./app/socket";
 import Profile from "./components/pages/Profile";
 import H2HTest from "./components/pages/H2HTest";
-import GameReview from "./components/pages/GameReview";
+import GameMovesReview from "./components/pages/GameMovesReview";
 import { Toaster } from "react-hot-toast";
 
 const darkTheme = createTheme({
@@ -46,7 +46,7 @@ const App = () => {
           <Route path="/match" element={<Match />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/h2htest" element={<H2HTest />} />
-          <Route path="/gamereview" element={<GameReview />} />
+          <Route path="/profile/gamemovesreview" element={<GameMovesReview />} />
         </Routes>
       </Router>
     </ThemeProvider>
