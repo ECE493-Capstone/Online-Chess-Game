@@ -82,6 +82,7 @@ const GameReview = ({ data, username, userId }) => {
       const updatedData = await Promise.all(data.map(async (game) => {
         let newPlayer1 = "";
         let newPlayer2 = "";
+        let newWinner = "";
   
         if (game.player1 === userId) {
           newPlayer1 = username;
@@ -96,11 +97,19 @@ const GameReview = ({ data, username, userId }) => {
           const player2 = await getOpponentName(game.player2);
           newPlayer2 = player2;
         }
+
+        if (game.winner === userId) {
+          newWinner = username;
+        } else {
+          const winner = await getOpponentName(game.winner);
+          newWinner = winner;
+        }
   
         return {
           ...game,
           player1: newPlayer1,
-          player2: newPlayer2
+          player2: newPlayer2,
+          winner: newWinner,
         };
       }));
   
@@ -118,8 +127,14 @@ const GameReview = ({ data, username, userId }) => {
             <TableRow>
               <TableCell className="title">Completed games</TableCell>
             </TableRow>
-            {updatedData.map((game) => {
-              return (
+            {updatedData.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={3} style={{fontStyle: "italic"}}>
+                  No games found
+                </TableCell>
+              </TableRow>
+            ) : (
+              updatedData.map((game) => (
                 <TableRow hover key={game.move}>
                   <TableCell className="data users" rowSpan={2}>
                     <span>{game.player1}</span>
@@ -133,13 +148,13 @@ const GameReview = ({ data, username, userId }) => {
                     <a href="/">Review</a>
                   </TableCell>
                 </TableRow>
-              );
-            })}
+              ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>
     </StyledGameReview>
-  );  
+  );
 };
 
 export default GameReview;

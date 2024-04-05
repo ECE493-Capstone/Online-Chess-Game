@@ -31,8 +31,29 @@ const StyledUserInfoContainer = styled.div`
     flex-direction: column;
     align-items: center;
     overflow: scroll;
+
+    &::-webkit-scrollbar-track {
+    border-radius: 10px;
+    background-color: #191d28;
+    };
+
+    &::-webkit-scrollbar {
+      width: 12px;
+      background-color: #191d28;
+    };
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: 10px;
+      -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+      background-color: #555;
+    };
+
+    &::-webkit-scrollbar-thumb:hover {
+      background: #3b3b3b; 
+    }
   }
 `;
+
 const PageContainer = styled.div`
   display: flex;
   align-items: center;
@@ -52,7 +73,7 @@ const ProfileInfo = styled.div`
   min-width: 20vw;
   gap: 10px;
   button {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     width: 200px;
   }
 `;
@@ -76,6 +97,13 @@ const Subtitle = styled.div`
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+`;
+
+const StyledScrollbar = styled.div`
+ flex: 75%;
+  padding: 10px;
+  paddingTop: 60px;
+  overflowX: hidden;
 `;
 
 const UserInfo = ({ statistics, setIsLoggedIn }) => {
@@ -267,7 +295,28 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
         }}
       >
         <ProfileInfo className="section">
-          <img src={img} alt="profile" style={{ width: "175px" }} />
+          <Popover
+              open={open}
+              anchorEl={anchorEl}
+              onClose={handlePopoverClose}
+              anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'left',
+              }}
+              sx={{
+                pointerEvents: "none",
+              }}
+            >
+              <div style={{ padding: '10px' }}>
+                <Typography variant="h6">{username}</Typography>
+                <Typography variant="subtitle1">({email})</Typography>
+              </div>
+            </Popover>
+          <img src={img} alt="profile" style={{ width: "175px" }} onMouseEnter={handlePopoverOpen} onMouseLeave={handlePopoverClose}/>
           <Title>{username}</Title>
           <Subtitle>({email})</Subtitle>
           <StyledButton variant="contained" onClick={handleOpenChangeUsername}>
@@ -280,8 +329,9 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
       </div>
       <div
         className="section games-info"
-        style={{ flex: "75%", padding: "10px", paddingTop: "60px" }}
+        style={{ flex: "75%", padding: "10px", paddingTop: "60px", overflowX: "hidden"}}
       >
+      {/* <StyledScrollbar> */}
         <GameStatistics
           gamesPlayed={statistics.gamesPlayed}
           wins={statistics.wins}
@@ -293,6 +343,7 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
         />
         <GameReview data={data} username={username} userId={storedUserId} />
       </div>
+      {/* </StyledScrollbar> */}
   
       <Modal
         open={openChangePassword}
