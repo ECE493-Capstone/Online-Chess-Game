@@ -3,19 +3,15 @@ import { createSlice } from "@reduxjs/toolkit";
 export const userSlice = createSlice({
   name: "user",
   initialState: {
-    isLoggedIn: true,
-    userId: 123,
-    socket: null,
-    gameSession: null,
-    spectateSessions: [],
+    isPlayer: null,
     gameInfo: null,
   },
   reducers: {
+    setIsPlayer: (state, action) => {
+      state.isPlayer = action.payload;
+    },
     setGameInfo: (state, action) => {
       state.gameInfo = action.payload;
-    },
-    setSocket: (state, action) => {
-      state.socket = action.payload;
     },
     removeGameInfo: (state) => {
       state.gameInfo = null;
@@ -23,6 +19,6 @@ export const userSlice = createSlice({
   },
 });
 
-export const { setGameInfo, removeGameInfo, setSocket } = userSlice.actions;
+export const { setGameInfo, removeGameInfo, setIsPlayer } = userSlice.actions;
 
 export default userSlice.reducer;
