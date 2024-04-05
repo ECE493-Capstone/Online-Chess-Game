@@ -6,8 +6,10 @@ import {
   TableContainer,
   TableRow,
 } from "@mui/material";
-import React from "react";
+import React, {useState, useEffect} from "react";
 import styled from "styled-components";
+import { fetchUser } from "../api/fetchUser";
+import { useNavigate } from "react-router-dom";
 
 const StyledGameReview = styled.div`
   width: 70%;
@@ -151,7 +153,7 @@ const GameReview = ({ data, username, userId }) => {
                     <span>{game.winner === game.player2 ? 1 : 0}</span>
                   </TableCell>
                   <TableCell className="data link" rowSpan={2}>
-                  <a onClick={() => handleListItemSelect(game)}>Review</a>
+                  <a href="/">Review</a>
                   </TableCell>
                 </TableRow>
               ))

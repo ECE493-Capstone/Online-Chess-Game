@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import Header from "../Header";
-import ChangePassword from "../ChangePassword";
-import ChangeUsername from "../ChangeUsername";
-import Modal from "@mui/material/Modal";
-import Box from "@mui/material/Box";
-import { Button } from "@mui/material";
+import ChangePassword  from '../ChangePassword';
+import ChangeUsername  from '../ChangeUsername';
+import Modal from '@mui/material/Modal';
+import Box from '@mui/material/Box';
+import { Button, Popover, Typography } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import Cookies from "universal-cookie";
@@ -12,6 +12,7 @@ import { fetchUser } from "../../api/fetchUser";
 import GameStatistics from "../Statistics";
 import img from "../../assets/profile.svg";
 import { getPastGamesInformation } from "../../api/pastGames";
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import GameReview from "../GameReview";
 
 const StyledUserInfoContainer = styled.div`
@@ -30,8 +31,29 @@ const StyledUserInfoContainer = styled.div`
     flex-direction: column;
     align-items: center;
     overflow: scroll;
+
+    &::-webkit-scrollbar-track {
+    border-radius: 10px;
+    background-color: #191d28;
+    };
+
+    &::-webkit-scrollbar {
+      width: 12px;
+      background-color: #191d28;
+    };
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: 10px;
+      -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+      background-color: #555;
+    };
+
+    &::-webkit-scrollbar-thumb:hover {
+      background: #3b3b3b; 
+    }
   }
 `;
+
 const PageContainer = styled.div`
   display: flex;
   align-items: center;
@@ -51,7 +73,7 @@ const ProfileInfo = styled.div`
   min-width: 20vw;
   gap: 10px;
   button {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     width: 200px;
   }
 `;
@@ -63,18 +85,32 @@ const StyledButton = styled(Button)`
 const Title = styled.div`
   font-size: 32px;
   color: white;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 `;
 
 const Subtitle = styled.div`
   font-size: 14px;
   text-transform: none;
   color: white;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+`;
+
+const StyledScrollbar = styled.div`
+ flex: 75%;
+  padding: 10px;
+  paddingTop: 60px;
+  overflowX: hidden;
 `;
 
 const UserInfo = ({ statistics, setIsLoggedIn }) => {
   const cookie = new Cookies();
   const storedUserId = cookie.get("userId");
   const [username, setUsername] = useState("");
+
   const dummyData = [
     {
       gameId: 1,
@@ -107,11 +143,14 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
       winner: "black",
     },
   ];
+
   const [email, setEmail] = useState("");
   const [openChangePassword, setOpenChangePassword] = useState(false);
   const [openChangeUsername, setOpenChangeUsername] = useState(false);
   const [isFocused, setIsFocused] = useState(true);
-  const [data, setData] = useState(dummyData);
+  const [userId, setUserId] = useState("");
+  const [anchorEl, setAnchorEl] = useState(false);
+  const [data, setData] = useState([]);
   // const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleOpenChangePassword = () => {
@@ -130,8 +169,21 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
     setOpenChangeUsername(false);
   };
 
+  const handlePopoverOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+
   const checkLoginStatus = async () => {
     try {
+      const storedUserId = cookie.get("userId");
+      setUserId(storedUserId);
+  
       if (storedUserId) {
         console.log("Retrieved user ID from cookie: " + storedUserId);
 
@@ -166,20 +218,46 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
     }
   };
 
-  const handleSetData = (mode) => {
-    if (mode === "All") {
-      setData(dummyData);
-      return;
+  // useEffect(() => {
+  //   if (userId !== "") {
+
+  //       // Fetch past games information when component mounts
+  //       const fetchPastGames = async () => {
+  //       try {
+  //           const gamesData = await getPastGamesInformation(userId);
+  //           setdATA(gamesData);
+  //       } catch (error) {
+  //           console.error('Error fetching past games:', error);
+  //       }
+  //       };
+
+  //       fetchPastGames();
+  //   }
+  // }, [userId]);
+
+  const handleSetData = async (mode) => {
+    if (userId !== "") {
+      try {
+        const gamesData = await getPastGamesInformation(userId);
+        if (mode === "All") {
+          setData(gamesData);
+        } else {
+          console.log("Setting data for mode: " + mode);
+          setData(gamesData.filter((data) => data.mode === mode));
+        }
+      } catch (error) {
+        console.error('Error fetching past games:', error);
+      }
     }
-    console.log("Setting data for mode: " + mode);
-    setData(dummyData.filter((data) => data.mode === mode));
   };
+
   useEffect(() => {
     if (isFocused) {
       checkLoginStatus();
       setIsFocused(false);
     }
   }, [isFocused]);
+
   useEffect(() => {
     getPastGamesInformation(storedUserId)
       .then((response) => {
@@ -189,6 +267,22 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
         console.log(error);
       });
   }, []);
+
+  // initial loading of data
+  useEffect(() => {
+    const fetchData = async () => {
+      if (userId !== "") {
+        try {
+          const gamesData = await getPastGamesInformation(userId);
+          setData(gamesData);
+        } catch (error) {
+          console.error('Error fetching past games:', error);
+        }
+      }
+    };
+  
+    fetchData();
+  }, [userId]);
 
   return (
     <StyledUserInfoContainer>
@@ -201,7 +295,28 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
         }}
       >
         <ProfileInfo className="section">
-          <img src={img} alt="profile" style={{ width: "175px" }} />
+          <Popover
+              open={open}
+              anchorEl={anchorEl}
+              onClose={handlePopoverClose}
+              anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'left',
+              }}
+              sx={{
+                pointerEvents: "none",
+              }}
+            >
+              <div style={{ padding: '10px' }}>
+                <Typography variant="h6">{username}</Typography>
+                <Typography variant="subtitle1">({email})</Typography>
+              </div>
+            </Popover>
+          <img src={img} alt="profile" style={{ width: "175px" }} onMouseEnter={handlePopoverOpen} onMouseLeave={handlePopoverClose}/>
           <Title>{username}</Title>
           <Subtitle>({email})</Subtitle>
           <StyledButton variant="contained" onClick={handleOpenChangeUsername}>
@@ -214,8 +329,9 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
       </div>
       <div
         className="section games-info"
-        style={{ flex: "75%", padding: "10px", paddingTop: "60px" }}
+        style={{ flex: "75%", padding: "10px", paddingTop: "60px", overflowX: "hidden"}}
       >
+      {/* <StyledScrollbar> */}
         <GameStatistics
           gamesPlayed={statistics.gamesPlayed}
           wins={statistics.wins}
@@ -225,8 +341,10 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
           data={data}
           username={username}
         />
-        <GameReview data={data} username={username} />
+        <GameReview data={data} username={username} userId={storedUserId} />
       </div>
+      {/* </StyledScrollbar> */}
+  
       <Modal
         open={openChangePassword}
         onClose={handleCloseChangePassword}
@@ -282,7 +400,7 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
         </Box>
       </Modal>
     </StyledUserInfoContainer>
-  );
+  );  
 };
 
 const Profile = () => {
