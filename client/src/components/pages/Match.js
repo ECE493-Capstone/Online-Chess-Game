@@ -36,7 +36,24 @@ const Container = styled.div`
     align-items: center;
     height: 100vh;
     width: 60vw;
-
+    .game-result {
+      text-align: center;
+      padding: 10px 0px;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+    .draw-result {
+      background-color: #d3d3d3;
+      color: black;
+    }
+    .win-result {
+      background-color: #22a186;
+      color: black;
+    }
+    .loss-result {
+      background-color: #ff474c;
+      color: black;
+    }
     .board {
       display: flex;
       flex-direction: column;
@@ -361,8 +378,18 @@ const Match = () => {
       <div className="lhs">
         {game ? (
           <div className="board">
-            {matchState.endGameInfo === null && (
-              <div>{matchState.endGameInfo}</div>
+            {matchState.endGameInfo !== null && (
+              <div
+                className={`game-result ${
+                  matchState.endGameInfo === "Draw"
+                    ? "draw-result"
+                    : matchState.endGameInfo === "You won!"
+                    ? "win-result"
+                    : "loss-result"
+                }`}
+              >
+                {matchState.endGameInfo}
+              </div>
             )}
             <>
               <div className="info">
@@ -452,7 +479,9 @@ const Match = () => {
               player2Id={matchState.opponent?.id}
             />
           </div>
-          <div className="move-history">{/* <MoveHistory /> */}</div>
+          <div className="move-history">
+            <MoveHistory />
+          </div>
           {isPlayer && (
             <div className="request-btns">
               <RequestButtons
