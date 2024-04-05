@@ -15,7 +15,6 @@ export const getPastGamesInformation = async (player) => {
 };
 
 export const getPastGamesInformationWithOpponent = async (player, opponent) => {
-  // console.log("getPastGamesInformation: " + player);
   const response = await axios.get(
     `${serverApiConfig.SERVER_URL}/games/past/byPlayerOpponent`,
     {

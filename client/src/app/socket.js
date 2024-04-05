@@ -14,5 +14,5 @@ const parseCookie = (cookie) => {
 
 export const socket = io.connect("http://localhost:5050");
 socket.on("connect", () => {
-  console.log(`socket: ${socket.id}`);
+  socket.emit("user connect", parseCookie(document.cookie)["userId"]);
 });

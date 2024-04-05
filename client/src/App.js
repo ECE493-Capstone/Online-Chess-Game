@@ -41,14 +41,8 @@ const App = () => {
           <Route path="/timeselect" element={<TimeSelect />} />
           <Route path="/test" element={<Test />} />
           <Route path="/test-join" element={<TestJoin />} />
-          <Route
-            path="/match/:gameId"
-            element={
-              <PrivateRoute>
-                <Match />
-              </PrivateRoute>
-            }
-          />
+          <Route path="/match/:gameId" element={<Match />} />
+          <Route path="/timeselect" element={<TimeSelect />} />
           <Route path="/match" element={<Match />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/h2htest" element={<H2HTest />} />

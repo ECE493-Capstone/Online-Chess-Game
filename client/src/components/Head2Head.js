@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getOngoingGameInformation } from '../api/ongoingGames';
+import { getOngoingGameInformationByGameId } from '../api/ongoingGames';
 import { fetchUser } from "../api/fetchUser";
 import { AppBar, Toolbar, Typography, Divider } from '@mui/material';
 import styled from "styled-components";
@@ -18,7 +18,7 @@ const Head2Head = ({ PlayerId }) => {
     useEffect(() => {
         const getOtherPlayer = async () => {
             try {
-            const gameData = await getOngoingGameInformation(PlayerId);
+            const gameData = await getOngoingGameInformationByGameId(PlayerId);
         
             console.log('This is the data fetched:', gameData);
         
