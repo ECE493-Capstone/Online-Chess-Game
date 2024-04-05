@@ -14,6 +14,17 @@ const addSocket = (userId, socketId) => {
   }
 };
 
+const initActiveGame = (roomId, time) => {
+  activeGames[roomId] = {
+    timers: {
+      player1: time,
+      player2: time,
+    },
+    currentPlayer: "player1",
+    lastTime: Date.now(),
+  };
+};
+
 const resetUser = (userId) => {
   activeUsers[userId] = {
     activeGame: null,
@@ -103,4 +114,5 @@ module.exports = {
   getActiveGames,
   getActiveUsers,
   resetUser,
+  initActiveGame,
 };

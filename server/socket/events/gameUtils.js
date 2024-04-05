@@ -1,7 +1,12 @@
 const OngoingGames = require("../../models/OngoingGames");
 const PastGames = require("../../models/PastGames");
 const Queue = require("../../models/Queue");
-const { addSocket, addActiveGame, resetUser } = require("../../data");
+const {
+  addSocket,
+  addActiveGame,
+  resetUser,
+  initActiveGame,
+} = require("../../data");
 const { handleUserDisconnect } = require("../user/userSocketHandler");
 const { createRoom } = require("../rooms/roomUtils");
 const { emitToRoom } = require("../emittors");
@@ -60,6 +65,7 @@ const handleGameJoin = (io, socket, existingGame, newGame) => {
   addActiveGame(existingGame.userId, existingGame.room);
   addActiveGame(userId, existingGame.room);
   emitToRoom(io, existingGame.room, "game joined", existingGame.room);
+  initActiveGame(existingGame.room, existingGame.timeControl);
 };
 
 const handlePrivateGameJoin = (io, socket, existingGame, userId) => {
@@ -81,6 +87,7 @@ const handlePrivateGameJoin = (io, socket, existingGame, userId) => {
   addActiveGame(existingGame.userId, existingGame.room);
   addActiveGame(userId, existingGame.room);
   emitToRoom(io, existingGame.room, "game joined", existingGame.room);
+  initActiveGame(existingGame.room, existingGame.timeControl);
 };
 
 const addToOngoingGames = async (data) => {
