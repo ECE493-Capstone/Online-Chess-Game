@@ -49,10 +49,15 @@ const listen = (io, socket) => {
     // Logic for starting the game
   });
 
+  socket.on("join room", (gameId) => {
+    console.log("JOINING ROOM");
+    socket.join(gameId);
+  });
   socket.on("move piece", async (move) => {
     const { gameRoom, input, fen } = move;
     await addFen(gameRoom, fen);
     emitToRoom(socket, gameRoom, "oppMove", input);
+    emitToRoom(socket, gameRoom, "spectatorMove", fen);
   });
 
   socket.on("game end", async (gameInfo) => {
