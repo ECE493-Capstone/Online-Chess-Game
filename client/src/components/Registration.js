@@ -15,7 +15,7 @@ const RegistrationContainer = styled.div`
   padding: 0px 20px 20px 20px;
   display: flex;
   flex-direction: column;
-  min-width: 300px;
+  max-width: 300px;
   div {
     margin: 2px 0px;
     display: flex;

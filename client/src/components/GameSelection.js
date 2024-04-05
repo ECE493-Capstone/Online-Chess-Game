@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Popover } from "@mui/material";
 import { IconButton } from "@mui/material";
@@ -75,7 +75,6 @@ const GameSelect = ({ handleGameSelectHome }) => {
 
   const open = Boolean(anchorEl);
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
 
 
