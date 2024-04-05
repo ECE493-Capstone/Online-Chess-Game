@@ -4,7 +4,7 @@ import ChangePassword  from '../ChangePassword';
 import ChangeUsername  from '../ChangeUsername';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
-import { Button, Popover, Typography } from "@mui/material";
+import { Button } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import Cookies from "universal-cookie";
@@ -169,16 +169,6 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
     setOpenChangeUsername(false);
   };
 
-  const handlePopoverOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handlePopoverClose = () => {
-    setAnchorEl(null);
-  };
-
-  const open = Boolean(anchorEl);
-
   const checkLoginStatus = async () => {
     try {
       const storedUserId = cookie.get("userId");
@@ -295,28 +285,7 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
         }}
       >
         <ProfileInfo className="section">
-          <Popover
-              open={open}
-              anchorEl={anchorEl}
-              onClose={handlePopoverClose}
-              anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left',
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'left',
-              }}
-              sx={{
-                pointerEvents: "none",
-              }}
-            >
-              <div style={{ padding: '10px' }}>
-                <Typography variant="h6">{username}</Typography>
-                <Typography variant="subtitle1">({email})</Typography>
-              </div>
-            </Popover>
-          <img src={img} alt="profile" style={{ width: "175px" }} onMouseEnter={handlePopoverOpen} onMouseLeave={handlePopoverClose}/>
+          <img src={img} alt="profile" style={{ width: "175px" }}/>
           <Title>{username}</Title>
           <Subtitle>({email})</Subtitle>
           <StyledButton variant="contained" onClick={handleOpenChangeUsername}>
