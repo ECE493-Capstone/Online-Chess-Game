@@ -127,7 +127,19 @@ export class Chessboard {
             row.push(null);
           }
         } else {
-          row.push(char);
+          let charPiece = `${char}`;
+          // check if characters followed is evolve symbol or progress symbol
+          let charToSkip = 0;
+          while (
+            (fenRow.charAt(j + charToSkip + 1) === EVOLVE_SYMBOL ||
+              fenRow.charAt(j + charToSkip + 1) === PROGRESS_SYMBOL) &&
+            j + charToSkip + 1 < fenRow.length
+          ) {
+            charPiece += fenRow.charAt(j + charToSkip + 1);
+            charToSkip++;
+          }
+          row.push(charPiece);
+          j += charToSkip;
         }
       }
       board.push(row);
@@ -156,74 +168,74 @@ export class Chessboard {
     this._halfMove = parseInt(halfMove);
     this._fullMove = parseInt(fullMove);
   }
-  _initFromFEN(fen) {
-    const [board, turn, castlingRights, enPassantSquare, halfMove, fullMove] =
-      fen.split(" ");
-    const rows = board.split("/");
-    this._board = rows.map((row) => row.split(""));
-    this._turn = turn;
-    this._castlingRights = {
-      [WHITE]: [],
-      [BLACK]: [],
-    };
-    if (castlingRights !== "-") {
-      for (const right of castlingRights) {
-        if (right === "k") {
-          this._castlingRights[WHITE].push(KING_SIDE_CASTLE);
-        } else if (right === "q") {
-          this._castlingRights[WHITE].push(QUEEN_SIDE_CASTLE);
-        } else if (right === "K") {
-          this._castlingRights[BLACK].push(KING_SIDE_CASTLE);
-        } else if (right === "Q") {
-          this._castlingRights[BLACK].push(QUEEN_SIDE_CASTLE);
-        }
-      }
-    }
-    this._enPassantSquare = enPassantSquare !== "-" ? enPassantSquare : null;
-    this._halfMove = parseInt(halfMove);
-    this._fullMove = parseInt(fullMove);
-  }
-  convertToFEN2() {
-    let fen = "";
-    for (let row = 0; row < 8; row++) {
-      let emptySquares = 0;
-      for (let col = 0; col < 8; col++) {
-        const piece = this.getPiece(row, col);
-        if (piece === null) {
-          emptySquares++;
-        } else {
-          if (emptySquares > 0) {
-            fen += emptySquares;
-            emptySquares = 0;
-          }
-          fen += piece;
-        }
-      }
-      if (emptySquares > 0) {
-        fen += emptySquares;
-      }
-      if (row < 7) {
-        fen += "/";
-      }
-    }
+  // _initFromFEN(fen) {
+  //   const [board, turn, castlingRights, enPassantSquare, halfMove, fullMove] =
+  //     fen.split(" ");
+  //   const rows = board.split("/");
+  //   this._board = rows.map((row) => row.split(""));
+  //   this._turn = turn;
+  //   this._castlingRights = {
+  //     [WHITE]: [],
+  //     [BLACK]: [],
+  //   };
+  //   if (castlingRights !== "-") {
+  //     for (const right of castlingRights) {
+  //       if (right === "k") {
+  //         this._castlingRights[WHITE].push(KING_SIDE_CASTLE);
+  //       } else if (right === "q") {
+  //         this._castlingRights[WHITE].push(QUEEN_SIDE_CASTLE);
+  //       } else if (right === "K") {
+  //         this._castlingRights[BLACK].push(KING_SIDE_CASTLE);
+  //       } else if (right === "Q") {
+  //         this._castlingRights[BLACK].push(QUEEN_SIDE_CASTLE);
+  //       }
+  //     }
+  //   }
+  //   this._enPassantSquare = enPassantSquare !== "-" ? enPassantSquare : null;
+  //   this._halfMove = parseInt(halfMove);
+  //   this._fullMove = parseInt(fullMove);
+  // }
+  // convertToFEN2() {
+  //   let fen = "";
+  //   for (let row = 0; row < 8; row++) {
+  //     let emptySquares = 0;
+  //     for (let col = 0; col < 8; col++) {
+  //       const piece = this.getPiece(row, col);
+  //       if (piece === null) {
+  //         emptySquares++;
+  //       } else {
+  //         if (emptySquares > 0) {
+  //           fen += emptySquares;
+  //           emptySquares = 0;
+  //         }
+  //         fen += piece;
+  //       }
+  //     }
+  //     if (emptySquares > 0) {
+  //       fen += emptySquares;
+  //     }
+  //     if (row < 7) {
+  //       fen += "/";
+  //     }
+  //   }
 
-    // Add the side to move
-    fen += " w"; // Assuming it's white's turn to move
+  //   // Add the side to move
+  //   fen += " w"; // Assuming it's white's turn to move
 
-    // Add castling availability
-    fen += " -"; // Assuming no castling is available
+  //   // Add castling availability
+  //   fen += " -"; // Assuming no castling is available
 
-    // Add en passant square
-    fen += " -"; // Assuming no en passant square available
+  //   // Add en passant square
+  //   fen += " -"; // Assuming no en passant square available
 
-    // Add halfmove clock
-    fen += " 0"; // Assuming no halfmove clock
+  //   // Add halfmove clock
+  //   fen += " 0"; // Assuming no halfmove clock
 
-    // Add fullmove number
-    fen += " 1"; // Assuming the current move number is 1
+  //   // Add fullmove number
+  //   fen += " 1"; // Assuming the current move number is 1
 
-    return fen;
-  }
+  //   return fen;
+  // }
   convertToFEN() {
     let fen = "";
     for (let row = 0; row < 8; row++) {
