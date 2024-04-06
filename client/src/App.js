@@ -1,17 +1,17 @@
 // App.js
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Home from "./components/pages/Home";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import Test from "./components/pages/Test";
-import TimeSelect from "./components/TimeSelect";
+import { useSelector } from "react-redux";
+import Home from "./components/pages/Home";
+import TestJoin from "./components/pages/TestJoin";
 import Match from "./components/pages/Match";
 import GameSelect from "./components/GameSelection";
-import Voice from "./components/Voice";
-import { useDispatch, useSelector } from "react-redux";
-import io from "socket.io-client";
-import { setSocket } from "./features/userSlice";
-import TestJoin from "./components/pages/TestJoin";
+import TimeSelect from "./components/TimeSelect";
+import { socket } from "./app/socket";
+import Profile from "./components/pages/Profile";
+import { Toaster } from "react-hot-toast";
 
 const darkTheme = createTheme({
   palette: {
@@ -20,25 +20,29 @@ const darkTheme = createTheme({
 });
 
 const App = () => {
-  const dispatch = useDispatch();
-  const socket = io.connect("http://localhost:5050/");
-  console.log(socket.id);
-  dispatch(setSocket(socket));
   const userId = useSelector((state) => state.user.userId);
   console.log(userId);
+  socket.on("reconnect", () => {
+    console.log("reconnected");
+  });
   return (
     <ThemeProvider theme={darkTheme}>
+      <div>
+        <Toaster />
+      </div>
       <CssBaseline />
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/gameselect" element={<GameSelect />} />
+          <Route path="/timeselect" element={<TimeSelect />} />
           <Route path="/test" element={<Test />} />
+          <Route path="/test-join" element={<TestJoin />} />
+          <Route path="/match/:gameId" element={<Match />} />
           <Route path="/timeselect" element={<TimeSelect />} />
           <Route path="/match" element={<Match />} />
           <Route path="/gameselect" element={<GameSelect />} />
-          <Route path="/voice" element={<Voice />} />
-          <Route path="/test-join" element={<TestJoin />} />
-          <Route path="/match" element={<Match />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </Router>
     </ThemeProvider>

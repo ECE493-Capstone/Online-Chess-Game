@@ -1,97 +1,79 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Modal, TextField, Fab } from "@mui/material";
-import CloseIcon from '@mui/icons-material/Close';
 import Header from "../Header";
-import "../styles.css";
 import styled from "styled-components";
+import { socket } from "../../app/socket";
+import { useDispatch } from "react-redux";
+import { setGameInfo } from "../../features/userSlice";
+import Cookies from "universal-cookie";
+import img from "../../assets/chessbg.jpg";
+import GameCreation from "../GameCreation";
+import GameSelect from "../GameSelection";
+import { FaChevronCircleLeft } from "react-icons/fa";
+import TypeSubmit from "../TypeSubmit";
+import toast from "react-hot-toast";
 
-const Container = styled.div`
+const PageContainer = styled.div`
   display: flex;
+  background-image: url(${img});
+  background-size: cover;
+  background-position: 50% 50%;
+  text-align: center;
+  min-height: 100vh;
+  overflow: hidden;
   flex-direction: column;
-  align-items: center;
   justify-content: flex-end;
-  min-height: 80vh;
-  padding-bottom: 20px;
+  .selection-container {
+    display: flex;
+    justify-content: center;
+    width: 300vw;
+    transform: ${(props) => `translateX(${props.direction})`};
+    transition: transform 0.5s;
+    // margin-top: ${(props) => (props.playType === null ? "50vh" : "0")};
+    .game-create {
+      transition: transform 0.5s;
+    }
+    .select-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 100vw;
+      .back-icon {
+        width: 80%;
+        text-align: left;
+        margin-bottom: 20px;
+      }
+      button {
+        opacity: 0.7;
+      }
+      button:hover {
+        opacity: 1;
+      }
+    }
+    .game-select {
+      margin-bottom: 50px;
+    }
+    .time-select {
+      margin-bottom: 50px;
+    }
+  }
 `;
-
-const StyledButton = styled(Button)`
-  margin-right: 10px;
-  flex-grow: 1;
-  max-width: 300px;
-  height: auto;
-  text-transform: none;
-`;
-
-const ButtonContent = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-const Title = styled.div`
-  font-size: 20px;
-`;
-
-const Subtitle = styled.div`
-  font-size: 14px;
-  text-transform: none;
-`;
-
-const RightButton = styled(Button)`
-  margin-bottom: 10px;
-  width: 100%;
-  max-width: 150px;
-  text-transform: none;
-  height: 3vh;
-  padding-bottom: 10px;
-  margin-bottom: 10px;
-`;
-
-const ModalContainer = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding: 20px;
-  border-radius: 8px;
-  max-width: 90%;
-`;
-
-const ModalHeader = styled.div`
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-`;
-
-const ModalTitle = styled.h2`
-  margin-right: 10px;
-  margin-bottom: 0;
-`;
-
-const ModalLine = styled.div`
-  border-bottom: 1px solid #ccc;
-  width: 100%;
-  margin-top: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const ContentWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 2em;
-  width: 90%;
-  max-width: 400px;
-`;
-
 const Home = () => {
+  const [direction, setDirection] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [roomCode, setRoomCode] = useState("");
   const [submitClicked, setSubmitClicked] = useState(false);
+  const [playInfo, setPlayInfo] = useState({
+    playType: null,
+    gameMode: null,
+    time: "1 + 0",
+    side: "r",
+  });
+  const cookies = new Cookies();
+  const userId = cookies.get("userId");
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
   const handleJoinGame = () => {
     setIsModalOpen(true);
   };
@@ -114,67 +96,130 @@ const Home = () => {
     }
 
     console.log("Joining room with code:", roomCode);
-    navigate('/match');
+
+    socket.emit("join private game", {
+      userId: userId,
+      room: roomCode,
+    });
+
+    socket.on("game joined", (gameInfo) => {
+      dispatch(setGameInfo(gameInfo));
+      navigate(`/match/${gameInfo}`);
+    });
+
+    socket.on("join fail", (gameInfo) => {
+      console.log("Failed to join room with code:", roomCode);
+    });
     setIsModalOpen(false);
   };
 
   const handleQuickPlayClick = () => {
-    navigate('/timeselect');
+    setPlayInfo({ ...playInfo, playType: "quick play" });
+    setDirection(direction + 1);
   };
 
   const handleCreateGameClick = () => {
-    navigate('/gameselect');
+    setPlayInfo({ ...playInfo, playType: "private game" });
+    setDirection(direction + 1);
+  };
+  const handleTimeControlClick = (tc) => {
+    console.log("Time control selected", tc);
+    setPlayInfo({ ...playInfo, time: tc });
+  };
+
+  const handleSideClick = (side) => {
+    console.log("Side selected", side);
+    setPlayInfo({ ...playInfo, side: side });
+  };
+
+  const handleSubmit = () => {
+    if (
+      userId &&
+      playInfo.side &&
+      playInfo.time &&
+      playInfo.gameMode &&
+      playInfo.playType
+    ) {
+      console.log("READY TO PLAY", playInfo);
+      socket.emit(`join ${playInfo.playType}`, {
+        userId: userId,
+        mode: playInfo.gameMode,
+        type: playInfo.playType, // "Quick Play" or "Custom Game
+        side:
+          playInfo.side === "r"
+            ? ["w", "b"][Math.floor(Math.random() * 2)]
+            : playInfo.side,
+        timeControl: playInfo.time,
+      });
+      socket.on("game joined", (gameInfo) => {
+        dispatch(setGameInfo(gameInfo));
+        navigate(`/match/${gameInfo}`);
+      });
+    } else {
+      toast.error("Please login to play");
+    }
+  };
+  const handleBackClick = () => {
+    setDirection(direction - 1);
+  };
+
+  const handleGameSelect = (gameMode) => {
+    console.log("Selected game mode:", gameMode);
+    setPlayInfo({ ...playInfo, gameMode: gameMode });
+    setDirection(direction + 1);
   };
 
   return (
-    <Header>
-      <div>
-        <h1>Home Page</h1>
-      </div>
-      <Container>
-        <div style={{ display: "flex", alignItems: "center"}}>
-          <StyledButton variant="contained" className="standard" onClick={handleQuickPlayClick}>
-            <ButtonContent>
-              <Title>Quick Play</Title>
-              <Subtitle>Standard, blind, or power up chess</Subtitle>
-            </ButtonContent>
-          </StyledButton>
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px"}}>
-            <RightButton id="create-game-button" variant="contained" className="standard" onClick={handleCreateGameClick}>
-              Create Game
-            </RightButton>
-            <RightButton id="join-game-button" variant="contained" className="standard" onClick={handleJoinGame}>
-              Join Game
-            </RightButton>
+    <>
+      <Header />
+      <PageContainer direction={String(-direction * 100) + "vw"}>
+        <div className="selection-container">
+          <div className="select-container game-create">
+            <GameCreation
+              handleCreateGameClick={handleCreateGameClick}
+              handleQuickPlayClick={handleQuickPlayClick}
+              handleJoinGame={handleJoinGame}
+              roomCode={roomCode}
+              handleRoomCodeChange={handleRoomCodeChange}
+              handleJoinRoom={handleJoinRoom}
+              isModalOpen={isModalOpen}
+              handleCloseModal={handleCloseModal}
+              submitClicked={submitClicked}
+            />
+          </div>
+          <div className="select-container game-select">
+            <div className="back-icon">
+              <FaChevronCircleLeft
+                onClick={() => {
+                  setPlayInfo({ ...playInfo, playType: null });
+                  handleBackClick();
+                }}
+                style={{ cursor: "pointer", fontSize: "2rem" }}
+              />
+            </div>
+            <GameSelect handleGameSelectHome={handleGameSelect} />
+          </div>
+          <div className="select-container time-select">
+            <div className="back-icon">
+              <FaChevronCircleLeft
+                onClick={() => {
+                  setPlayInfo({ ...playInfo, playType: null });
+                  handleBackClick();
+                }}
+                style={{ cursor: "pointer", fontSize: "2rem" }}
+              />
+            </div>
+            <TypeSubmit
+              handleTimeControlClick={handleTimeControlClick}
+              handleSideClick={handleSideClick}
+              side={playInfo.side}
+              playType={playInfo.playType}
+              handleSubmit={handleSubmit}
+            />
           </div>
         </div>
-      </Container>
-
-      <Modal open={isModalOpen} aria-labelledby="join-game-modal-title" aria-describedby="join-game-modal-description">
-        <ModalContainer className="standard">
-          <ModalHeader>
-            <ModalTitle id="join-game-modal-title">Join Game</ModalTitle>
-            <div style={{ marginLeft: "auto" }}>
-              <Fab onClick={handleCloseModal} style={{ width: "35px", height: "35px" }}><CloseIcon /></Fab>
-            </div>
-          </ModalHeader>
-          <ModalLine></ModalLine>
-            <ContentWrapper>
-              <TextField
-                id="room-code"
-                label="Room Code"
-                variant="outlined"
-                value={roomCode}
-                onChange={handleRoomCodeChange}
-                error={submitClicked && roomCode.trim() === ""}
-                helperText={(submitClicked && roomCode.trim() === "") ? "Please enter the room code." : ""}
-                style={{ marginTop: "2em" }}
-              />
-              <Button variant="contained" className="standard" style={{ marginTop: "2em" }} onClick={handleJoinRoom}>Join Room</Button>
-            </ContentWrapper>
-        </ModalContainer>
-      </Modal>
-    </Header>
+      </PageContainer>
+    </>
   );
 };
 

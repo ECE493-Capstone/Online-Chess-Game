@@ -1,33 +1,78 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setClickPiece, updateBoard } from "../features/boardSlice";
+import { setClickPiece, setGame } from "../features/boardSlice";
 import Piece from "./Piece";
 import styled from "styled-components";
+import { socket } from "../app/socket";
+import { useParams } from "react-router-dom";
+
 const StyledSquare = styled.div`
   box-shadow: ${(props) =>
-    props.ishighlighted ? " inset  0 0 40px #00abe3;" : null};
+    props.ishighlighted === "true" ? " inset  0 0 40px #00abe3;" : null};
   transition: box-shadow 0.2s ease-in;
   width: 100%;
   height: 100%;
 `;
-const Square = ({ piece, rowIndex, colIndex }) => {
+const Square = ({ piece, rowIndex, colIndex, game }) => {
+  const { gameId } = useParams();
   const dispatch = useDispatch();
   const dragStart = useSelector((state) => state.board.dragStart);
   const clickHighlights = useSelector((state) => state.board.clickPiece);
-
   const isHighlighted = clickHighlights.legalMoves.some(
     (move) => move[0] === rowIndex && move[1] === colIndex
   );
   const handleDragOver = (e) => {
     e.preventDefault();
   };
+  const handleMovePiece = (move) => {
+    const gameCopy = game.copy();
+    console.log(gameCopy.convertToFEN());
+    gameCopy.playYourMove(move);
+    dispatch(setGame(gameCopy));
+    socket.emit("move piece", {
+      gameRoom: gameId,
+      input: move,
+      fen: gameCopy.convertToFEN(),
+    });
+  };
   const handleClick = () => {
-    const validMoves = [
-      [1, 1],
-      [2, 2],
-      [3, 3],
-    ];
-    dispatch(setClickPiece({ clickedSquare: piece, legalMoves: validMoves }));
+    if (game.isSameTurn(game.side)) {
+      // move the piece
+      if (isHighlighted) {
+        const move = {
+          fromRow: clickHighlights.clickedSquare.rowIndex,
+          fromCol: clickHighlights.clickedSquare.colIndex,
+          toRow: rowIndex,
+          toCol: colIndex,
+        };
+        if (game.isLegalMove(move)) {
+          handleMovePiece(move);
+          dispatch(
+            setClickPiece({
+              clickedSquare: null,
+              legalMoves: [],
+            })
+          );
+        }
+      } else {
+        // highlight if clicked on piece
+        if (piece && game._isSameSide(piece)) {
+          dispatch(
+            setClickPiece({
+              clickedSquare: { rowIndex, colIndex },
+              legalMoves: game._getLegalMoves(rowIndex, colIndex),
+            })
+          );
+        } else if (clickHighlights.clickedSquare) {
+          dispatch(
+            setClickPiece({
+              clickedSquare: null,
+              legalMoves: [],
+            })
+          );
+        }
+      }
+    }
   };
   const handleDrop = (e) => {
     if (
@@ -38,18 +83,21 @@ const Square = ({ piece, rowIndex, colIndex }) => {
       )
     ) {
       e.preventDefault();
-      dispatch(
-        updateBoard({
-          from: [dragStart.startIndex[0], dragStart.startIndex[1]],
-          to: [rowIndex, colIndex],
-        })
-      );
+      const move = {
+        fromRow: dragStart.startIndex[0],
+        fromCol: dragStart.startIndex[1],
+        toRow: rowIndex,
+        toCol: colIndex,
+      };
+      if (game.isLegalMove(move)) {
+        handleMovePiece(move);
+      }
     }
   };
 
   return (
     <StyledSquare
-      ishighlighted={isHighlighted}
+      ishighlighted={isHighlighted.toString()}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       onClick={handleClick}

@@ -5,10 +5,11 @@ import styled from "styled-components";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import PasswordOutlinedIcon from "@mui/icons-material/PasswordOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import { SERVER_URL } from "../config";
+import { registerUser } from "../api/auth";
 import { useNavigate } from "react-router-dom";
 
 const RegistrationContainer = styled.div`
+  background-color: black;
   border: 1px solid white;
   border-radius: 10px;
   padding: 0px 20px 20px 20px;
@@ -55,7 +56,7 @@ const Registration = ({ onClose }) => {
     }
   );
 
-  const navigate = useNavigate(); // navigation element
+  // const navigate = useNavigate(); // navigation element
 
   const handleSubmit = (e) => {
     setIsSubmitting(true);
@@ -63,17 +64,7 @@ const Registration = ({ onClose }) => {
 
     e.preventDefault();
     // make a post call to the server to register the user and check response to see if the user was registered
-    fetch(`${SERVER_URL}/signup`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username: username,
-        password: password,
-        email: email,
-      }),
-    })
+    registerUser(username, email, password)
       .then((res) => {
         setIsSubmitting(false);
         if (res.status === 200) {
@@ -82,7 +73,7 @@ const Registration = ({ onClose }) => {
 
           // route to the previous page the user was on
           onClose();
-          navigate(-1);
+          // navigate(-1);
           return Promise.resolve(undefined);
         }
         return res.json();
