@@ -59,6 +59,7 @@ const MoveHistory = ({ history }) => {
   ];
 
   history = Array.from({ length: 50 }, () => fakeData).flat();
+  let counter = 0;
   return (
     <Container>
       <TableContainer component={Paper}>
@@ -83,9 +84,9 @@ const MoveHistory = ({ history }) => {
             {history.map((turn) => {
               const wMove = turn[WHITE];
               const bMove = turn[BLACK];
-
+              counter++;
               return (
-                <TableRow hover key={turn.move}>
+                <TableRow hover key={counter}>
                   <TableCell className="move">{turn.move}</TableCell>
                   <TableCell>
                     {convertToSquare(wMove.from[0], wMove.from[1])}

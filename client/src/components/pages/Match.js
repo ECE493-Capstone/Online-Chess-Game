@@ -5,14 +5,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { setGame } from "../../features/boardSlice";
 import { getOngoingGameInformationByGameId } from "../../api/ongoingGames";
 import Cookies from "universal-cookie";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { socket } from "../../app/socket";
 import toast from "react-hot-toast";
 import styled from "styled-components";
 import NoticeDialog from "../dialog/NoticeDialog";
 import { setIsPlayer } from "../../features/userSlice";
 import Timer from "../game-room/Timer";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import ShareIcon from "@mui/icons-material/Share";
 import Button from "@mui/material/Button";
 import { Snackbar } from "@mui/material";
@@ -163,6 +162,9 @@ const Match = () => {
   const cookies = new Cookies();
   const userId = cookies.get("userId");
   console.log("ISPLAYER", isPlayer);
+  const getIncrement = () => {
+    return matchState.increment;
+  };
   useEffect(() => {
     console.log("TEST", isPlayer);
     if (isPlayer) {
@@ -260,15 +262,29 @@ const Match = () => {
         userId !== undefined &&
         (gameInfoData.player1 === userId || gameInfoData.player2 === userId);
       orientation = !userId || gameInfoData.player1 === userId ? WHITE : BLACK;
+      console.log("TEST", gameInfoData);
       const chessboard = new Chessboard(
         orientation,
         gameInfoData.mode,
         gameInfoData.fen[gameInfoData.fen.length - 1]
       );
-      console.log("Set player", isPlayerVal);
+
       dispatch(setIsPlayer(isPlayerVal));
       dispatch(setGame(chessboard));
-
+      matchDispatch({
+        type: "PLAYER_TIME",
+        payload:
+          orientation === WHITE
+            ? gameInfoData.player1Time
+            : gameInfoData.player2Time,
+      });
+      matchDispatch({
+        type: "OPPONENT_TIME",
+        payload:
+          orientation === BLACK
+            ? gameInfoData.player1Time
+            : gameInfoData.player2Time,
+      });
       // handle undo when game variable is not set (a.k.a. 1st move)
       socket.on("undoBoard", (fen) => {
         const gameFromFen = new Chessboard(
@@ -312,6 +328,9 @@ const Match = () => {
           opponentTime: initTimeInMs,
           increment: incrementInMs,
         },
+      });
+      socket.emit("start timer", {
+        gameRoom: gameId,
       });
     };
     fetchGame();
@@ -396,18 +415,22 @@ const Match = () => {
                 <h2>{matchState.opponent?.username}</h2>
                 {matchState.opponentTime !== null && (
                   <Timer
-                    initTimeInMs={matchState.opponentTime}
+                    type="opponent"
+                    side={game.side === WHITE ? BLACK : WHITE}
+                    defaultTime={matchState.opponentTime}
                     isActive={!game.isSameTurn(game.side)}
                     onTimeoutCb={onOpponentTimeout}
                   />
                 )}
               </div>
-              <Board game={game} />
+              <Board game={game} getIncrement={getIncrement} />
               <div className="info">
                 <h2>{matchState.player?.username}</h2>
                 {matchState.playerTime !== null && (
                   <Timer
-                    initTimeInMs={matchState.playerTime}
+                    type="player"
+                    side={game.side}
+                    defaultTime={matchState.playerTime}
                     isActive={game.isSameTurn(game.side)}
                     onTimeoutCb={onPlayerTimeout}
                   />

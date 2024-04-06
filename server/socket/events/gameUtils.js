@@ -65,7 +65,12 @@ const handleGameJoin = (io, socket, existingGame, newGame) => {
   addActiveGame(existingGame.userId, existingGame.room);
   addActiveGame(userId, existingGame.room);
   emitToRoom(io, existingGame.room, "game joined", existingGame.room);
-  initActiveGame(existingGame.room, existingGame.timeControl);
+  initActiveGame(existingGame.room, timeControlToMs(timeControl));
+};
+
+const timeControlToMs = (timeControl) => {
+  const [minutes, seconds] = timeControl.split("+");
+  return parseInt(minutes) * 60000;
 };
 
 const handlePrivateGameJoin = (io, socket, existingGame, userId) => {
@@ -87,7 +92,7 @@ const handlePrivateGameJoin = (io, socket, existingGame, userId) => {
   addActiveGame(existingGame.userId, existingGame.room);
   addActiveGame(userId, existingGame.room);
   emitToRoom(io, existingGame.room, "game joined", existingGame.room);
-  initActiveGame(existingGame.room, existingGame.timeControl);
+  initActiveGame(existingGame.room, timeControlToMs(timeControl));
 };
 
 const addToOngoingGames = async (data) => {

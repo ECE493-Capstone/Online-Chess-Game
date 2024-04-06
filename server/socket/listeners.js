@@ -13,6 +13,13 @@ const {
 const { emitToRoom } = require("./emittors");
 const { handleDisconnection } = require("./events/gameUtils");
 const { handleUserConnect } = require("./user/userSocketHandler");
+const {
+  updateActiveGame,
+  getTime,
+  getInterval,
+  setIntervalVal,
+  clearIntervalVal,
+} = require("../data");
 const listen = (io, socket) => {
   socket.on("user connect", (userId) => {
     handleUserConnect(userId, socket, io);
@@ -50,12 +57,12 @@ const listen = (io, socket) => {
   });
 
   socket.on("join room", (gameId) => {
-    console.log("JOINING ROOM");
     socket.join(gameId);
   });
   socket.on("move piece", async (move) => {
-    const { gameRoom, input, fen } = move;
+    const { gameRoom, input, fen, increment } = move;
     await addFen(gameRoom, fen);
+    updateActiveGame(gameRoom, increment);
     emitToRoom(socket, gameRoom, "oppMove", input);
     emitToRoom(socket, gameRoom, "spectatorMove", fen);
   });
@@ -75,6 +82,24 @@ const listen = (io, socket) => {
   socket.on("join room", (roomId) => {
     socket.join(roomId);
     io.to(roomId).emit("player joined", socket.id);
+  });
+
+  socket.on("start timer", ({ gameRoom }) => {
+    if (getInterval(gameRoom)) {
+      return;
+    }
+    const interval = setInterval(() => {
+      let time = getTime(gameRoom);
+      let isWhite = time.side === "player1" ? true : false;
+      let event = isWhite ? "whiteTime" : "blackTime";
+      let playerTime = isWhite ? time.player1 : time.player2;
+      if (playerTime < -999.99) {
+        clearIntervalVal(gameRoom);
+        return;
+      }
+      io.to(gameRoom).emit(event, playerTime);
+    }, 1000);
+    setIntervalVal(gameRoom, interval);
   });
 
   socket.on("leave room", (roomId) => {
