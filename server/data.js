@@ -93,6 +93,51 @@ const isExistingActivePlayer = (userId) => {
   return activeUsers[userId];
 };
 
+const addVote = (voteInfo) => {
+  const { gameRoom, square, fen } = voteInfo;
+
+  if (!activeGames[gameRoom]) activeGames[gameRoom] = {};
+
+  if (!activeGames[gameRoom].votes) {
+    activeGames[gameRoom].votes = [];
+  }
+
+  activeGames[gameRoom].votes.push({ square, fen });
+};
+
+const clearVotes = (gameRoom) => {
+  if (!activeGames[gameRoom]) return;
+  activeGames[gameRoom].votes = [];
+};
+
+const getMajorityVote = (gameRoom) => {
+  const votes = activeGames[gameRoom]?.votes;
+
+  if (!votes) return null;
+
+  let majorCount = 0;
+  let majorityVote = null;
+  for (let i = 0; i < votes.length; i++) {
+    let currCount = 0;
+    let currSquare = votes[i].square;
+    for (let j = 0; j < votes.length; j++) {
+      if (
+        currSquare &&
+        votes[j].square &&
+        currSquare[0] === votes[j].square[0] &&
+        currSquare[1] === votes[j].square[1]
+      ) {
+        currCount++;
+      }
+    }
+    if (currCount > majorCount) {
+      majorCount = currCount;
+      majorityVote = votes[i];
+    }
+  }
+  return majorityVote;
+};
+
 module.exports = {
   addSocket,
   addActiveGame,
@@ -103,4 +148,7 @@ module.exports = {
   getActiveGames,
   getActiveUsers,
   resetUser,
+  addVote,
+  clearVotes,
+  getMajorityVote,
 };

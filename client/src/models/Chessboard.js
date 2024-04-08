@@ -480,13 +480,16 @@ export class Chessboard {
 
   randomizeDuckPosition() {
     // return random empty square in the form [row, col]
-    const emptySquares = this.getEmptySquares();
-    const [newRow, newCol] =
-      emptySquares[Math.floor(Math.random() * emptySquares.length)];
-
-    const [oldRow, oldCol] = this._findDuck();
-    this.remove(oldRow, oldCol);
+    const [newRow, newCol] = this.getRandomEmptySquare();
+    this._removeDuck();
     this.add(newRow, newCol, DUCK);
+
+    return [newRow, newCol];
+  }
+
+  getRandomEmptySquare() {
+    const emptySquares = this.getEmptySquares();
+    return emptySquares[Math.floor(Math.random() * emptySquares.length)];
   }
 
   _findDuck() {
@@ -497,6 +500,20 @@ export class Chessboard {
         }
       }
     }
+    return null; // return null if can't find duck
+  }
+
+  _removeDuck() {
+    const duckPosition = this._findDuck();
+    if (duckPosition) {
+      this.remove(duckPosition[0], duckPosition[1]);
+    }
+  }
+
+  voteDuck(row, col) {
+    if (this.gameMode !== GAME_MODE.POWER_UP_DUCK) return;
+    this._removeDuck();
+    this.add(row, col, DUCK);
   }
 
   _getAttackedSquares(fromRow, fromCol) {

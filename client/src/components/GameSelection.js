@@ -150,7 +150,30 @@ const GameSelect = ({ handleGameSelectHome }) => {
             }}
             disableRestoreFocus
           >
-            <Typography sx={{ p: 1 }}>Info on the power-ups</Typography>
+            <Typography sx={{ p: 1 }}>
+              Pawn: explode upon death and destroy all pieces within one square
+              (evolve requirements: capture 2 pieces)
+            </Typography>
+            <Typography sx={{ p: 1 }}>
+              Rook: gain a 'Global Castle' counter with each successful capture.
+              This counter can be consumed to ‘recall’ the rook to within one
+              square from the king regardless of its position on the board
+              (evolve requirements: None)
+            </Typography>
+            <Typography sx={{ p: 1 }}>
+              Knight: Upon reaching the opposite side of the board, it gains the
+              ability to wrap around the board when moving, maintaining its
+              original knight-like movement pattern (evolve requirements: reach
+              the final rank)
+            </Typography>
+            <Typography sx={{ p: 1 }}>
+              Bishop: snap back to original position after capturing a piece
+              (evolve requirements: capture a piece at least 4 squares away)
+            </Typography>
+            <Typography sx={{ p: 1 }}>
+              King: spawn an equivalent piece at its previous position every
+              time it captures an enemy piece (evolve requirements: None)
+            </Typography>
           </Popover>
         </div>
         <div className="standard">
