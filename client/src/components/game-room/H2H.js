@@ -12,7 +12,7 @@ const Container = styled.div`
   border-radius: 10px;
   margin: 10px;
   width: fit-content;
-  min-width: 400px;
+  min-width: 320px;
 
   .divider {
     margin: 0;
