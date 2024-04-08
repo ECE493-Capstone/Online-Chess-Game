@@ -67,8 +67,7 @@ const listen = (io, socket) => {
     updateActiveGame(gameRoom, increment);
     emitToRoom(socket, gameRoom, "oppMove", input);
     emitToRoom(socket, gameRoom, "spectatorMove", fen);
-    if (infoIfRandomDuck !== null) {
-      // !== null if game mode is POWER_UP_DUCK
+    const broadcastVotingEvent = (io, gameRoom, infoIfRandomDuck) => {
       let timeLeft = 10000; // 10 seconds
       io.to(gameRoom).emit("voteStart", timeLeft / 1000);
       const voteInterval = setInterval(async () => {
@@ -95,6 +94,10 @@ const listen = (io, socket) => {
         }
         io.to(gameRoom).emit("voteTime", timeLeft / 1000);
       }, 1000);
+    };
+    if (infoIfRandomDuck !== null) {
+      // !== null if game mode is POWER_UP_DUCK
+      broadcastVotingEvent(io, gameRoom, infoIfRandomDuck);
     }
   });
 
