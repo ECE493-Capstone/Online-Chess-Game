@@ -156,6 +156,7 @@ const HeaderElements = ({ setOthersIsLoggedIn }) => {
           {isLoggedIn ? (
             <>
               <Button
+                id="account-icon"
                 style={{ marginRight: "5px", textTransform: "none" }}
                 onClick={handleUserIconClick}
               >
@@ -176,6 +177,7 @@ const HeaderElements = ({ setOthersIsLoggedIn }) => {
           ) : (
             <>
               <Button
+                id = "signin"
                 variant="contained"
                 style={{
                   color: "white",
@@ -189,6 +191,7 @@ const HeaderElements = ({ setOthersIsLoggedIn }) => {
                 Sign in
               </Button>
               <Button
+                id = "signup"
                 variant="contained"
                 style={{
                   color: "white",

@@ -204,10 +204,10 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
           <img src={img} alt="profile" style={{ width: "175px" }} />
           <Title>{username}</Title>
           <Subtitle>({email})</Subtitle>
-          <StyledButton variant="contained" onClick={handleOpenChangeUsername}>
+          <StyledButton id="change-username" variant="contained" onClick={handleOpenChangeUsername}>
             Change Username
           </StyledButton>
-          <StyledButton variant="contained" onClick={handleOpenChangePassword}>
+          <StyledButton id="change-password" variant="contained" onClick={handleOpenChangePassword}>
             Change Password
           </StyledButton>
         </ProfileInfo>

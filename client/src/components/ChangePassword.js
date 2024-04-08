@@ -108,10 +108,14 @@ const ChangePassword = ({ onClose, setIsFocused }) => {
           // Redirect to previous page after password change
           // navigate(-1);
           return Promise.resolve(undefined);
+        } else if (res.status === 401) {
+          const responseData = await res.json();
+          const errorMessage = responseData.error || "Internal server error";
+          dispatch({ type: "SET_ERROR", payload: errorMessage });
+        } else {
+          const data = await res.json();
+          dispatch({ type: "SET_ERROR", payload: data.message });
         }
-
-        const data = await res.json();
-        dispatch({ type: "SET_ERROR", payload: data.message });
       } else {
         console.log('Error. Email not found in cookie');
         dispatch({ type: "SET_ERROR", payload: "Error finding user's email in cookie. Are you logged in?" });
@@ -156,7 +160,7 @@ const ChangePassword = ({ onClose, setIsFocused }) => {
             }
           ></TextField>
         </div>
-        {errorMsg && <Box color="error.main">{errorMsg}</Box>}
+        {errorMsg && <Box id = "error-box" color="error.main">{errorMsg}</Box>}
         <div className="footer">
           <Button type="submit" variant="contained" disabled={isSubmitting}>
             Change Password
