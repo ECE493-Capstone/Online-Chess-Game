@@ -9,6 +9,7 @@ const {
   addFen,
   popFen,
   getLastFen,
+  removePlayerFromQueue,
 } = require("./events/gameUtils");
 const { emitToRoom } = require("./emittors");
 const { handleDisconnection } = require("./events/gameUtils");
@@ -191,6 +192,15 @@ const listen = (io, socket) => {
       console.log(`$Fen for undo: ${lastFen}`);
     } else {
       emitToRoom(socket, gameRoom, "undoRejected");
+    }
+  });
+
+  socket.on("exit queue", async (userId) => {
+    const res = await removePlayerFromQueue(userId);
+    if (res) {
+      console.log(`Player ${userId} removed from queue`);
+    } else {
+      console.log(`Player ${userId} not found in queue`);
     }
   });
 };

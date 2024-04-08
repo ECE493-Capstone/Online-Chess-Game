@@ -22,6 +22,11 @@ const findGameInQueue = async (mode, tc, type) => {
   return game;
 };
 
+const removePlayerFromQueue = async (userId) => {
+  const result = await Queue.deleteOne({ userId });
+  return result;
+};
+
 const findPrivateGame = async (room) => {
   const game = await Queue.findOne({ room: room }, null, {
     sort: { joinTime: 1 },
@@ -196,4 +201,5 @@ module.exports = {
   updateFen,
   popFen,
   getLastFen,
+  removePlayerFromQueue,
 };
