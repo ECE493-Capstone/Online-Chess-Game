@@ -13,7 +13,7 @@ import GameStatistics from "../Statistics";
 import img from "../../assets/profile.svg";
 import { getPastGamesInformation } from "../../api/pastGames";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import GameReview from "../GameHistory";
+import GameHistory from "../GameHistory";
 
 const StyledUserInfoContainer = styled.div`
   display: flex;
@@ -310,7 +310,7 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
           data={data}
           username={username}
         />
-        <GameReview data={data} username={username} userId={storedUserId} />
+        <GameHistory data={data} username={username} userId={storedUserId} />
       </div>
       {/* </StyledScrollbar> */}
   

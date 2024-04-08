@@ -51,7 +51,7 @@ const StyledGameReview = styled.div`
     align-items: center;
   }
 `;
-const GameReview = ({ data, username, userId }) => {
+const GameHistory = ({ data, username, userId }) => {
 
   const [updatedData, setUpdatedData] = useState([]);
 
@@ -152,4 +152,4 @@ const GameReview = ({ data, username, userId }) => {
   );
 };
 
-export default GameReview;
+export default GameHistory;
