@@ -15,7 +15,6 @@ import Timer from "../game-room/Timer";
 import ShareIcon from "@mui/icons-material/Share";
 import Button from "@mui/material/Button";
 import { Snackbar } from "@mui/material";
-import MoveHistory from "../game-room/MoveHistory";
 import RequestButtons from "../game-room/RequestButtons";
 import { fetchUser } from "../../api/fetchUser";
 import H2H from "../game-room/H2H";
@@ -492,9 +491,6 @@ const Match = () => {
               player1Id={matchState.player?.id}
               player2Id={matchState.opponent?.id}
             />
-          </div>
-          <div className="move-history">
-            <MoveHistory />
           </div>
           {isPlayer && (
             <div className="request-btns">
