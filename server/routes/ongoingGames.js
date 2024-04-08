@@ -3,13 +3,13 @@ const User = require("../models/OngoingGames");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcryptjs");
 const OngoingGames = require("../models/OngoingGames");
+const { getTime } = require("../data");
 
 const router = express.Router();
 const jsonParser = bodyParser.json();
 
 router.get("/byPlayer", jsonParser, async (req, res) => {
   const { player } = req.query;
-  console.log(req.query);
   const player1Game = await OngoingGames.findOne({ player1: player });
   const player2Game = await OngoingGames.findOne({ player2: player });
   if (player1Game || player2Game) {
@@ -21,13 +21,16 @@ router.get("/byPlayer", jsonParser, async (req, res) => {
     res.send({ message: "No ongoing game found" });
   }
 });
-
 router.get("/byGameId", jsonParser, async (req, res) => {
   const { gameId } = req.query;
-  console.log(req.query);
-  const game = await OngoingGames.findOne({ room: gameId });
+  let game = await OngoingGames.findOne({ room: gameId });
   if (game) {
-    console.log(game);
+    const time = getTime(gameId);
+    game = {
+      ...game._doc,
+      player1Time: time.player1,
+      player2Time: time.player2,
+    };
     res.status(200);
     res.send(game);
   } else {
