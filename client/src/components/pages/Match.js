@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setGame, setVoteInfo } from "../../features/boardSlice";
 import { getOngoingGameInformationByGameId } from "../../api/ongoingGames";
 import Cookies from "universal-cookie";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { socket } from "../../app/socket";
 import toast from "react-hot-toast";
 import styled from "styled-components";
@@ -189,6 +189,9 @@ const Match = () => {
       fen: gameClone.convertToFEN(), // fen if vote comes through
     });
   };
+  const getIncrement = () => {
+    return matchState.increment;
+  };
   useEffect(() => {
     console.log("TEST", isPlayer);
 
@@ -311,15 +314,15 @@ const Match = () => {
         userId !== undefined &&
         (gameInfoData.player1 === userId || gameInfoData.player2 === userId);
       orientation = !userId || gameInfoData.player1 === userId ? WHITE : BLACK;
+      console.log("TEST", gameInfoData);
       const chessboard = new Chessboard(
         orientation,
         gameInfoData.mode,
         gameInfoData.fen[gameInfoData.fen.length - 1]
       );
-      console.log("Set player", isPlayerVal);
+
       dispatch(setIsPlayer(isPlayerVal));
       dispatch(setGame(chessboard));
-
       // handle undo when game variable is not set (a.k.a. 1st move)
       socket.on("undoBoard", (fen) => {
         const gameFromFen = new Chessboard(
@@ -346,7 +349,6 @@ const Match = () => {
         console.log(gameInfoData, opponentInfo, playerInfo);
       }
       const tc = gameInfoData.timeControl.split(" ");
-      const initTimeInMs = parseInt(tc[0]) * 1000 * 60;
       const incrementInMs = parseInt(tc[2]) * 1000;
       matchDispatch({
         type: "INIT",
@@ -359,10 +361,19 @@ const Match = () => {
             id: opponentId,
             ...opponentInfo,
           },
-          playerTime: initTimeInMs,
-          opponentTime: initTimeInMs,
+          playerTime:
+            orientation === WHITE
+              ? gameInfoData.player1Time
+              : gameInfoData.player2Time,
+          opponentTime:
+            orientation === BLACK
+              ? gameInfoData.player1Time
+              : gameInfoData.player2Time,
           increment: incrementInMs,
         },
+      });
+      socket.emit("start timer", {
+        gameRoom: gameId,
       });
     };
     fetchGame();
@@ -447,18 +458,22 @@ const Match = () => {
                 <h2>{matchState.opponent?.username}</h2>
                 {matchState.opponentTime !== null && (
                   <Timer
-                    initTimeInMs={matchState.opponentTime}
+                    type="opponent"
+                    side={game.side === WHITE ? BLACK : WHITE}
+                    defaultTime={matchState.opponentTime}
                     isActive={!game.isSameTurn(game.side)}
                     onTimeoutCb={onOpponentTimeout}
                   />
                 )}
               </div>
-              <Board game={game} />
+              <Board game={game} getIncrement={getIncrement} />
               <div className="info">
                 <h2>{matchState.player?.username}</h2>
                 {matchState.playerTime !== null && (
                   <Timer
-                    initTimeInMs={matchState.playerTime}
+                    type="player"
+                    side={game.side}
+                    defaultTime={matchState.playerTime}
                     isActive={game.isSameTurn(game.side)}
                     onTimeoutCb={onPlayerTimeout}
                   />
@@ -530,9 +545,6 @@ const Match = () => {
               player2Id={matchState.opponent?.id}
             />
           </div>
-          {/* <div className="move-history">
-            <MoveHistory />
-          </div> */}
           {isPlayer && (
             <div className="request-btns">
               <RequestButtons

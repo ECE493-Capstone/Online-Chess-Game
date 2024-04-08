@@ -18,7 +18,7 @@ const StyledSquare = styled.div`
   width: 100%;
   height: 100%;
 `;
-const Square = ({ piece, rowIndex, colIndex, game }) => {
+const Square = ({ piece, rowIndex, colIndex, game, getIncrement }) => {
   const { gameId } = useParams();
   const dispatch = useDispatch();
   const dragStart = useSelector((state) => state.board.dragStart);
@@ -67,6 +67,7 @@ const Square = ({ piece, rowIndex, colIndex, game }) => {
               fenAfterRandomDuck,
             }
           : null,
+      increment: getIncrement(),
     });
   };
   const handleClick = () => {
