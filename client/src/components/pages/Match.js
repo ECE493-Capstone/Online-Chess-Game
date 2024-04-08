@@ -1,22 +1,20 @@
 import React, { useEffect, useState, useReducer } from "react";
 import Board from "../Board";
-import { BLACK, Chessboard, WHITE } from "../../models/Chessboard";
+import { BLACK, Chessboard, GAME_MODE, WHITE } from "../../models/Chessboard";
 import { useDispatch, useSelector } from "react-redux";
-import { setGame } from "../../features/boardSlice";
+import { setGame, setVoteInfo } from "../../features/boardSlice";
 import { getOngoingGameInformationByGameId } from "../../api/ongoingGames";
 import Cookies from "universal-cookie";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { socket } from "../../app/socket";
 import toast from "react-hot-toast";
 import styled from "styled-components";
 import NoticeDialog from "../dialog/NoticeDialog";
 import { setIsPlayer } from "../../features/userSlice";
 import Timer from "../game-room/Timer";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import ShareIcon from "@mui/icons-material/Share";
 import Button from "@mui/material/Button";
 import { Snackbar } from "@mui/material";
-import MoveHistory from "../game-room/MoveHistory";
 import RequestButtons from "../game-room/RequestButtons";
 import { fetchUser } from "../../api/fetchUser";
 import H2H from "../game-room/H2H";
@@ -91,7 +89,7 @@ const Container = styled.div`
   .rhs {
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
+    justify-content: center;
     align-items: center;
     width: 40vw;
     height: 100vh;
@@ -108,6 +106,13 @@ const Container = styled.div`
       justify-content: center;
       align-items: center;
       width: 70%;
+    }
+
+    .voting-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
   }
 `;
@@ -135,6 +140,8 @@ const MatchReducer = (state, action) => {
       return { ...state, openDrawDialog: action.payload };
     case "UNDO_DIALOG":
       return { ...state, openUndoDialog: action.payload };
+    case "VOTE_TIMER":
+      return { ...state, voteTimer: action.payload };
     default:
       return state;
   }
@@ -159,12 +166,44 @@ const Match = () => {
     endGameInfo: null,
     openDrawDialog: false,
     openUndoDialog: false,
+    voteTimer: null, // time left to vote (in seconds)
   });
+  const voteInfo = useSelector((state) => state.board.voteInfo);
   const cookies = new Cookies();
   const userId = cookies.get("userId");
   console.log("ISPLAYER", isPlayer);
+
+  const castDuckVote = () => {
+    dispatch(
+      setVoteInfo({ votedSquare: voteInfo.votedSquare, isAllowed: false })
+    );
+    const gameClone = new Chessboard(
+      game.side,
+      game.gameMode,
+      game.convertToFEN()
+    );
+    gameClone.voteDuck(voteInfo.votedSquare[0], voteInfo.votedSquare[1]);
+    socket.emit("cast vote", {
+      gameRoom: gameId,
+      square: voteInfo.votedSquare,
+      fen: gameClone.convertToFEN(), // fen if vote comes through
+    });
+  };
+  const getIncrement = () => {
+    return matchState.increment;
+  };
   useEffect(() => {
     console.log("TEST", isPlayer);
+
+    socket.on("voteStart", (startTime) => {
+      dispatch(setVoteInfo({ votedSquare: null, isAllowed: true }));
+      matchDispatch({ type: "VOTE_TIMER", payload: startTime });
+    });
+
+    socket.on("voteTime", (timeLeft) => {
+      matchDispatch({ type: "VOTE_TIMER", payload: timeLeft });
+    });
+
     if (isPlayer) {
       console.log("PLAYER");
       // ----------------- socket listeners -----------------
@@ -226,6 +265,26 @@ const Match = () => {
       });
     }
   }, [isPlayer]);
+
+  useEffect(() => {
+    socket.off("voteEnd");
+    socket.on("voteEnd", (duckSquare) => {
+      dispatch(setVoteInfo({ votedSquare: null, isAllowed: false }));
+      matchDispatch({ type: "VOTE_TIMER", payload: null });
+      const [row, col] = duckSquare;
+      const gameCopy = game.copy();
+      gameCopy.voteDuck(row, col);
+      dispatch(setGame(gameCopy));
+    });
+
+    socket.off("undoBoard");
+    socket.on("undoBoard", (fen) => {
+      const gameFromFen = new Chessboard(game.side, game.gameMode, fen);
+      dispatch(setGame(gameFromFen));
+      matchDispatch({ type: "BTN_DISABLED", payload: false });
+    });
+  }, [game]);
+
   useEffect(() => {
     if (game) {
       if (input !== null) {
@@ -245,11 +304,6 @@ const Match = () => {
           });
         }
       }
-      socket.on("undoBoard", (fen) => {
-        const gameFromFen = new Chessboard(game.side, game.gameMode, fen);
-        dispatch(setGame(gameFromFen));
-        matchDispatch({ type: "BTN_DISABLED", payload: false });
-      });
 
       return;
     }
@@ -260,15 +314,15 @@ const Match = () => {
         userId !== undefined &&
         (gameInfoData.player1 === userId || gameInfoData.player2 === userId);
       orientation = !userId || gameInfoData.player1 === userId ? WHITE : BLACK;
+      console.log("TEST", gameInfoData);
       const chessboard = new Chessboard(
         orientation,
         gameInfoData.mode,
         gameInfoData.fen[gameInfoData.fen.length - 1]
       );
-      console.log("Set player", isPlayerVal);
+
       dispatch(setIsPlayer(isPlayerVal));
       dispatch(setGame(chessboard));
-
       // handle undo when game variable is not set (a.k.a. 1st move)
       socket.on("undoBoard", (fen) => {
         const gameFromFen = new Chessboard(
@@ -295,7 +349,6 @@ const Match = () => {
         console.log(gameInfoData, opponentInfo, playerInfo);
       }
       const tc = gameInfoData.timeControl.split(" ");
-      const initTimeInMs = parseInt(tc[0]) * 1000 * 60;
       const incrementInMs = parseInt(tc[2]) * 1000;
       matchDispatch({
         type: "INIT",
@@ -308,10 +361,19 @@ const Match = () => {
             id: opponentId,
             ...opponentInfo,
           },
-          playerTime: initTimeInMs,
-          opponentTime: initTimeInMs,
+          playerTime:
+            orientation === WHITE
+              ? gameInfoData.player1Time
+              : gameInfoData.player2Time,
+          opponentTime:
+            orientation === BLACK
+              ? gameInfoData.player1Time
+              : gameInfoData.player2Time,
           increment: incrementInMs,
         },
+      });
+      socket.emit("start timer", {
+        gameRoom: gameId,
       });
     };
     fetchGame();
@@ -396,18 +458,22 @@ const Match = () => {
                 <h2>{matchState.opponent?.username}</h2>
                 {matchState.opponentTime !== null && (
                   <Timer
-                    initTimeInMs={matchState.opponentTime}
+                    type="opponent"
+                    side={game.side === WHITE ? BLACK : WHITE}
+                    defaultTime={matchState.opponentTime}
                     isActive={!game.isSameTurn(game.side)}
                     onTimeoutCb={onOpponentTimeout}
                   />
                 )}
               </div>
-              <Board game={game} />
+              <Board game={game} getIncrement={getIncrement} />
               <div className="info">
                 <h2>{matchState.player?.username}</h2>
                 {matchState.playerTime !== null && (
                   <Timer
-                    initTimeInMs={matchState.playerTime}
+                    type="player"
+                    side={game.side}
+                    defaultTime={matchState.playerTime}
                     isActive={game.isSameTurn(game.side)}
                     onTimeoutCb={onPlayerTimeout}
                   />
@@ -479,9 +545,6 @@ const Match = () => {
               player2Id={matchState.opponent?.id}
             />
           </div>
-          <div className="move-history">
-            <MoveHistory />
-          </div>
           {isPlayer && (
             <div className="request-btns">
               <RequestButtons
@@ -492,6 +555,25 @@ const Match = () => {
               />
             </div>
           )}
+          {voteInfo.isAllowed &&
+            (!isPlayer ? (
+              <div className="voting-info">
+                <h3>Click on empty square to vote!</h3>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  disabled={voteInfo.votedSquare === null}
+                  onClick={() => castDuckVote()}
+                >
+                  Vote
+                </Button>
+                {matchState.voteTimer}s left to vote.
+              </div>
+            ) : (
+              <div className="voting-info">
+                <h3>Waiting for vote... ({matchState.voteTimer}s left)</h3>
+              </div>
+            ))}
         </div>
       )}
     </Container>

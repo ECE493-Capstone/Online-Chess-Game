@@ -1,5 +1,5 @@
 import React from "react";
-import Pieces from "./Pieces";
+import getPieceImage from "./Pieces";
 import { useDispatch } from "react-redux";
 import { setDragStart } from "../features/boardSlice";
 import styled from "styled-components";
@@ -25,7 +25,7 @@ const Piece = ({ piece, rowIndex, colIndex }) => {
       })
     );
   };
-  const img = Pieces[piece];
+  const img = getPieceImage(piece);
   return (
     <StyledPiece>
       {piece && (

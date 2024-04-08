@@ -12,6 +12,8 @@ import GameSelect from "../GameSelection";
 import { FaChevronCircleLeft } from "react-icons/fa";
 import TypeSubmit from "../TypeSubmit";
 import toast from "react-hot-toast";
+import QueueDialog from "../dialog/QueueDialog";
+import { Dialog } from "@mui/material";
 
 const PageContainer = styled.div`
   display: flex;
@@ -70,6 +72,7 @@ const Home = () => {
     time: "1 + 0",
     side: "r",
   });
+  const [showQueueDialog, setShowQueueDialog] = useState(false);
   const cookies = new Cookies();
   const userId = cookies.get("userId");
   const navigate = useNavigate();
@@ -155,6 +158,7 @@ const Home = () => {
         dispatch(setGameInfo(gameInfo));
         navigate(`/match/${gameInfo}`);
       });
+      setShowQueueDialog(true);
     } else {
       toast.error("Please login to play");
     }
@@ -167,6 +171,13 @@ const Home = () => {
     console.log("Selected game mode:", gameMode);
     setPlayInfo({ ...playInfo, gameMode: gameMode });
     setDirection(direction + 1);
+  };
+
+  const handleExitQueue = (userId) => {
+    console.log("Exiting queue...");
+    socket.off("game joined");
+    socket.emit("exit queue", userId);
+    setShowQueueDialog(false);
   };
 
   return (
@@ -217,6 +228,12 @@ const Home = () => {
               handleSubmit={handleSubmit}
             />
           </div>
+          <Dialog
+            open={showQueueDialog}
+            onClose={() => handleExitQueue(userId)}
+          >
+            <QueueDialog onCancelClicked={() => handleExitQueue(userId)} />
+          </Dialog>
         </div>
       </PageContainer>
     </>

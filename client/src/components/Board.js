@@ -28,17 +28,22 @@ const StyledBoard = styled.div`
     }
   }
 `;
-const Board = ({ game }) => {
+const Board = ({ game, getIncrement }) => {
   // Define the chess board as a 2D array
   // Render the chess board
   const board = game.getBoard();
   const isPlayer = useSelector((state) => state.user.isPlayer);
+  const voteInfo = useSelector((state) => state.board.voteInfo);
   const orientation = game.side;
   const flipConstant = orientation === "w" ? 0 : 7;
   const getRow = (rowIndex) => Math.abs(flipConstant - rowIndex);
   const getCol = (colIndex) => Math.abs(flipConstant - colIndex);
   return (
-    <StyledBoard disabled={!isPlayer}>
+    <StyledBoard
+      disabled={
+        (isPlayer && voteInfo.isAllowed) || (!isPlayer && !voteInfo.isAllowed)
+      }
+    >
       {board.map((row, rowIndex) => (
         <div key={rowIndex} className="board-row">
           {row.map((piece, colIndex) => (
@@ -55,6 +60,7 @@ const Board = ({ game }) => {
                 rowIndex={getRow(rowIndex)}
                 colIndex={getCol(colIndex)}
                 game={game}
+                getIncrement={getIncrement}
               />
             </div>
           ))}
