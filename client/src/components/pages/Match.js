@@ -271,20 +271,6 @@ const Match = () => {
 
       dispatch(setIsPlayer(isPlayerVal));
       dispatch(setGame(chessboard));
-      matchDispatch({
-        type: "PLAYER_TIME",
-        payload:
-          orientation === WHITE
-            ? gameInfoData.player1Time
-            : gameInfoData.player2Time,
-      });
-      matchDispatch({
-        type: "OPPONENT_TIME",
-        payload:
-          orientation === BLACK
-            ? gameInfoData.player1Time
-            : gameInfoData.player2Time,
-      });
       // handle undo when game variable is not set (a.k.a. 1st move)
       socket.on("undoBoard", (fen) => {
         const gameFromFen = new Chessboard(
@@ -311,7 +297,6 @@ const Match = () => {
         console.log(gameInfoData, opponentInfo, playerInfo);
       }
       const tc = gameInfoData.timeControl.split(" ");
-      const initTimeInMs = parseInt(tc[0]) * 1000 * 60;
       const incrementInMs = parseInt(tc[2]) * 1000;
       matchDispatch({
         type: "INIT",
@@ -324,8 +309,14 @@ const Match = () => {
             id: opponentId,
             ...opponentInfo,
           },
-          playerTime: initTimeInMs,
-          opponentTime: initTimeInMs,
+          playerTime:
+            orientation === WHITE
+              ? gameInfoData.player1Time
+              : gameInfoData.player2Time,
+          opponentTime:
+            orientation === BLACK
+              ? gameInfoData.player1Time
+              : gameInfoData.player2Time,
           increment: incrementInMs,
         },
       });
