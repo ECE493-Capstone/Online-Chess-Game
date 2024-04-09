@@ -20,6 +20,7 @@ import { fetchUser } from "../../api/fetchUser";
 import H2H from "../game-room/H2H";
 import YesNoDialog from "../dialog/YesNoDialog";
 import BlindChess from "../BlindChess/BlindChess";
+import BlindChessInstructions from "../BlindChess/BlindChessInstructions";
 
 const Container = styled.div`
   /* border: 1px solid white;
@@ -531,6 +532,7 @@ const Match = () => {
               player2Id={matchState.opponent?.id}
             />
           </div>
+          {game.gameMode === "Blind" && <BlindChessInstructions />}
           {isPlayer && (
             <div className="request-btns">
               <RequestButtons

@@ -14,6 +14,7 @@ import { socket } from "./app/socket";
 import Profile from "./components/pages/Profile";
 import { Toaster } from "react-hot-toast";
 import BlindChess from "./components/BlindChess/BlindChess";
+import BlindChessInstructions from "./components/BlindChess/BlindChessInstructions";
 
 const darkTheme = createTheme({
   palette: {
@@ -44,7 +45,7 @@ const App = () => {
           <Route path="/timeselect" element={<TimeSelect />} />
           <Route path="/match" element={<Match />} />
           <Route path="/gameselect" element={<GameSelect />} />
-          <Route path="/blindchess" element={<BlindChess />} />
+          <Route path="/blindchess" element={<BlindChessInstructions />} />
           <Route path="/profile" element={<Profile />} />
         </Routes>
       </Router>
