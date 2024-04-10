@@ -63,7 +63,7 @@ const GameCreation = ({
               borderRadius: "8px",
             }}
           >
-            <ButtonContent>
+            <ButtonContent id="quick-play">
               <Title>Quick Play</Title>
               <Subtitle>Standard, blind, or power up chess</Subtitle>
             </ButtonContent>
@@ -77,6 +77,7 @@ const GameCreation = ({
             }}
           >
             <RightButton
+            id = "create-game"
               variant="contained"
               onClick={handleCreateGameClick}
               style={{
@@ -88,6 +89,7 @@ const GameCreation = ({
               <Title>Create Game</Title>
             </RightButton>
             <RightButton
+              id = "join-game"
               variant="contained"
               onClick={handleJoinGame}
               style={{

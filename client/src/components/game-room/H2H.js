@@ -104,7 +104,7 @@ const H2H = ({
   return (
     <>
       {state.player1 && state.player2 && (
-        <Container>
+        <Container id="h2h">
           <div
             className={`player-info ${
               state.player1.wins > state.player2.wins

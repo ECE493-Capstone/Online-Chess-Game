@@ -35,6 +35,7 @@ const SideSelect = ({ side, handleSideClick }) => {
   return (
     <StyledSideSelectContainer>
       <Button
+        id="play-as-white"
         className={`white ${side === "w" ? "selected" : ""}`}
         title="Play as white"
         onClick={() => handleSideClick("w")}
@@ -42,6 +43,7 @@ const SideSelect = ({ side, handleSideClick }) => {
         <FaChessKing />
       </Button>
       <Button
+        id="play-as-black"
         className={`black ${side === "b" ? "selected" : ""}`}
         title="Play as black"
         onClick={() => handleSideClick("b")}

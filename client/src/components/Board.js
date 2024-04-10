@@ -40,6 +40,7 @@ const Board = ({ game, getIncrement }) => {
   const getCol = (colIndex) => Math.abs(flipConstant - colIndex);
   return (
     <StyledBoard
+      id="game-board"
       disabled={
         (isPlayer && voteInfo.isAllowed) || (!isPlayer && !voteInfo.isAllowed)
       }

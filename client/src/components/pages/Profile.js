@@ -233,6 +233,7 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
           setData(gamesData);
         } else {
           console.log("Setting data for mode: " + mode);
+          console.log("These are all the game datas: " + JSON.stringify(gamesData));
           setData(gamesData.filter((data) => data.mode === mode));
         }
       } catch (error) {
@@ -308,7 +309,7 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
           draws={statistics.draws}
           handleSetData={handleSetData}
           data={data}
-          username={username}
+          userId={storedUserId}
         />
         <GameHistory data={data} username={username} userId={storedUserId} />
       </div>

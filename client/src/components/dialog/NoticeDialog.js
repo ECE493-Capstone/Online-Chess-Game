@@ -36,7 +36,7 @@ const NoticeDialog = ({
   showSpinner = true,
 }) => {
   return (
-    <DialogContainer>
+    <DialogContainer id="reconnecting-dialog">
       <div className="header">
         <div>
           <h2 className="headerContent">Notice</h2>

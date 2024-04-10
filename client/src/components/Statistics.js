@@ -18,7 +18,7 @@ const PageContainer = styled.div`
 `;
 
 // Sample game mode data. Hard-coded. Once they finish with the API for the actual data, I'll implement them.
-const GameStatistics = ({ handleSetData, data, username }) => {
+const GameStatistics = ({ handleSetData, data, userId }) => {
   // console.log("Data retreived into stats: " + JSON.stringify(data));
   const [selectedGameMode, setSelectedGameMode] = useState("All");
   const [formattedData, setFormattedData] = useState([]);
@@ -35,22 +35,22 @@ const GameStatistics = ({ handleSetData, data, username }) => {
   
   
       data.forEach((entry) => {
-        if (entry.winner === username) {
-          if (entry.player1 === username) {
+        if (entry.winner ===  userId) {
+          if (entry.player1 ===  userId) {
             winCountWhite++;
           }
           else {
             winCountBlack++;
           }
         } else if (entry.winner === null) {
-          if (entry.player1 === username) {
+          if (entry.player1 === userId) {
             tieCountWhite++;
           }
           else {
             tieCountBlack++;
           }
         } else {
-          if (entry.player1 === username) {
+          if (entry.player1 === userId) {
             lossCountWhite++;
           }
           else {
@@ -64,7 +64,7 @@ const GameStatistics = ({ handleSetData, data, username }) => {
     };
 
     const formatGameData = (gameData) => {
-      // console.log("gamedata: " + JSON.stringify(gameData[0]));
+      console.log("gamedata: " + JSON.stringify(gameData[0]));
       const formattedData = [
           { name: "Wins", white: gameData[0].winWhite, black: gameData[0].winBlack },
           { name: "Losses", white: gameData[0].loseWhite, black: gameData[0].loseBlack },
@@ -107,6 +107,7 @@ const GameStatistics = ({ handleSetData, data, username }) => {
   return (
     <PageContainer>
       <BarChart
+        id = "game-statistics"
         width={400}
         height={300}
         data={formattedData}
@@ -116,8 +117,8 @@ const GameStatistics = ({ handleSetData, data, username }) => {
         <YAxis />
         <Tooltip content={<CustomTooltip />} />
         <Legend />
-        <Bar dataKey="white" fill="white" name="White" stackId="white" />
-        <Bar dataKey="black" fill="#9e9fa0" name="Black" stackId="black" />
+        <Bar dataKey="white" fill="white" name="White" stackId="white" id="white"/>
+        <Bar dataKey="black" fill="#9e9fa0" name="Black" stackId="black" id="black"/>
       </BarChart>
       <FormControl className="select-form">
         <InputLabel id="demo-simple-select-label">Game Mode</InputLabel>
@@ -127,14 +128,16 @@ const GameStatistics = ({ handleSetData, data, username }) => {
           value={selectedGameMode}
           label="Game mode"
           onChange={(e) => {
-            setSelectedGameMode(e.target.value);
-            handleSetData(e.target.value);
+            const selectedMode = e.target.value;
+            setSelectedGameMode(selectedMode);
+            console.log("Selected Game Mode: " + selectedMode);
+            handleSetData(selectedMode);
           }}
         >
           <MenuItem value={"All"}>All</MenuItem>
-          <MenuItem value={"Standard"}>Standard</MenuItem>
-          <MenuItem value={"Blind"}>Blind</MenuItem>
-          <MenuItem value={"PowerUp"}>PowerUp</MenuItem>
+          <MenuItem id="standard" value={"Standard"}>Standard</MenuItem>
+          <MenuItem id="blind" value={"Blind"}>Blind</MenuItem>
+          <MenuItem id="powerupduck" value={"Power-up Duck"}>Power-up Duck</MenuItem>
         </Select>
       </FormControl>
     </PageContainer>

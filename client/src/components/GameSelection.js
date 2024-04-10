@@ -85,7 +85,7 @@ const GameSelect = ({ handleGameSelectHome }) => {
         margin: "0px 50px 0px 50px",
       }}
     >
-      <GameContainer onClick={() => handleGameSelect("Standard")}>
+      <GameContainer id="standard-select" onClick={() => handleGameSelect("Standard")}>
         <img
           src={StandardChessImage}
           alt="Standard"
@@ -98,7 +98,7 @@ const GameSelect = ({ handleGameSelectHome }) => {
           </ModalContent>
         </div>
       </GameContainer>
-      <GameContainer onClick={() => handleGameSelect("Blind")}>
+      <GameContainer id="blind-select" onClick={() => handleGameSelect("Blind")}>
         <img
           src={BlindChessImage}
           alt="Blind"

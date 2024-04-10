@@ -116,7 +116,7 @@ const GameHistory = ({ data, username, userId }) => {
   return (
     <StyledGameReview>
       <TableContainer component={Paper}>
-        <Table stickyHeader>
+        <Table stickyHeader id="game-review">
           <TableBody>
             <TableRow>
               <TableCell className="title">Completed games</TableCell>

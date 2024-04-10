@@ -27,10 +27,10 @@ const QueueDialog = ({
   onCancelClicked,
 }) => {
   return (
-    <DialogContainer>
+    <DialogContainer id="queue-container">
       <h3>{content}</h3>
       {showSpinner && <CircularProgress size={30} />}
-      <Button
+      <Button id="cancel"
         className="cancel-button"
         variant="contained"
         onClick={onCancelClicked}
