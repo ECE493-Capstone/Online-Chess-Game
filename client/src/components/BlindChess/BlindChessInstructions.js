@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { LETTER_WORDS } from "../../constants/BoardConstants";
 
 const StyledInstructionsContainer = styled.div`
   display: flex;
@@ -24,14 +25,14 @@ const BlindChessInstructions = () => {
         <div className="instructions-letter">
           For the letter notations please use the following words:
           <ul>
-            <li>Alpha for A</li>
-            <li>Bravo for B</li>
-            <li>Charlie for C</li>
-            <li>Delta for D</li>
-            <li>Echo for E</li>
-            <li>Foxtrot for F</li>
-            <li>Golf for G</li>
-            <li>Hotel for H</li>
+            <li>{LETTER_WORDS["a"]} for A</li>
+            <li>{LETTER_WORDS["b"]} for B</li>
+            <li>{LETTER_WORDS["c"]} for C</li>
+            <li>{LETTER_WORDS["d"]} for D</li>
+            <li>{LETTER_WORDS["e"]} for E</li>
+            <li>{LETTER_WORDS["f"]} for F</li>
+            <li>{LETTER_WORDS["g"]} for G</li>
+            <li>{LETTER_WORDS["h"]} for H</li>
           </ul>
         </div>
         <p>

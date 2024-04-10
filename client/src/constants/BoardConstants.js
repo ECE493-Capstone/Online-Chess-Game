@@ -66,14 +66,44 @@ const CHESS_POSITIONS = [
 ];
 
 const CHESS_LETTERS = ["a", "b", "c", "d", "e", "f", "g", "h"];
+
+const NUMBER_WORDS = {
+  1: "one",
+  2: "two",
+  3: "three",
+  4: "four",
+  5: "five",
+  6: "six",
+  7: "seven",
+  8: "eight",
+};
+
+const WORDS_NUMBER = {
+  one: 1,
+  two: 2,
+  three: 3,
+  four: 4,
+  five: 5,
+  six: 6,
+  seven: 7,
+  eight: 8,
+};
+
 const LETTER_WORDS = {
   a: "alpha",
   b: "bravo",
-  c: "charlie",
+  c: "cherry",
   d: "delta",
-  e: "echo",
-  f: "foxtrot",
-  g: "golf",
-  h: "hotel",
+  e: "elephant",
+  f: "fox",
+  g: "gamma",
+  h: "honey",
 };
-module.exports = { CHESS_POSITIONS, CHESS_LETTERS, LETTER_WORDS };
+
+module.exports = {
+  CHESS_POSITIONS,
+  CHESS_LETTERS,
+  LETTER_WORDS,
+  NUMBER_WORDS,
+  WORDS_NUMBER,
+};

@@ -96,8 +96,9 @@ const listen = (io, socket) => {
         io.to(gameRoom).emit("voteTime", timeLeft / 1000);
       }, 1000);
     };
-    if (infoIfRandomDuck !== null) {
+    if (infoIfRandomDuck) {
       // !== null if game mode is POWER_UP_DUCK
+      console.log("GOKUL POWER UP,", infoIfRandomDuck);
       broadcastVotingEvent(io, gameRoom, infoIfRandomDuck);
     }
   });

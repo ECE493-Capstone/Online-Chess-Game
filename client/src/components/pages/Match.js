@@ -341,7 +341,7 @@ const Match = () => {
       socket.on("undoBoard", (fen) => {
         const gameFromFen = new Chessboard(
           chessboard.side,
-          chessboard.gameMode,
+          chessboard.gameMode === "power_up" ? chessboard.gameMode : "standard",
           fen
         );
         dispatch(setGame(gameFromFen));

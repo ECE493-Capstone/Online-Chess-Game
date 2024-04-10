@@ -1,5 +1,9 @@
 import FuzzySet from "fuzzyset";
-import { CHESS_POSITIONS } from "../constants/BoardConstants";
+import {
+  CHESS_POSITIONS,
+  NUMBER_WORDS,
+  WORDS_NUMBER,
+} from "../constants/BoardConstants";
 export default class VoiceMove {
   Pieces = [
     { id: 1, name: "Pawn" },
@@ -48,26 +52,42 @@ export default class VoiceMove {
     const last = event.results.length - 1;
     const recognizedText = event.results[last][0].transcript;
 
-    let result = recognizedText.toUpperCase();
+    let result = recognizedText.toLowerCase();
+    let result_split = result.split(" ");
+    result_split.forEach((word, index) => {
+      if (word in NUMBER_WORDS) {
+        result_split[index] = NUMBER_WORDS[word];
+      }
+    });
+    result = result_split.join(" ");
     console.log(result, fzySet.get(result));
     let fzySetList = fzySet.get(result) || [];
-    if (fzySetList.length > 0) {
-      const result = fzySetList[0][1].split(" ");
-      let fromCol = String.fromCharCode(result[0][0].charCodeAt(0) - 49);
-      let fromRow = result[1];
-      let toCol = String.fromCharCode(result[3][0].charCodeAt(0) - 49);
-      let toRow = result[4];
-      console.log(result, fromCol, fromRow, toCol, toRow);
-      return {
-        move: {
-          fromRow: parseInt(fromRow) - 1,
-          fromCol: parseInt(fromCol),
-          toRow: parseInt(toRow) - 1,
-          toCol: parseInt(toCol),
-        },
-        voiceNotation1: fzySetList[0][1],
-        voiceNotation2: `${result[0][0]}${result[1]} to ${result[3][0]}${result[4]}`,
-      };
+    try {
+      if (fzySetList.length > 0) {
+        const result = fzySetList[0][1].split(" ");
+        console.log("NEW RESULT", result);
+        let fromCol = String.fromCharCode(result[0][0].charCodeAt(0) - 49);
+        let fromRow = 8 - parseInt(WORDS_NUMBER[result[1]]);
+        let toCol = String.fromCharCode(result[3][0].charCodeAt(0) - 49);
+        let toRow = 8 - parseInt(WORDS_NUMBER[result[4]]);
+        // console.log("VOICE", result, fromCol, fromRow, toCol, toRow);
+        // console.log("Result: ", result);
+        return {
+          move: {
+            fromRow: parseInt(fromRow),
+            fromCol: parseInt(fromCol),
+            toRow: parseInt(toRow),
+            toCol: parseInt(toCol),
+          },
+          name: `${result[0][0]}${WORDS_NUMBER[result[1]]} to ${result[3][0]}${
+            WORDS_NUMBER[result[4]]
+          }`,
+          voiceNotation1: fzySetList[0][1],
+          voiceNotation2: `${result[0][0]}${result[1]} to ${result[3][0]}${result[4]}`,
+        };
+      }
+    } catch (err) {
+      console.log("Error in recognizing move: ", err);
     }
     return null;
   }

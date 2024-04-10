@@ -3,7 +3,11 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { RiUserVoiceFill } from "react-icons/ri";
 import { Chessboard } from "../../models/Chessboard";
-import { CHESS_LETTERS, LETTER_WORDS } from "../../constants/BoardConstants";
+import {
+  CHESS_LETTERS,
+  LETTER_WORDS,
+  NUMBER_WORDS,
+} from "../../constants/BoardConstants";
 import Fuse from "fuse.js";
 import Dictaphone2 from "../Dictaphone2";
 import { useDispatch } from "react-redux";
@@ -56,31 +60,25 @@ const BlindChess = ({ game, gameId, handleBlindChessMove }) => {
   const dispatch = useDispatch();
   const getLegalMoves = () => {
     const moves = game.legalMoves;
-    console.log(moves);
     const keys = Object.keys(moves);
     const lMoves = [];
     for (let i = 0; i < keys.length; i++) {
       let keyPair = keys[i].padStart(2, "0").split("");
       for (let j = 0; j < moves[keys[i]].length; j++) {
         let xmove = moves[keys[i]][j];
-        console.log(keyPair, xmove);
+        // lmoves give the [row, col] pair. Have to modify voice notation
+        const newMove = {
+          fromRow: parseInt(keyPair[0]),
+          fromCol: parseInt(keyPair[1]),
+          toRow: parseInt(xmove[0]),
+          toCol: parseInt(xmove[1]),
+        };
         lMoves.push({
           id: i * 10 + j,
-          move: {
-            fromRow: parseInt(keyPair[0]),
-            fromCol: parseInt(keyPair[1]),
-            toRow: parseInt(xmove[0]),
-            toCol: parseInt(xmove[1]),
-          },
-          name: `${CHESS_LETTERS[keyPair[1]]}${7 - parseInt(keyPair[0]) + 1} ${
-            CHESS_LETTERS[xmove[1]]
-          }${7 - xmove[0] + 1}`,
-          voiceNotation1: `${LETTER_WORDS[CHESS_LETTERS[keyPair[1]]]} ${
-            7 - parseInt(keyPair[0]) + 1
-          } to ${LETTER_WORDS[CHESS_LETTERS[xmove[1]]]} ${xmove[0] + 1}`,
-          voiceNotation2: `${CHESS_LETTERS[keyPair[1]]} ${
-            7 - parseInt(keyPair[0]) + 1
-          } to ${CHESS_LETTERS[xmove[1]]} ${7 - xmove[0] + 1}`,
+          move: newMove,
+          name: getName(newMove),
+          voiceNotation1: getWordNotation(newMove),
+          voiceNotation2: getLetterNotation(newMove),
         });
       }
     }
@@ -88,16 +86,38 @@ const BlindChess = ({ game, gameId, handleBlindChessMove }) => {
     setLegalMoves(lMoves);
   };
 
+  const getName = (move) => {
+    return `${CHESS_LETTERS[move.fromCol]}${8 - move.fromRow} ${
+      CHESS_LETTERS[move.toCol]
+    }${8 - move.toRow}`;
+  };
+
+  const getLetterNotation = (move) => {
+    return `${CHESS_LETTERS[move.fromCol]} ${NUMBER_WORDS[8 - move.fromRow]} ${
+      CHESS_LETTERS[move.toCol]
+    } ${NUMBER_WORDS[8 - move.toRow]}`;
+  };
+
+  const getWordNotation = (move) => {
+    return `${LETTER_WORDS[CHESS_LETTERS[move.fromCol]]} ${
+      NUMBER_WORDS[8 - move.fromRow]
+    } to ${LETTER_WORDS[CHESS_LETTERS[move.toCol]]} ${
+      NUMBER_WORDS[8 - move.toRow]
+    }`;
+  };
+
   const getLegalMovesFromInput = () => {
     const options = { keys: ["name"] };
     const fuse = new Fuse(legalMoves, options);
     const result = fuse.search(input);
-    console.log(legalMoves, result);
     setInputLegalMoves(result.map((move) => move.item));
   };
 
   const handleSetMove = (move) => {
-    setRecognizedMove(move);
+    if (move) {
+      console.log("MOVE??", move);
+      setRecognizedMove(move);
+    }
   };
   const fetchMoves = () => {
     let validMoveVoice = [];
@@ -105,16 +125,13 @@ const BlindChess = ({ game, gameId, handleBlindChessMove }) => {
       validMoveVoice.push(move.voiceNotation1);
       validMoveVoice.push(move.voiceNotation2);
     });
-    console.log(validMoveVoice);
     return validMoveVoice;
   };
 
   const handleMovePiece = (move) => {
-    console.log(move);
     if (move) {
-      handleBlindChessMove(`You played ${move.voiceNotation2}`);
+      handleBlindChessMove(`You played ${move.name}`);
       const gameCopy = game.copy();
-      console.log(gameCopy.convertToFEN());
       gameCopy.playYourMove(move.move);
       dispatch(setGame(gameCopy));
       socket.emit("move piece", {
@@ -134,7 +151,6 @@ const BlindChess = ({ game, gameId, handleBlindChessMove }) => {
   }, [legalMoves]);
 
   useEffect(() => {
-    console.log("WORKING");
     getLegalMovesFromInput();
   }, [input]);
 
@@ -173,7 +189,7 @@ const BlindChess = ({ game, gameId, handleBlindChessMove }) => {
       <div className="voice-input">
         <RiUserVoiceFill size={50} />
         <Dictaphone2 getVoiceMoves={fetchMoves} handleSetMove={handleSetMove} />
-        <div className="recognized-move">{recognizedMove?.voiceNotation2}</div>
+        <div className="recognized-move">{recognizedMove?.name}</div>
         <div className="submit-input">
           <Button
             variant="contained"

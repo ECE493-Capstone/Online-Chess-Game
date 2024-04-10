@@ -15,6 +15,7 @@ export class Chessboard {
   constructor(side, gameMode, fen = null) {
     this._side = side;
     this._gameMode = gameMode ? gameMode : GAME_MODE.STANDARD;
+    console.log(this._gameMode);
     this._isEnded = false;
     this._winner = null;
     this._isInCheck = false;
