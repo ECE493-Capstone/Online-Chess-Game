@@ -3,6 +3,7 @@ export const BLACK = "b";
 export const GAME_MODE = {
   STANDARD: "standard",
   POWER_UP_DUCK: "Power-up Duck",
+  BLIND: "Blind",
 };
 
 const KING_SIDE_CASTLE = "O-O";

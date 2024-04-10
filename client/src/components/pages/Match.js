@@ -19,6 +19,8 @@ import RequestButtons from "../game-room/RequestButtons";
 import { fetchUser } from "../../api/fetchUser";
 import H2H from "../game-room/H2H";
 import YesNoDialog from "../dialog/YesNoDialog";
+import BlindChess from "../BlindChess/BlindChess";
+import BlindChessInstructions from "../BlindChess/BlindChessInstructions";
 
 const Container = styled.div`
   /* border: 1px solid white;
@@ -27,6 +29,17 @@ const Container = styled.div`
   max-width: fit-content;
   padding: 10px 10px; */
   display: flex;
+  .blind-chess {
+    cursor: not-allowed;
+    .blind-chess-span {
+      width: 100%;
+      display: block;
+      text-align: center;
+    }
+  }
+  .disabled {
+    pointer-events: none;
+  }
   .lhs {
     display: flex;
     flex-direction: column;
@@ -152,6 +165,7 @@ const Match = () => {
   const game = useSelector((state) => state.board.game);
   const [input, setInput] = React.useState(null);
   const [isOpponentDisconnected, setIsOpponentDisconnected] = useState(false);
+  const [blindChessSpan, setBlindChessSpan] = useState("Game started...");
   const { gameId } = useParams();
   const [showShareToast, setShowShareToast] = useState(false);
   const dispatch = useDispatch();
@@ -426,6 +440,10 @@ const Match = () => {
     console.log("Opponent Timeout");
   };
 
+  const handleBlindChessMove = (text) => {
+    setBlindChessSpan(text);
+  };
+
   return (
     <Container>
       {showShareToast && (
@@ -466,7 +484,29 @@ const Match = () => {
                   />
                 )}
               </div>
-              <Board game={game} getIncrement={getIncrement} />
+              {/* Is player ? isBlind? No board
+                Is player ?  NOT isBlind? show board
+                Is spectator? show board
+                */}
+              {!isPlayer || game.gameMode !== GAME_MODE.BLIND ? (
+                <Board game={game} />
+              ) : (
+                <div className="blind-chess">
+                  <h1 style={{ textAlign: "center" }}>
+                    You are playing with the{" "}
+                    {game.side === "w" ? "WHITE" : "BLACK"} pieces
+                  </h1>
+                  <span className="blind-chess-span">
+                    {blindChessSpan}
+                    {game.side !== game.turn ? ". Waiting for opponent..." : ""}
+                  </span>
+                  <BlindChess
+                    game={game}
+                    gameId={gameId}
+                    handleBlindChessMove={handleBlindChessMove}
+                  />
+                </div>
+              )}
               <div className="info">
                 <h2>{matchState.player?.username}</h2>
                 {matchState.playerTime !== null && (
@@ -545,6 +585,7 @@ const Match = () => {
               player2Id={matchState.opponent?.id}
             />
           </div>
+          {game.gameMode === GAME_MODE.BLIND && <BlindChessInstructions />}
           {isPlayer && (
             <div className="request-btns">
               <RequestButtons

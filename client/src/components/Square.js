@@ -55,7 +55,7 @@ const Square = ({ piece, rowIndex, colIndex, game, getIncrement }) => {
       duckSquare = gameCopyClone.randomizeDuckPosition();
       fenAfterRandomDuck = gameCopyClone.convertToFEN();
     }
-
+    console.log("GOKUL GAME MODE: ", gameCopy.gameMode);
     socket.emit("move piece", {
       gameRoom: gameId,
       input: move,
