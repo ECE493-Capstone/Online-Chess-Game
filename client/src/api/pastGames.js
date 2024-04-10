@@ -26,3 +26,15 @@ export const getPastGamesInformationWithOpponent = async (player, opponent) => {
   );
   return response.data;
 };
+
+export const getPastGamesInfoById = async (gameId) => {
+  const response = await axios.get(
+    `${serverApiConfig.SERVER_URL}/games/past/byId`,
+    {
+      params: {
+        gameId: gameId,
+      },
+    }
+  );
+  return response.data;
+};
