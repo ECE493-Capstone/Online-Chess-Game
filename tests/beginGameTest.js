@@ -80,10 +80,10 @@ async function TestMount(PlayerA, PlayerB) {
     // await PlayerB.findElement(By.id('time-submit')).click();
     // await new Promise(resolve => setTimeout(resolve, 1000));
 
-    playType: null,
-    gameMode: null,
-    time: "1 + 0",
-    side: "r",
+    // playType: null,
+    // gameMode: null,
+    // time: "1 + 0",
+    // side: "r",
 
     // I NEED THE FUCKIN GAME ROOM CODE BRUH
 
