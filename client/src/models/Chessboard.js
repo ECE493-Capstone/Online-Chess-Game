@@ -3,6 +3,7 @@ export const BLACK = "b";
 export const GAME_MODE = {
   STANDARD: "standard",
   POWER_UP_DUCK: "Power-up Duck",
+  BLIND: "Blind",
 };
 
 const KING_SIDE_CASTLE = "O-O";
@@ -15,7 +16,6 @@ export class Chessboard {
   constructor(side, gameMode, fen = null) {
     this._side = side;
     this._gameMode = gameMode ? gameMode : GAME_MODE.STANDARD;
-    console.log(this._gameMode);
     this._isEnded = false;
     this._winner = null;
     this._isInCheck = false;

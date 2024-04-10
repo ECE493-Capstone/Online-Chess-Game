@@ -341,7 +341,7 @@ const Match = () => {
       socket.on("undoBoard", (fen) => {
         const gameFromFen = new Chessboard(
           chessboard.side,
-          chessboard.gameMode === "power_up" ? chessboard.gameMode : "standard",
+          chessboard.gameMode,
           fen
         );
         dispatch(setGame(gameFromFen));
@@ -488,7 +488,7 @@ const Match = () => {
                 Is player ?  NOT isBlind? show board
                 Is spectator? show board
                 */}
-              {!isPlayer || game.gameMode !== "Blind" ? (
+              {!isPlayer || game.gameMode !== GAME_MODE.BLIND ? (
                 <Board game={game} />
               ) : (
                 <div className="blind-chess">
@@ -585,7 +585,7 @@ const Match = () => {
               player2Id={matchState.opponent?.id}
             />
           </div>
-          {game.gameMode === "Blind" && <BlindChessInstructions />}
+          {game.gameMode === GAME_MODE.BLIND && <BlindChessInstructions />}
           {isPlayer && (
             <div className="request-btns">
               <RequestButtons
