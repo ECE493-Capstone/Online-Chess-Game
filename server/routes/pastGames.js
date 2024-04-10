@@ -44,9 +44,11 @@ router.get("/h2h", jsonParser, async (req, res) => {
 router.get("/byPlayer", jsonParser, async (req, res) => {
   const { player } = req.query;
   // console.log("this is the query: " + req.query);
-//   player = "66048fbaa9cde3a65f01e1d6";
+  //   player = "66048fbaa9cde3a65f01e1d6";
   try {
-    const games = await pastGames.find({ $or: [{ player1: player }, { player2: player }] });
+    const games = await pastGames.find({
+      $or: [{ player1: player }, { player2: player }],
+    });
     if (games.length > 0) {
       console.log("Found games for the player. Sending games: " + games);
       res.status(200);
@@ -58,6 +60,24 @@ router.get("/byPlayer", jsonParser, async (req, res) => {
     }
   } catch (error) {
     console.error("Error retrieving games:", error);
+    res.status(500);
+    res.send({ message: "Internal server error" });
+  }
+});
+
+router.get("/byId", jsonParser, async (req, res) => {
+  const { gameId } = req.query;
+  try {
+    const game = await pastGames.findOne({ room: gameId });
+    if (game) {
+      res.status(200);
+      res.send(game);
+    } else {
+      res.status(404);
+      res.send({ message: "Game not found." });
+    }
+  } catch (error) {
+    console.error("Error retrieving game:", error);
     res.status(500);
     res.send({ message: "Internal server error" });
   }

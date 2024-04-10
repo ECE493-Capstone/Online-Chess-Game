@@ -15,6 +15,7 @@ import Profile from "./components/pages/Profile";
 import { Toaster } from "react-hot-toast";
 import BlindChess from "./components/BlindChess/BlindChess";
 import BlindChessInstructions from "./components/BlindChess/BlindChessInstructions";
+import GameReview from "./components/pages/GameReview";
 
 const darkTheme = createTheme({
   palette: {
@@ -46,6 +47,7 @@ const App = () => {
           <Route path="/match" element={<Match />} />
           <Route path="/gameselect" element={<GameSelect />} />
           <Route path="/blindchess" element={<BlindChessInstructions />} />
+          <Route path="/profile/gamereview/:gameId" element={<GameReview />} />
           <Route path="/profile" element={<Profile />} />
         </Routes>
       </Router>
