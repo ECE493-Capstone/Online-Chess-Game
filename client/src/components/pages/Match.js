@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useReducer } from "react";
 import Board from "../Board";
-import { BLACK, Chessboard, WHITE } from "../../models/Chessboard";
+import { BLACK, Chessboard, GAME_MODE, WHITE } from "../../models/Chessboard";
 import { useDispatch, useSelector } from "react-redux";
-import { setGame } from "../../features/boardSlice";
+import { setGame, setVoteInfo } from "../../features/boardSlice";
 import { getOngoingGameInformationByGameId } from "../../api/ongoingGames";
 import Cookies from "universal-cookie";
 import { useParams } from "react-router-dom";
@@ -102,7 +102,7 @@ const Container = styled.div`
   .rhs {
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
+    justify-content: center;
     align-items: center;
     width: 40vw;
     height: 100vh;
@@ -119,6 +119,13 @@ const Container = styled.div`
       justify-content: center;
       align-items: center;
       width: 70%;
+    }
+
+    .voting-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
   }
 `;
@@ -146,6 +153,8 @@ const MatchReducer = (state, action) => {
       return { ...state, openDrawDialog: action.payload };
     case "UNDO_DIALOG":
       return { ...state, openUndoDialog: action.payload };
+    case "VOTE_TIMER":
+      return { ...state, voteTimer: action.payload };
     default:
       return state;
   }
@@ -171,15 +180,44 @@ const Match = () => {
     endGameInfo: null,
     openDrawDialog: false,
     openUndoDialog: false,
+    voteTimer: null, // time left to vote (in seconds)
   });
+  const voteInfo = useSelector((state) => state.board.voteInfo);
   const cookies = new Cookies();
   const userId = cookies.get("userId");
   console.log("ISPLAYER", isPlayer);
+
+  const castDuckVote = () => {
+    dispatch(
+      setVoteInfo({ votedSquare: voteInfo.votedSquare, isAllowed: false })
+    );
+    const gameClone = new Chessboard(
+      game.side,
+      game.gameMode,
+      game.convertToFEN()
+    );
+    gameClone.voteDuck(voteInfo.votedSquare[0], voteInfo.votedSquare[1]);
+    socket.emit("cast vote", {
+      gameRoom: gameId,
+      square: voteInfo.votedSquare,
+      fen: gameClone.convertToFEN(), // fen if vote comes through
+    });
+  };
   const getIncrement = () => {
     return matchState.increment;
   };
   useEffect(() => {
     console.log("TEST", isPlayer);
+
+    socket.on("voteStart", (startTime) => {
+      dispatch(setVoteInfo({ votedSquare: null, isAllowed: true }));
+      matchDispatch({ type: "VOTE_TIMER", payload: startTime });
+    });
+
+    socket.on("voteTime", (timeLeft) => {
+      matchDispatch({ type: "VOTE_TIMER", payload: timeLeft });
+    });
+
     if (isPlayer) {
       console.log("PLAYER");
       // ----------------- socket listeners -----------------
@@ -241,6 +279,26 @@ const Match = () => {
       });
     }
   }, [isPlayer]);
+
+  useEffect(() => {
+    socket.off("voteEnd");
+    socket.on("voteEnd", (duckSquare) => {
+      dispatch(setVoteInfo({ votedSquare: null, isAllowed: false }));
+      matchDispatch({ type: "VOTE_TIMER", payload: null });
+      const [row, col] = duckSquare;
+      const gameCopy = game.copy();
+      gameCopy.voteDuck(row, col);
+      dispatch(setGame(gameCopy));
+    });
+
+    socket.off("undoBoard");
+    socket.on("undoBoard", (fen) => {
+      const gameFromFen = new Chessboard(game.side, game.gameMode, fen);
+      dispatch(setGame(gameFromFen));
+      matchDispatch({ type: "BTN_DISABLED", payload: false });
+    });
+  }, [game]);
+
   useEffect(() => {
     if (game) {
       if (input !== null) {
@@ -260,11 +318,6 @@ const Match = () => {
           });
         }
       }
-      socket.on("undoBoard", (fen) => {
-        const gameFromFen = new Chessboard(game.side, game.gameMode, fen);
-        dispatch(setGame(gameFromFen));
-        matchDispatch({ type: "BTN_DISABLED", payload: false });
-      });
 
       return;
     }
@@ -543,6 +596,25 @@ const Match = () => {
               />
             </div>
           )}
+          {voteInfo.isAllowed &&
+            (!isPlayer ? (
+              <div className="voting-info">
+                <h3>Click on empty square to vote!</h3>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  disabled={voteInfo.votedSquare === null}
+                  onClick={() => castDuckVote()}
+                >
+                  Vote
+                </Button>
+                {matchState.voteTimer}s left to vote.
+              </div>
+            ) : (
+              <div className="voting-info">
+                <h3>Waiting for vote... ({matchState.voteTimer}s left)</h3>
+              </div>
+            ))}
         </div>
       )}
     </Container>

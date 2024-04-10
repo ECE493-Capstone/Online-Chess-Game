@@ -13,6 +13,10 @@ export const boardSlice = createSlice({
       legalMoves: [],
     },
     game: null,
+    voteInfo: {
+      votedSquare: null,
+      isAllowed: false, // true if spectator turn & not voted yet
+    },
   },
   reducers: {
     setDragStart: (state, action) => {
@@ -24,9 +28,13 @@ export const boardSlice = createSlice({
     setGame: (state, action) => {
       state.game = action.payload;
     },
+    setVoteInfo: (state, action) => {
+      state.voteInfo = action.payload;
+    },
   },
 });
 
-export const { setDragStart, setGame, setClickPiece } = boardSlice.actions;
+export const { setDragStart, setGame, setClickPiece, setVoteInfo } =
+  boardSlice.actions;
 
 export default boardSlice.reducer;

@@ -9,10 +9,12 @@ const {
   addFen,
   popFen,
   getLastFen,
+  removePlayerFromQueue,
 } = require("./events/gameUtils");
 const { emitToRoom } = require("./emittors");
 const { handleDisconnection } = require("./events/gameUtils");
 const { handleUserConnect } = require("./user/userSocketHandler");
+const { addVote, getMajorityVote, clearVotes } = require("../data");
 const {
   updateActiveGame,
   getTime,
@@ -60,11 +62,48 @@ const listen = (io, socket) => {
     socket.join(gameId);
   });
   socket.on("move piece", async (move) => {
-    const { gameRoom, input, fen, increment } = move;
+    const { gameRoom, input, fen, infoIfRandomDuck, increment } = move;
+    console.log(`[FEN after move]: ${fen}`);
     await addFen(gameRoom, fen);
     updateActiveGame(gameRoom, increment);
     emitToRoom(socket, gameRoom, "oppMove", input);
     emitToRoom(socket, gameRoom, "spectatorMove", fen);
+    const broadcastVotingEvent = (io, gameRoom, infoIfRandomDuck) => {
+      let timeLeft = 10000; // 10 seconds
+      io.to(gameRoom).emit("voteStart", timeLeft / 1000);
+      const voteInterval = setInterval(async () => {
+        timeLeft -= 1000;
+        if (timeLeft <= 0) {
+          clearInterval(voteInterval);
+          const majorityVote = getMajorityVote(gameRoom);
+          clearVotes(gameRoom);
+
+          if (majorityVote !== null) {
+            console.log(`Majority vote: ${majorityVote.square}`);
+            io.to(gameRoom).emit("voteEnd", majorityVote.square);
+            await addFen(gameRoom, majorityVote.fen);
+            console.log(`[FEN after vote]: ${majorityVote.fen}`);
+          } else {
+            console.log(`Randomized vote: ${infoIfRandomDuck.duckSquare}`);
+            io.to(gameRoom).emit("voteEnd", infoIfRandomDuck.duckSquare);
+            await addFen(gameRoom, infoIfRandomDuck.fenAfterRandomDuck);
+            console.log(
+              `[FEN after vote]: ${infoIfRandomDuck.fenAfterRandomDuck}`
+            );
+          }
+          return;
+        }
+        io.to(gameRoom).emit("voteTime", timeLeft / 1000);
+      }, 1000);
+    };
+    if (infoIfRandomDuck !== null) {
+      // !== null if game mode is POWER_UP_DUCK
+      broadcastVotingEvent(io, gameRoom, infoIfRandomDuck);
+    }
+  });
+
+  socket.on("cast vote", (voteInfo) => {
+    addVote(voteInfo);
   });
 
   socket.on("game end", async (gameInfo) => {
@@ -153,6 +192,15 @@ const listen = (io, socket) => {
       console.log(`$Fen for undo: ${lastFen}`);
     } else {
       emitToRoom(socket, gameRoom, "undoRejected");
+    }
+  });
+
+  socket.on("exit queue", async (userId) => {
+    const res = await removePlayerFromQueue(userId);
+    if (res) {
+      console.log(`Player ${userId} removed from queue`);
+    } else {
+      console.log(`Player ${userId} not found in queue`);
     }
   });
 };
