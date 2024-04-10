@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import Header from "../Header";
-import ChangePassword  from '../ChangePassword';
-import ChangeUsername  from '../ChangeUsername';
-import Modal from '@mui/material/Modal';
-import Box from '@mui/material/Box';
+import ChangePassword from "../ChangePassword";
+import ChangeUsername from "../ChangeUsername";
+import Modal from "@mui/material/Modal";
+import Box from "@mui/material/Box";
 import { Button } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -12,7 +12,7 @@ import { fetchUser } from "../../api/fetchUser";
 import GameStatistics from "../Statistics";
 import img from "../../assets/profile.svg";
 import { getPastGamesInformation } from "../../api/pastGames";
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import GameHistory from "../GameHistory";
 
 const StyledUserInfoContainer = styled.div`
@@ -20,7 +20,6 @@ const StyledUserInfoContainer = styled.div`
   margin: 100px;
   .section {
     display: flex;
-    justify-content: center;
     background-color: #191d28;
     margin: 30px;
   }
@@ -33,23 +32,23 @@ const StyledUserInfoContainer = styled.div`
     overflow: scroll;
 
     &::-webkit-scrollbar-track {
-    border-radius: 10px;
-    background-color: #191d28;
-    };
+      border-radius: 10px;
+      background-color: #191d28;
+    }
 
     &::-webkit-scrollbar {
       width: 12px;
       background-color: #191d28;
-    };
+    }
 
     &::-webkit-scrollbar-thumb {
       border-radius: 10px;
       -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
       background-color: #555;
-    };
+    }
 
     &::-webkit-scrollbar-thumb:hover {
-      background: #3b3b3b; 
+      background: #3b3b3b;
     }
   }
 `;
@@ -100,10 +99,8 @@ const Subtitle = styled.div`
 `;
 
 const StyledScrollbar = styled.div`
- flex: 75%;
+  flex: 75%;
   padding: 10px;
-  paddingTop: 60px;
-  overflowX: hidden;
 `;
 
 const UserInfo = ({ statistics, setIsLoggedIn }) => {
@@ -173,7 +170,7 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
     try {
       const storedUserId = cookie.get("userId");
       setUserId(storedUserId);
-  
+
       if (storedUserId) {
         console.log("Retrieved user ID from cookie: " + storedUserId);
 
@@ -237,7 +234,7 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
           setData(gamesData.filter((data) => data.mode === mode));
         }
       } catch (error) {
-        console.error('Error fetching past games:', error);
+        console.error("Error fetching past games:", error);
       }
     }
   };
@@ -267,11 +264,11 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
           const gamesData = await getPastGamesInformation(userId);
           setData(gamesData);
         } catch (error) {
-          console.error('Error fetching past games:', error);
+          console.error("Error fetching past games:", error);
         }
       }
     };
-  
+
     fetchData();
   }, [userId]);
 
@@ -286,7 +283,7 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
         }}
       >
         <ProfileInfo className="section">
-          <img src={img} alt="profile" style={{ width: "175px" }}/>
+          <img src={img} alt="profile" style={{ width: "175px" }} />
           <Title>{username}</Title>
           <Subtitle>({email})</Subtitle>
           <StyledButton id="change-username" variant="contained" onClick={handleOpenChangeUsername}>
@@ -299,9 +296,14 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
       </div>
       <div
         className="section games-info"
-        style={{ flex: "75%", padding: "10px", paddingTop: "60px", overflowX: "hidden"}}
+        style={{
+          flex: "75%",
+          padding: "10px",
+          paddingTop: "60px",
+          overflowX: "hidden",
+        }}
       >
-      {/* <StyledScrollbar> */}
+        {/* <StyledScrollbar> */}
         <GameStatistics
           gamesPlayed={statistics.gamesPlayed}
           wins={statistics.wins}
@@ -314,7 +316,7 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
         <GameHistory data={data} username={username} userId={storedUserId} />
       </div>
       {/* </StyledScrollbar> */}
-  
+
       <Modal
         open={openChangePassword}
         onClose={handleCloseChangePassword}
@@ -370,7 +372,7 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
         </Box>
       </Modal>
     </StyledUserInfoContainer>
-  );  
+  );
 };
 
 const Profile = () => {

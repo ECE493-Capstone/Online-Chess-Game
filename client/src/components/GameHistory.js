@@ -9,6 +9,7 @@ import {
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { fetchUser } from "../api/fetchUser";
+import { useNavigate } from "react-router-dom";
 
 const StyledGameReview = styled.div`
   width: 70%;
@@ -53,6 +54,7 @@ const StyledGameReview = styled.div`
 `;
 const GameHistory = ({ data, username, userId }) => {
   const [updatedData, setUpdatedData] = useState([]);
+  const navigate = useNavigate();
 
   const getOpponentName = async (opponentId) => {
     try {
@@ -130,7 +132,7 @@ const GameHistory = ({ data, username, userId }) => {
               </TableRow>
             ) : (
               updatedData.map((game) => (
-                <TableRow hover key={game.move}>
+                <TableRow hover key={game.room}>
                   <TableCell className="data users" rowSpan={2}>
                     <span>{game.player1}</span>
                     <span>{game.player2}</span>
@@ -140,7 +142,7 @@ const GameHistory = ({ data, username, userId }) => {
                     <span>{game.winner === game.player2 ? 1 : 0}</span>
                   </TableCell>
                   <TableCell className="data link" rowSpan={2}>
-                    <a href="/">Review</a>
+                    <a href={`/profile/gamereview/${game.room}`}>Review</a>
                   </TableCell>
                 </TableRow>
               ))
