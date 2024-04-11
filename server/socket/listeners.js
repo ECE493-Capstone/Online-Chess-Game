@@ -29,28 +29,33 @@ const listen = (io, socket) => {
 
   // Logic for handling a new game join
   socket.on("join quick play", async (gameInfo) => {
-    const { mode, type, timeControl } = gameInfo;
+    const { mode, type, timeControl, userId } = gameInfo;
     const game = await findGameInQueue(mode, timeControl, type);
     if (game) {
-      const newGameInfo = {
-        ...gameInfo,
-        side: game.side === "w" ? "b" : "w",
-      };
-      handleGameJoin(io, socket, game, newGameInfo);
+      // const newGameInfo = {
+      //   ...gameInfo,
+      //   side: game.side === "w" ? "b" : "w",
+      // };
+      handleGameJoin(io, socket, game, userId);
     } else {
       handleCreateGame(socket, gameInfo);
     }
   });
 
   socket.on("join private game", async (gameInfo) => {
-    const { userId, mode, side, type, timeControl, room } = gameInfo;
-    // INSTEAD FIND GAME ROOM IN QUEUE
+    // this create a private game
+    const roomCode = await handleCreateGame(socket, gameInfo);
+    console.log(`[Room Code]: ${roomCode}`);
+    socket.emit("privateRoom", roomCode);
+  });
+
+  socket.on("join existing private game", async (gameInfo) => {
+    const { room, userId } = gameInfo;
     const game = await findPrivateGame(room);
     if (game) {
-      handleGameJoin(io, socket, game, gameInfo);
+      handleGameJoin(io, socket, game, userId);
     } else {
-      // ERROR: GAME NOT FOUND
-      socket.emit("join fail", "Game not found");
+      socket.emit("join fail", "Room not found");
     }
   });
 

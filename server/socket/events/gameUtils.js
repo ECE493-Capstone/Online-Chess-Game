@@ -28,9 +28,7 @@ const removePlayerFromQueue = async (userId) => {
 };
 
 const findPrivateGame = async (room) => {
-  const game = await Queue.findOne({ room: room }, null, {
-    sort: { joinTime: 1 },
-  });
+  const game = await Queue.findOne({ room: room });
   return game;
 };
 
@@ -48,29 +46,29 @@ const handleCreateGame = async (socket, gameInfo) => {
   });
   const saveResult = await newGame.save();
   socket.join(room);
+  return room;
 };
 
-const handleGameJoin = (io, socket, existingGame, newGame) => {
-  const { userId, mode, side, timeControl } = newGame;
+const handleGameJoin = (io, socket, existingGame, joiningUserId) => {
   // join existing game
   // delete from queue
   // add to active game
   // join a room
   socket.join(existingGame.room);
   addToOngoingGames({
-    player1: existingGame.side === "w" ? existingGame.userId : userId,
-    player2: existingGame.side === "b" ? existingGame.userId : userId,
-    mode,
-    timeControl,
+    player1: existingGame.side === "w" ? existingGame.userId : joiningUserId,
+    player2: existingGame.side === "b" ? existingGame.userId : joiningUserId,
+    mode: existingGame.mode,
+    timeControl: existingGame.timeControl,
     room: existingGame.room,
     fen: [],
   });
   addSocket(existingGame.userId, existingGame.socketId);
-  addSocket(userId, socket.id);
+  addSocket(joiningUserId, socket.id);
   addActiveGame(existingGame.userId, existingGame.room);
-  addActiveGame(userId, existingGame.room);
+  addActiveGame(joiningUserId, existingGame.room);
   emitToRoom(io, existingGame.room, "game joined", existingGame.room);
-  initActiveGame(existingGame.room, timeControlToMs(timeControl));
+  initActiveGame(existingGame.room, timeControlToMs(existingGame.timeControl));
 };
 
 const timeControlToMs = (timeControl) => {
