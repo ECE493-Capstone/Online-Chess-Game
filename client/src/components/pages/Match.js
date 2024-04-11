@@ -221,12 +221,15 @@ const Match = () => {
     if (isPlayer) {
       console.log("PLAYER");
       // ----------------- socket listeners -----------------
+      socket.on("disconnect socket", () => {
+        toast("You have been disconnected!");
+        socket.disconnect();
+      });
       socket.on("oppMove", (input) => {
         console.log("input", input);
         setInput(input);
       });
       socket.on("opponent disconnected", (input) => {
-        console.log("WTF");
         setIsOpponentDisconnected(true);
         toast.error("Opponent Disconnected!");
       });
@@ -489,7 +492,7 @@ const Match = () => {
                 Is spectator? show board
                 */}
               {!isPlayer || game.gameMode !== GAME_MODE.BLIND ? (
-                <Board game={game} />
+                <Board game={game} getIncrement={getIncrement} />
               ) : (
                 <div className="blind-chess">
                   <h1 style={{ textAlign: "center" }}>

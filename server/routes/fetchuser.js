@@ -10,7 +10,6 @@ const ObjectId = require("mongodb").ObjectId;
 
 router.post("/", jsonParser, async (req, res) => {
   const { id: userId } = req.body;
-  console.log("WTF", userId);
   try {
     const userById = await User.findById(userId);
     if (userById) {

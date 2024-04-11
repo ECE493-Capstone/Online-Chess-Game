@@ -69,6 +69,7 @@ const handleGameJoin = (io, socket, existingGame, newGame) => {
   addSocket(userId, socket.id);
   addActiveGame(existingGame.userId, existingGame.room);
   addActiveGame(userId, existingGame.room);
+  removePlayerFromQueue(existingGame.userId);
   emitToRoom(io, existingGame.room, "game joined", existingGame.room);
   initActiveGame(existingGame.room, timeControlToMs(timeControl));
 };
@@ -122,29 +123,6 @@ const handleDisconnection = async (socketId, io) => {
   await handleUserDisconnect(socketId, io);
 };
 
-const convertOngoingGameToPastGame = async (roomId, winnerId) => {
-  const gameToSave = await OngoingGames.findOne({ room: roomId });
-  if (!gameToSave) {
-    console.log(`Game not found for room: ${roomId}`);
-    return;
-  }
-  const newPastGame = new PastGames({
-    gameId: roomId,
-    player1: gameToSave.player1,
-    player2: gameToSave.player2,
-    mode: gameToSave.mode,
-    timeControl: gameToSave.timeControl,
-    room: gameToSave.room,
-    fen: gameToSave.fen,
-    winner: winnerId ? winnerId : null,
-  });
-  await newPastGame.save();
-  console.log(`${gameToSave.room} saved to past games`);
-  resetUser(gameToSave.player1);
-  resetUser(gameToSave.player2);
-  await OngoingGames.deleteOne({ room: roomId });
-};
-
 const addFen = async (roomId, fen) => {
   const game = await OngoingGames.findOne({ room: roomId });
   if (game) {
@@ -196,7 +174,6 @@ module.exports = {
   handleGameJoin,
   handleCreateGame,
   updateOngoingGames,
-  convertOngoingGameToPastGame,
   addFen,
   updateFen,
   popFen,

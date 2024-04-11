@@ -1,11 +1,9 @@
 const Queue = require("../models/Queue");
 const {
   findGameInQueue,
-  addToOngoingGames,
   handleGameJoin,
   handleCreateGame,
   findPrivateGame,
-  convertOngoingGameToPastGame,
   addFen,
   popFen,
   getLastFen,
@@ -14,7 +12,13 @@ const {
 const { emitToRoom } = require("./emittors");
 const { handleDisconnection } = require("./events/gameUtils");
 const { handleUserConnect } = require("./user/userSocketHandler");
-const { addVote, getMajorityVote, clearVotes } = require("../data");
+const {
+  addVote,
+  getMajorityVote,
+  clearVotes,
+  convertOngoingGameToPastGame,
+  findUserBySocket,
+} = require("../data");
 const {
   updateActiveGame,
   getTime,

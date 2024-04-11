@@ -24,7 +24,6 @@ router.post("/", jsonParser, async (req, res) => {
   console.log(username, email, password);
   if (!(username && password)) {
     res.status(500);
-    res.send("WTF");
   }
   if (userByEmail) {
     res.status(409);
