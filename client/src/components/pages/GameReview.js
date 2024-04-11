@@ -87,7 +87,7 @@ const GameReview = () => {
   return (
     <>
       <Header>
-        <Container>
+        <Container id="game-review">
           <h1>Game Review</h1>
           {game && (
             <div className="content">
@@ -100,14 +100,14 @@ const GameReview = () => {
                   onClick={onBackClick}
                   disabled={!fen || index === 0}
                 >
-                  <ArrowLeftIcon fontSize="inherit" />
+                  <ArrowLeftIcon id="previous-move" fontSize="inherit" />
                 </IconButton>
                 <IconButton
                   className="btn"
                   onClick={onNextClick}
                   disabled={!fen || index === fen.length - 1}
                 >
-                  <ArrowRightIcon fontSize="inherit" />
+                  <ArrowRightIcon id="next-move" fontSize="inherit" />
                 </IconButton>
               </div>
             </div>

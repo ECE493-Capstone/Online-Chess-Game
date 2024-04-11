@@ -134,7 +134,7 @@ const GameStatistics = ({ handleSetData, data, userId }) => {
             handleSetData(selectedMode);
           }}
         >
-          <MenuItem value={"All"}>All</MenuItem>
+          <MenuItem id="all" value={"All"}>All</MenuItem>
           <MenuItem id="standard" value={"Standard"}>Standard</MenuItem>
           <MenuItem id="blind" value={"Blind"}>Blind</MenuItem>
           <MenuItem id="powerupduck" value={"Power-up Duck"}>Power-up Duck</MenuItem>

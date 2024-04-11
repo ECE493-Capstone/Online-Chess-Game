@@ -2,10 +2,21 @@ const clientConfig = require("./clientConfig.js"); // Make sure to keep the exte
 const { getPastGamesInformation } = require("./pastGames.js"); // Make sure to keep the extension as .js
 const bcrypt = require("bcryptjs");
 const { Builder, By, Key, until, Actions, Select } = require('selenium-webdriver');
+const { handleCreateGame, findPrivateGame } = require("./gameUtils.js"); // Make sure to keep the extension as .js
+const io = require("socket.io-client");
+
 
 let failures = 0;
 let successes = 0;
 let testsran = 0;
+
+const parseCookie = (cookie) => {
+    return cookie.split(";").reduce((acc, cookie) => {
+      const [key, value] = cookie.split("=");
+      acc[key.trim()] = value;
+      return acc;
+    }, {});
+};
 
 async function beginGameTests() {
     let PlayerA = await new Builder().forBrowser('chrome').build();
@@ -84,6 +95,69 @@ async function TestMount(PlayerA, PlayerB) {
     // gameMode: null,
     // time: "1 + 0",
     // side: "r",
+
+
+    let PlayerACookie = "";
+    let PlayerBCookie = "";
+
+    await PlayerA.manage().getCookie("userId").then(function(cookie) {
+        console.log('cookie details A => ', cookie.value);
+        PlayerACookie = cookie.value;
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    await PlayerB.manage().getCookie("userId").then(function(cookie) {
+        console.log('cookie details B => ', cookie.value);
+        PlayerBCookie = cookie.value;
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // get PlayerA socket
+    const PlayerASocket = io.connect("http://localhost:5050");
+    PlayerASocket.on("connect", () => {
+        PlayerASocket.emit("user connect", PlayerACookie);
+    });
+
+    // get PlayerB socket
+    const PlayerBSocket = io.connect("http://localhost:5050");
+    PlayerBSocket.on("connect", () => {
+        PlayerBSocket.emit("user connect", PlayerBCookie);
+    });
+
+    console.log("Now trying to connect");
+
+    // create a dummy game info.
+    const gameInfo = {
+        userId: PlayerACookie,
+        mode: "standard",
+        side: "w",
+        type: "Custom Game",
+        timeControl: "5 + 0",
+    };
+
+    const room = await handleCreateGame(PlayerASocket, gameInfo);
+
+    console.log("creating new game");
+
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    const game = await findPrivateGame(room);
+    
+    // create a dummy game.
+    if (game) {
+        const newGameInfo = {
+            ...gameInfo,
+            side: "b",
+        };
+
+        handleGameJoin(io, PlayerBSocket, game, newGameInfo);
+
+    } else {
+        // ERROR: GAME NOT FOUND
+        PlayerBSocket.emit("join fail", "Game not found");
+    }
 
     // I NEED THE FUCKIN GAME ROOM CODE BRUH
 

@@ -227,10 +227,11 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
       try {
         const gamesData = await getPastGamesInformation(userId);
         if (mode === "All") {
+          console.log("Setting data for mode: " + mode);
           setData(gamesData);
         } else {
           console.log("Setting data for mode: " + mode);
-          console.log("These are all the game datas: " + JSON.stringify(gamesData));
+          console.log("These are all the game datas: " + JSON.stringify(gamesData.filter((data) => data.mode === mode)));
           setData(gamesData.filter((data) => data.mode === mode));
         }
       } catch (error) {

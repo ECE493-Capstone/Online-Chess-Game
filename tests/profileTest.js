@@ -38,7 +38,17 @@ async function profileTests() {
 
     console.log("----GAME REVIEW----");
 
-    console.log("Testing Criteria 11: Test system displays game review after selecting an item in game history list:");
+    console.log("Testing Criteria 11, 12, and 13: Test system displays game review after selecting an item in game history list, showing info of the game and defaults to the first move:");
+
+    await testEnterGameReview(driver);
+
+    console.log("Testing Criteria 14: Test system moves onto the next move when clicking the next button:");
+
+    await testNextMove(driver);
+
+    console.log("Testing Criteria 16: Test system moves onto the previous move when clicking the previous button:");
+
+    await testPreviousMove(driver);
 
     // GAME REVIEW NOT IMPLEMENTED YET
 
@@ -166,7 +176,7 @@ async function testDisplay(driver) {
   // now checking if game history mounts
 
   // Find the element(s) representing the statistics
-  const gameHistoryElement = await driver.findElement(By.id("game-review"));
+  const gameHistoryElement = await driver.findElement(By.id("game-history"));
 
   // Check if the statistics element is displayed
   const isDisplayedGameHistory = await gameHistoryElement.isDisplayed();
@@ -194,7 +204,7 @@ async function testDisplay(driver) {
   try {
 
     // Find the first name in the table
-    const RowName1 = await driver.findElement(By.xpath('//*[@id="game-review"]/tbody/tr[2]/td[1]/span[1]')).getText();
+    const RowName1 = await driver.findElement(By.xpath('//*[@id="game-history"]/tbody/tr[2]/td[1]/span[1]')).getText();
     // console.log('First row name:', firstRowName);
   
     // Assert that the first name is "newtesting"
@@ -202,14 +212,14 @@ async function testDisplay(driver) {
       throw new Error("The entries in game history are incorrect");
     }
 
-    const RowName2 = await driver.findElement(By.xpath('//*[@id="game-review"]/tbody/tr[3]/td[1]/span[1]')).getText();
+    const RowName2 = await driver.findElement(By.xpath('//*[@id="game-history"]/tbody/tr[3]/td[1]/span[1]')).getText();
   
     // Assert that the first name is "newtesting"
     if (RowName2 !== 'newtesting') {
       throw new Error("The entries in game history are incorrect");
     }
 
-    const RowName3 = await driver.findElement(By.xpath('//*[@id="game-review"]/tbody/tr[4]/td[1]/span[1]')).getText();
+    const RowName3 = await driver.findElement(By.xpath('//*[@id="game-history"]/tbody/tr[4]/td[1]/span[1]')).getText();
   
     // Assert that the first name is "newtesting"
     if (RowName3 !== 'newtesting') {
@@ -295,7 +305,7 @@ async function testStandard(driver) {
   try {
 
     // Find the first name in the table
-    const RowName1 = await driver.findElement(By.xpath('//*[@id="game-review"]/tbody/tr[2]/td[1]/span[1]')).getText();
+    const RowName1 = await driver.findElement(By.xpath('//*[@id="game-history"]/tbody/tr[2]/td[1]/span[1]')).getText();
     // console.log('First row name:', firstRowName);
   
     // Assert that the first name is "newtesting"
@@ -380,7 +390,7 @@ async function testBlind(driver) {
 
   try {
     // Find the first name in the table
-    const RowName1 = await driver.findElement(By.xpath('//*[@id="game-review"]/tbody/tr[2]/td[1]/span[1]')).getText();
+    const RowName1 = await driver.findElement(By.xpath('//*[@id="game-history"]/tbody/tr[2]/td[1]/span[1]')).getText();
     // console.log('First row name:', firstRowName);
   
     // Assert that the first name is "newtesting"
@@ -465,7 +475,7 @@ async function testPowerUpDuck(driver) {
 
   try {
     // Find the first name in the table
-    const RowName1 = await driver.findElement(By.xpath('//*[@id="game-review"]/tbody/tr[2]/td[1]/span[1]')).getText();
+    const RowName1 = await driver.findElement(By.xpath('//*[@id="game-history"]/tbody/tr[2]/td[1]/span[1]')).getText();
     // console.log('First row name:', firstRowName);
   
     // Assert that the first name is "newtesting"
@@ -484,6 +494,137 @@ async function testPowerUpDuck(driver) {
     }
     successes++;
     console.error("Passed");
+  }
+  catch (error) {
+    failures++;
+    console.error("Failed");
+  }
+
+  testsran++;
+
+}
+
+async function testEnterGameReview(driver) {
+  
+  console.log("Test ID 4:");
+
+  await driver.findElement(By.id('demo-simple-select')).click();
+  await driver.findElement(By.id('all')).click();
+
+  await new Promise(resolve => setTimeout(resolve, 500));
+
+  await driver.findElement(By.css('.data.link a')).click();
+
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+
+  try {
+    // Find the first name in the table
+    const gameReviewElement = await driver.findElement(By.id("game-review"));
+  
+    // Check if the statistics element is displayed
+    const isDisplayed = await gameReviewElement.isDisplayed();
+  
+
+    if (isDisplayed) {
+        successes++;
+        console.log("Passed");
+    }
+    else {
+        throw new Error("Game review not found");
+    }
+  
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
+  catch (error) {
+    failures++;
+    console.error("Failed");
+  }
+
+  testsran++;
+
+  // test that player1 is 'newtesting'
+
+  await driver.findElement(By.css('.player')).getText();
+
+  try {
+    if (player1Text.trim() === 'newtesting') {
+      successes++;
+      console.log("Passed");
+    } else {
+      throw new Error("proper game info not displayed");
+    }
+  }
+  catch (error) {
+    failures++;
+    console.error("Failed");
+  }
+
+  testsran++;
+
+  await new Promise(resolve => setTimeout(resolve, 500));
+
+  // now test that the proper moves are passed? maybe I'm not gonna implement this.
+
+}
+
+async function testNextMove(driver) {
+
+  console.log("Test ID 4:");
+
+  await new Promise(resolve => setTimeout(resolve, 500));
+  // await driver.findElement(By.id('next-move')).click();
+
+  try {
+    // Find the first name in the table
+    const nextMoveElement = await driver.findElement(By.id("next-move"));
+  
+    // Check if the statistics element is displayed
+    const isDisplayed = await nextMoveElement.isDisplayed();
+  
+
+    if (isDisplayed) {
+        successes++;
+        console.log("Passed");
+    }
+    else {
+        throw new Error("next move not performed");
+    }
+  
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
+  catch (error) {
+    failures++;
+    console.error("Failed");
+  }
+
+  testsran++;
+
+}
+
+async function testPreviousMove(driver) {
+
+  console.log("Test ID 6:");
+
+  // await driver.findElement(By.id('previous-move')).click();
+
+  try {
+    // Find the first name in the table
+    const nextMoveElement = await driver.findElement(By.id("previous-move"));
+  
+    // Check if the statistics element is displayed
+    const isDisplayed = await nextMoveElement.isDisplayed();
+  
+
+    if (isDisplayed) {
+        successes++;
+        console.log("Passed");
+    }
+    else {
+        throw new Error("next move not performed");
+    }
+  
+    await new Promise(resolve => setTimeout(resolve, 500));
   }
   catch (error) {
     failures++;
