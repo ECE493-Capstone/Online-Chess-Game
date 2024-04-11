@@ -10,6 +10,7 @@ import { getPastGamesInfoById } from "../../api/pastGames";
 import Header from "../Header";
 import { useParams } from "react-router-dom";
 import { fetchUser } from "../../api/fetchUser";
+import { GAME_MODE } from "../../models/Chessboard";
 
 const Container = styled.div`
   display: flex;
@@ -54,6 +55,8 @@ const GameReview = () => {
   useEffect(() => {
     const STARTING_FEN =
       "RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr w kqKQ - 0 1";
+    const STARTING_FEN_FOR_DUCK =
+      "RNBQKBNR/PPPPPPPP/8/8/3D4/8/pppppppp/rnbqkbnr w kqKQ - 0 1";
 
     const loadData = async () => {
       const data = await getPastGamesInfoById(gameId);
@@ -62,8 +65,13 @@ const GameReview = () => {
       const player2Info = (await fetchUser(data.player2)).data;
       setPlayer1(player1Info.username);
       setPlayer2(player2Info.username);
-      setFen([STARTING_FEN, ...data.fen]);
-      setGame(new Chessboard("w", data.mode, STARTING_FEN));
+      if (data.mode === GAME_MODE.POWER_UP_DUCK) {
+        setFen([STARTING_FEN_FOR_DUCK, ...data.fen]);
+        setGame(new Chessboard("w", data.mode, STARTING_FEN_FOR_DUCK));
+      } else {
+        setFen([STARTING_FEN, ...data.fen]);
+        setGame(new Chessboard("w", data.mode, STARTING_FEN));
+      }
     };
     loadData();
   }, [gameId]);
