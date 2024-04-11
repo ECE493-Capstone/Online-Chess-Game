@@ -436,6 +436,10 @@ const Match = () => {
 
   const onPlayerTimeout = () => {
     console.log("Player Timeout");
+    socket.emit("game end", {
+      gameRoom: gameId,
+      winnerId: matchState.opponent.id,
+    });
   };
 
   const onOpponentTimeout = () => {
@@ -492,9 +496,7 @@ const Match = () => {
                 Is player ?  NOT isBlind? show board
                 Is spectator? show board
                 */}
-              {!isPlayer || game.gameMode !== GAME_MODE.BLIND ? (
-                <Board game={game} />
-              ) : (
+              {isPlayer && game.gameMode === GAME_MODE.BLIND ? (
                 <div className="blind-chess">
                   <h1 style={{ textAlign: "center" }}>
                     You are playing with the{" "}
@@ -510,6 +512,8 @@ const Match = () => {
                     handleBlindChessMove={handleBlindChessMove}
                   />
                 </div>
+              ) : (
+                <Board game={game} getIncrement={getIncrement} />
               )}
               <div className="info">
                 <h2>{matchState.player?.username}</h2>
