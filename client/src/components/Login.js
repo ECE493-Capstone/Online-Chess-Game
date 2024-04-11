@@ -76,6 +76,7 @@ const Login = ({ onClose, setIsFocused }) => {
       })
       .catch((err) => {
         dispatch({ type: "SET_ERROR", payload: err.response.data.message });
+        setIsSubmitting(false);
       });
   };
 

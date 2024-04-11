@@ -109,9 +109,14 @@ const ChangeUsername = ({ onClose, setIsFocused }) => {
           // navigate(-1);
           return Promise.resolve(undefined);
         }
-
-        const data = await res.json();
-        dispatch({ type: "SET_ERROR", payload: data.message });
+        else if (res.status === 401) {
+          const responseData = await res.json();
+          const errorMessage = responseData.error || "Internal server error";
+          dispatch({ type: "SET_ERROR", payload: errorMessage });
+        } else {
+          const data = await res.json();
+          dispatch({ type: "SET_ERROR", payload: data.message });
+        }
       } else {
         console.log('Error. Email not found in cookie');
         dispatch({ type: "SET_ERROR", payload: "Error finding user's email in cookie. Are you logged in?" });
