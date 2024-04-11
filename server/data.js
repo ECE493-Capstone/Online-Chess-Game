@@ -1,19 +1,28 @@
 const OngoingGames = require("./models/OngoingGames");
+const PastGames = require("./models/PastGames");
 
 const activeUsers = {};
 const activeGames = {};
 
 const addSocket = (userId, socketId) => {
   if (activeUsers[userId]) {
-    activeUsers[userId].socket = socketId;
+    activeUsers[userId].socket.push(socketId);
   } else {
     activeUsers[userId] = {
       activeGame: null,
-      socket: socketId,
+      socket: [socketId],
+      timeout: null,
     };
   }
 };
 
+const removeSocketId = (userId, socketId) => {
+  if (activeUsers[userId]) {
+    activeUsers[userId].socket = activeUsers[userId].socket.filter(
+      (socket) => socket !== socketId
+    );
+  }
+};
 const initActiveGame = (roomId, time) => {
   activeGames[roomId] = {
     timers: {
@@ -24,11 +33,9 @@ const initActiveGame = (roomId, time) => {
     lastTime: Date.now(),
     interval: null,
   };
-  console.log("init done", activeGames);
 };
 
 const updateActiveGame = (roomId, increment = 0) => {
-  console.log("INCREMENT", increment);
   activeGames[roomId].timers[activeGames[roomId].currentPlayer] =
     activeGames[roomId].timers[activeGames[roomId].currentPlayer] -
     (Date.now() - activeGames[roomId].lastTime) +
@@ -65,7 +72,7 @@ const setIntervalVal = (roomId, interval) => {
 };
 
 const clearIntervalVal = (roomId) => {
-  clearInterval(activeGames[roomId].interval);
+  activeGames[roomId] && clearInterval(activeGames[roomId].interval);
 };
 
 const millisToMinutesAndSeconds = (millis) => {
@@ -77,7 +84,7 @@ const millisToMinutesAndSeconds = (millis) => {
 const resetUser = (userId) => {
   activeUsers[userId] = {
     activeGame: null,
-    socket: null,
+    socket: [],
   };
 };
 
@@ -95,34 +102,118 @@ const getPlayerFromRoom = (roomId, notUser = null) => {
   });
 };
 
-const removeSocket = (socketId, io) => {
-  Object.keys(activeUsers).forEach((user) => {
-    if (activeUsers[user].socket === socketId) {
-      activeUsers[user].socket = null;
-      const player = getPlayerFromRoom(activeUsers[user].activeGame, user);
-      if (player && activeUsers[player].socket) {
-        io.to(activeUsers[player].socket).emit("opponent disconnected");
-      } else {
-        clearIntervalVal(activeUsers[user].activeGame);
-        removeUser(user);
-        removeUser(player);
-      }
-      setTimeout(async () => {
-        if (!activeUsers[user]?.socket) {
-          removeUser(user);
-          clearIntervalVal(activeUsers[user].activeGame);
-          const player = getPlayerFromRoom(user.activeGame);
+const userHasSocket = (userId, socketId) => {
+  return activeUsers[userId].socket.includes(socketId);
+};
 
-          if (player) {
-            io.to(activeUsers[player].socket).emit("opponent abandoned");
-          }
-          const result = await OngoingGames.deleteMany({
-            $or: [{ player1: user }, { player2: user }],
+const isPlayerActive = (player) => {
+  return player && activeUsers[player].socket.length > 0;
+};
+
+const endGame = (roomId, userId, oppId) => {
+  clearIntervalVal(roomId);
+  removeUser(userId);
+  removeUser(oppId);
+};
+
+const findUserBySocket = (socketId) => {
+  let userIds = null;
+  userIds = Object.keys(activeUsers).filter((user) =>
+    activeUsers[user].socket.includes(socketId)
+  );
+  return userIds ? userIds[0] : null;
+};
+
+const disconnectPlayer = (socketId, io) => {
+  Object.keys(activeUsers).forEach(async (userId) => {
+    if (userHasSocket(userId, socketId)) {
+      removeSocketId(userId, socketId);
+      if (isPlayerActive(userId, socketId)) {
+        return;
+      }
+      const player = getPlayerFromRoom(activeUsers[userId].activeGame, userId);
+      if (isPlayerActive(player, socketId)) {
+        console.log("PLAYER ABANDONED");
+      } else {
+        clearTimeout(activeUsers[player]);
+        console.log("ALL PLAYERS ABANDONED");
+        clearIntervalVal(activeUsers[player].activeGame);
+        const result = await OngoingGames.deleteMany({
+          $or: [{ player1: userId }, { player2: userId }],
+        });
+        io.to(activeUsers[userId].activeGame).emit("all abandon");
+        endGame(activeUsers[userId].activeGame, userId, player);
+        return;
+      }
+      activeUsers[userId].timeout = setTimeout(async () => {
+        if (!isPlayerActive(userId)) {
+          endGame(activeUsers[userId].activeGame, userId, player);
+          clearIntervalVal(activeUsers[player].activeGame);
+          convertOngoingGameToPastGame(
+            activeUsers[userId].activeGame,
+            player
+          ).then(async () => {
+            const result = await OngoingGames.deleteMany({
+              $or: [{ player1: userId }, { player2: userId }],
+            });
           });
+          return;
         }
       }, 45000);
     }
   });
+};
+// const removeSocket = (socketId, io) => {
+//   Object.keys(activeUsers).forEach((user) => {
+//     if (activeUsers[user].socket === socketId) {
+//       activeUsers[user].socket = null;
+//       const player = getPlayerFromRoom(activeUsers[user].activeGame, user);
+//       if (player && activeUsers[player].socket) {
+//         io.to(activeUsers[player].socket).emit("opponent disconnected");
+//       } else {
+//         clearIntervalVal(activeUsers[user].activeGame);
+//         removeUser(user);
+//         removeUser(player);
+//       }
+//       setTimeout(async () => {
+//         if (!activeUsers[user]?.socket) {
+//           removeUser(user);
+//           clearIntervalVal(activeUsers[user].activeGame);
+//           const player = getPlayerFromRoom(user.activeGame);
+
+//           if (player) {
+//             io.to(activeUsers[player].socket).emit("opponent abandoned");
+//           }
+//           const result = await OngoingGames.deleteMany({
+//             $or: [{ player1: user }, { player2: user }],
+//           });
+//         }
+//       }, 45000);
+//     }
+//   });
+// };
+
+const convertOngoingGameToPastGame = async (roomId, winnerId) => {
+  const gameToSave = await OngoingGames.findOne({ room: roomId });
+  if (!gameToSave) {
+    console.log(`Game not found for room: ${roomId}`);
+    return;
+  }
+  const newPastGame = new PastGames({
+    gameId: roomId,
+    player1: gameToSave.player1,
+    player2: gameToSave.player2,
+    mode: gameToSave.mode,
+    timeControl: gameToSave.timeControl,
+    room: gameToSave.room,
+    fen: gameToSave.fen,
+    winner: winnerId ? winnerId : null,
+  });
+  await newPastGame.save();
+  console.log(`${gameToSave.room} saved to past games`);
+  resetUser(gameToSave.player1);
+  resetUser(gameToSave.player2);
+  await OngoingGames.deleteOne({ room: roomId });
 };
 
 const addActiveGame = (userId, roomId) => {
@@ -192,7 +283,7 @@ module.exports = {
   isExistingActivePlayer,
   getUserActiveGame,
   getPlayerFromRoom,
-  removeSocket,
+  disconnectPlayer,
   getActiveGames,
   getActiveUsers,
   getTime,
@@ -205,4 +296,7 @@ module.exports = {
   getInterval,
   setIntervalVal,
   clearIntervalVal,
+  convertOngoingGameToPastGame,
+  findUserBySocket,
+  removeSocketId,
 };

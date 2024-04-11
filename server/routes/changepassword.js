@@ -10,12 +10,10 @@ const hashPassword = async (password) => {
   return bcrypt
     .genSalt(10)
     .then((salt) => {
-      console.log("SALT");
       return bcrypt.hash(password, salt);
     })
     .catch((err) => console.error(err.message));
 };
-
 
 router.post("/", jsonParser, async (req, res) => {
   const { email, oldPassword, newPassword } = req.body;
@@ -48,8 +46,7 @@ router.post("/", jsonParser, async (req, res) => {
     // Send success response
     res.status(200);
 
-    res.send({message: "Password changed successfully!"});
-
+    res.send({ message: "Password changed successfully!" });
   } catch (error) {
     // If an error occurs, send internal server error response
     console.error(error);

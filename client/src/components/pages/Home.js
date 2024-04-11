@@ -146,7 +146,6 @@ const Home = () => {
       playInfo.gameMode &&
       playInfo.playType
     ) {
-      console.log("READY TO PLAY", playInfo);
       socket.emit(`join ${playInfo.playType}`, {
         userId: userId,
         mode: playInfo.gameMode,

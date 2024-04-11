@@ -1,9 +1,11 @@
 const {
   addSocket,
   getUserActiveGame,
-  removeSocket,
+  disconnectPlayer,
   getPlayerFromRoom,
   getActiveUsers,
+  getActiveGames,
+  removeSocketId,
 } = require("../../data");
 const Socket = require("../../models/Socket");
 const handleUserConnect = async (userId, socket, io) => {
@@ -16,6 +18,7 @@ const handleUserConnect = async (userId, socket, io) => {
   if (!getUserActiveGame(userId)) {
     return;
   }
+  console.log("ACTIVE GAMES", getActiveGames());
   handleUserReconnect(userId, socket, io);
 };
 
@@ -27,7 +30,7 @@ const handleUserDisconnect = async (socketId, io) => {
   // );
   // ON DISCONNECT:
   // - remove socketId from activeUsers (set it to null)
-  removeSocket(socketId, io);
+  disconnectPlayer(socketId, io);
 };
 
 const findExistingSocket = async (query) => {
@@ -36,28 +39,18 @@ const findExistingSocket = async (query) => {
 };
 
 const handleUserReconnect = async (userId, socket, io) => {
-  // const result = await Socket.findOneAndUpdate(
-  //   { userId: userId },
-  //   { $set: { socketId: socket.id } },
-  //   { upsert: true }
-  // ).then((res) => {
-  //   if (res) {
-  //     res.rooms.forEach((room) => {
-  //       socket.join(room);
-  //     });
-  //   } else {
-  //     console.log("OOP");
-  //   }
-  // });
-  // CHECK IF USER IS NEW
-  // IF NOT, RECONNECT
-  console.log("RECONNECTED", userId, socket.id);
   const activeGame = getUserActiveGame(userId);
   addSocket(userId, socket.id);
   socket.join(activeGame);
   const player = getPlayerFromRoom(activeGame, userId);
   const activeUsers = getActiveUsers();
-  if (player && activeUsers[player].socket) {
+  if (activeUsers[userId].socket.length > 1) {
+    console.log(activeUsers[userId].socket);
+    let toBeDisconnected = activeUsers[userId].socket[0];
+    removeSocketId(userId, activeUsers[userId].socket[0]);
+    io.to(toBeDisconnected).emit("disconnect socket");
+  }
+  if (player && activeUsers[userId].socket.length == 1) {
     console.log("EMITTING", activeUsers[player].socket);
     io.to(activeUsers[player].socket).emit("opponent reconnected");
   }
