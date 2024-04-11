@@ -635,4 +635,4 @@ async function testPreviousMove(driver) {
 
 }
 
-profileTests();
+module.exports = profileTests;

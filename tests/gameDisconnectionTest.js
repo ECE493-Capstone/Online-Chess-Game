@@ -187,4 +187,4 @@ async function TestNoSave(PlayerA, PlayerB) {
 
 }
 
-gameDisconnectionTests();
+module.exports = gameDisconnectionTests;

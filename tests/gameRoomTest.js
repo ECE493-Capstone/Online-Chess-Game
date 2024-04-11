@@ -124,4 +124,4 @@ async function ABlackBWhite(PlayerA, PlayerB) {
 
 }
 
-gameRoomTests();
+module.exports = gameRoomTests;

@@ -790,4 +790,4 @@ async function testChangeUsername(driver) {
     testsran++;
 }
 
-authenticationTests();
+module.exports = authenticationTests;

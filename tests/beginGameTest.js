@@ -44,6 +44,20 @@ async function beginGameTests() {
         console.log("Testing Criteria 10: Test that H2H properly displays the game results:");
 
         await TestH2H(PlayerA, PlayerB);
+
+        console.log("Testing Criteria 18: Check that forfeiting ends the match in a loss for the player, and a win for the opponent:");
+
+        await TestForfeit(PlayerA, PlayerB);
+
+        console.log("Testing Criteria 15 and 16: Check that a reuqest to draw is sent to opposing player, and a rejection proceeds the match as usual:");
+
+        await TestDrawReject(PlayerA, PlayerB);
+
+        console.log("Testing Criteria 17: Check that accepting a draw request works:");
+
+        await TestDrawAccept(PlayerA, PlayerB);
+
+        console.log("Testing Criteria 2: Check to see if the legal moves get displayed when player clicks on a piece:");
     
       } catch (error) {
         console.error("A test failure occurred. Terminating tests: " + error);
@@ -159,7 +173,7 @@ async function TestMount(PlayerA, PlayerB) {
         PlayerBSocket.emit("join fail", "Game not found");
     }
 
-    // I NEED THE FUCKIN GAME ROOM CODE BRUH
+    // I NEED THE GAME ROOM CODE BRUH
 
     try {
         const boardContainer = await PlayerA.findElement(By.id('game-board'));
@@ -270,4 +284,39 @@ async function TestH2H(PlayerA, PlayerB) {
 
 }
 
-beginGameTests();
+async function TestH2H(PlayerA, PlayerB) {
+
+    console.log("Test ID 1:");
+
+    await new Promise(resolve => setTimeout(resolve, 61000));
+
+    try {
+        const PlayerAResult = await PlayerA.findElement(By.id('game-result'));
+        const PlayerBResult = await PlayerB.findElement(By.id('game-result'));
+
+        const PlayerAText = await PlayerAResult.getText();
+        console.log('Game Result:', PlayerAText);
+        const PlayerBText = await PlayerBResult.getText();
+
+        // Check if the dialog container is displayed
+        
+        if (PlayerAText !== "You lost!" || PlayerBText !== "You won!") {
+            throw new Error("Game did not make Player A lose.");
+        }
+        console.log("Passed");
+        successes++;
+    }
+    catch (error) {
+        failures++;
+        console.error("Failed:" + error);
+    }
+    testsran++;
+
+    getPastGamesInformation(playerACookie)
+
+    // Test that game is stored into database
+    // maybe have it so that I can retreive the game info from dastabase with given game ID??
+
+}
+
+module.exports = beginGameTests;

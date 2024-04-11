@@ -128,4 +128,4 @@ async function TestSharing(PlayerA, PlayerB, PlayerC) {
     testsran++;
 }
 
-gameSharingTests();
+module.exports = gameSharingTests;

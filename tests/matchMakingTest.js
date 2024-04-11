@@ -247,4 +247,4 @@ async function testExit(PlayerA, PlayerE) {
 }
 
 
-matchMakingTests();
+module.exports = matchMakingTests;
