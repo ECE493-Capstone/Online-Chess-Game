@@ -66,7 +66,7 @@ const handleGameJoin = (io, socket, existingGame, joiningUserId) => {
   addSocket(existingGame.userId, existingGame.socketId);
   addSocket(joiningUserId, socket.id);
   addActiveGame(existingGame.userId, existingGame.room);
-  addActiveGame(userId, existingGame.room);
+  addActiveGame(joiningUserId, existingGame.room);
   removePlayerFromQueue(existingGame.userId);
   emitToRoom(io, existingGame.room, "game joined", existingGame.room);
   initActiveGame(existingGame.room, timeControlToMs(existingGame.timeControl));
