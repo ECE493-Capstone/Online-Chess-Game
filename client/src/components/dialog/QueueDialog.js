@@ -46,6 +46,8 @@ const QueueDialog = ({
         <div className="code">
           <Button
             variant="outlined"
+            id="share-room-code"
+            share-code= {roomCode}
             onClick={() => copyRoomToClipboard(roomCode)}
           >
             {roomCode}

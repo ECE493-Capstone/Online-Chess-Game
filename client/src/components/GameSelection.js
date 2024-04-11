@@ -115,6 +115,7 @@ const GameSelect = ({ handleGameSelectHome }) => {
         </div>
       </GameContainer>
       <GameContainer
+        id="power-up-select"
         style={{ position: "relative" }}
         onClick={() => handleGameSelect(GAME_MODE.POWER_UP_DUCK)}
       >

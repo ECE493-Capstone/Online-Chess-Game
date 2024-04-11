@@ -145,6 +145,8 @@ const Square = ({ piece, rowIndex, colIndex, game, getIncrement }) => {
 
   return (
     <StyledSquare
+      id="square-piece"
+      piece={piece}
       ishighlighted={isHighlighted.toString()}
       isvoted={isVoted.toString()}
       onDragOver={handleDragOver}

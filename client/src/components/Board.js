@@ -41,6 +41,7 @@ const Board = ({ game, getIncrement }) => {
   return (
     <StyledBoard
       id="game-board"
+      game-side = {game.side}
       disabled={
         (isPlayer && voteInfo.isAllowed) || (!isPlayer && !voteInfo.isAllowed)
       }

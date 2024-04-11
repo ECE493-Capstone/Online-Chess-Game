@@ -611,6 +611,7 @@ const Match = () => {
               <div className="voting-info">
                 <h3>Click on empty square to vote!</h3>
                 <Button
+                  id="vote"
                   variant="contained"
                   color="secondary"
                   disabled={voteInfo.votedSquare === null}

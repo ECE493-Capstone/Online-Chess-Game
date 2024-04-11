@@ -170,10 +170,10 @@ async function testFIFO(PlayerA, PlayerB, PlayerC, PlayerD) {
     await PlayerC.findElement(By.id('resign-button')).click();
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    PlayerA.quit();
-    PlayerB.quit();
-    PlayerC.quit();
-    PlayerD.quit();
+    await PlayerA.quit();
+    await PlayerB.quit();
+    await PlayerC.quit();
+    await PlayerD.quit();
   
 }
 
@@ -202,6 +202,8 @@ async function testExit(PlayerA, PlayerE) {
     await PlayerE.findElement(By.id('identity')).sendKeys('PlayerE');
     await PlayerE.findElement(By.id('password')).sendKeys('playere');
     await PlayerE.findElement(By.css('button[type="submit"]')).click();
+
+    console.log("Test ID 1:");
 
     await PlayerA.findElement(By.id('quick-play')).click();
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -238,8 +240,8 @@ async function testExit(PlayerA, PlayerE) {
     testsran++;
 
     await PlayerE.findElement(By.id('cancel')).click();
-    PlayerA.quit();
-    PlayerE.quit();
+    await PlayerA.quit();
+    await PlayerE.quit();
 
 }
 

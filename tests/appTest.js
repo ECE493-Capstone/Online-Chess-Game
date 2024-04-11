@@ -25,7 +25,7 @@ async function appTests() {
 
     await matchMakingTests();
 
-    // await gameRoomTests(); // Errors: The modal that displays the game room if user creates a custom game isn't implemented. Thus, we cannot test parts of this.
+    await gameRoomTests();
 
     // // await gameDisconnectionTests(); // Errors: Disconnection/reconnection handling doesn't work properly
 
@@ -33,18 +33,18 @@ async function appTests() {
 
     await gameSharingTests();
 
-    //  // await gameModesTests(); // game modes test not implemented yet
+     await gameModesTests(); // game modes test not implemented yet
 
-    const userData = await fetchUser("newtesting");
-    const userId = userData.userId;
+    // const userData = await fetchUser("newtesting");
+    // const userId = userData.userId;
     
-    const AData = await fetchUser("PlayerA");
-    const AId = AData.userId;
+    // const AData = await fetchUser("PlayerA");
+    // const AId = AData.userId;
 
-    console.log("User ID: " + userId);
-    console.log("AID: " + AId);
+    // console.log("User ID: " + userId);
+    // console.log("AID: " + AId);
     
-    console.log( "Adding 1st game:" );
+    // console.log( "Adding 1st game:" );
     // First past game
     // await addPastGame(
     //     "gameId1", // roomId

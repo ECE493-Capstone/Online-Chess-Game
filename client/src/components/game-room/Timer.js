@@ -50,7 +50,7 @@ const Timer = ({
   };
 
   return (
-    <TimerContainer isActive={isActive}>
+    <TimerContainer id="timer-container" timer={formatTime(timer)} isActive={isActive}>
       <h3>{formatTime(timer)}</h3>
     </TimerContainer>
   );
