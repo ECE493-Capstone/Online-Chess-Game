@@ -515,7 +515,7 @@ const Match = () => {
               ) : (
                 <Board game={game} getIncrement={getIncrement} />
               )}
-              <div className="info">
+              <div id="player-name" className="info">
                 <h2>{matchState.player?.username}</h2>
                 {matchState.playerTime !== null && (
                   <Timer

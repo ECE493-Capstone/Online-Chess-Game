@@ -105,7 +105,7 @@ async function TestSharing(PlayerA, PlayerB, PlayerC) {
     try {
         await PlayerC.get(gameLink);
 
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 3000));
     
         const playerNameDiv = await PlayerC.findElement(By.id("player-name"));
     

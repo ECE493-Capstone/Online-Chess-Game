@@ -478,19 +478,16 @@ async function testLogin(driver) {
         console.error("Failed");
     }
 
+    testsran++;
+
     let userCookie = "";
 
     const cookies = await driver.manage().getCookie("userId").then(function(cookie) {
-      console.log('cookie details => ', cookie.value);
+    //   console.log('cookie details => ', cookie.value);
       userCookie = cookie.value;
     });
   
-  
-  
-    const retreiveGameData = await getPastGamesInformation(userCookie);
-    console.log("This is the retreived stuff shit: "  + retreiveGameData);
-
-    testsran++;
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     try {
         // Check if the element exists
@@ -768,7 +765,7 @@ async function testChangeUsername(driver) {
     await driver.findElement(By.id('newUsername')).sendKeys('newtesting');
     await driver.findElement(By.id('password')).sendKeys('newpassword');
     await driver.findElement(By.css('button[type="submit"]')).click();
-    await new Promise(resolve => setTimeout(resolve, 100)); // wait for user to change username in database
+    await new Promise(resolve => setTimeout(resolve, 500)); // wait for user to change username in database
 
     const user = await fetchUser("newtesting");
 
