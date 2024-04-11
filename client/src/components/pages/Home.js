@@ -65,6 +65,7 @@ const Home = () => {
   const [direction, setDirection] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [roomCode, setRoomCode] = useState("");
+  const [privateRoom, setPrivateRoom] = useState(null);
   const [submitClicked, setSubmitClicked] = useState(false);
   const [playInfo, setPlayInfo] = useState({
     playType: null,
@@ -84,6 +85,8 @@ const Home = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSubmitClicked(false);
+    socket.off("game joined");
+    socket.off("join fail");
   };
 
   const handleRoomCodeChange = (event) => {
@@ -100,17 +103,17 @@ const Home = () => {
 
     console.log("Joining room with code:", roomCode);
 
-    socket.emit("join private game", {
+    socket.emit("join existing private game", {
       userId: userId,
       room: roomCode,
     });
 
-    socket.on("game joined", (gameInfo) => {
+    socket.once("game joined", (gameInfo) => {
       dispatch(setGameInfo(gameInfo));
       navigate(`/match/${gameInfo}`);
     });
 
-    socket.on("join fail", (gameInfo) => {
+    socket.once("join fail", (gameInfo) => {
       console.log("Failed to join room with code:", roomCode);
     });
     setIsModalOpen(false);
@@ -153,9 +156,13 @@ const Home = () => {
             : playInfo.side,
         timeControl: playInfo.time,
       });
-      socket.on("game joined", (gameInfo) => {
+      socket.once("game joined", (gameInfo) => {
         dispatch(setGameInfo(gameInfo));
         navigate(`/match/${gameInfo}`);
+      });
+      socket.once("privateRoom", (privateRoom) => {
+        console.log("Private room created:", privateRoom);
+        setPrivateRoom(privateRoom);
       });
       setShowQueueDialog(true);
     } else {
@@ -177,6 +184,12 @@ const Home = () => {
     socket.off("game joined");
     socket.emit("exit queue", userId);
     setShowQueueDialog(false);
+    clearPrivateRoom();
+  };
+
+  const clearPrivateRoom = () => {
+    socket.off("privateRoom");
+    setPrivateRoom(null);
   };
 
   return (
@@ -231,7 +244,15 @@ const Home = () => {
             open={showQueueDialog}
             onClose={() => handleExitQueue(userId)}
           >
-            <QueueDialog onCancelClicked={() => handleExitQueue(userId)} />
+            <QueueDialog
+              onCancelClicked={() => handleExitQueue(userId)}
+              content={
+                privateRoom
+                  ? "Room created. Share to join!"
+                  : "Finding an opponent..."
+              }
+              roomCode={privateRoom}
+            />
           </Dialog>
         </div>
       </PageContainer>
