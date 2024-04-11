@@ -17,7 +17,6 @@ const addSocket = (userId, socketId) => {
 };
 
 const removeSocketId = (userId, socketId) => {
-  console.log("NEW SOCKET: ", activeUsers[userId].socket);
   if (activeUsers[userId]) {
     activeUsers[userId].socket = activeUsers[userId].socket.filter(
       (socket) => socket !== socketId
@@ -34,11 +33,9 @@ const initActiveGame = (roomId, time) => {
     lastTime: Date.now(),
     interval: null,
   };
-  console.log("init done", activeGames);
 };
 
 const updateActiveGame = (roomId, increment = 0) => {
-  console.log("INCREMENT", increment);
   activeGames[roomId].timers[activeGames[roomId].currentPlayer] =
     activeGames[roomId].timers[activeGames[roomId].currentPlayer] -
     (Date.now() - activeGames[roomId].lastTime) +
@@ -75,7 +72,7 @@ const setIntervalVal = (roomId, interval) => {
 };
 
 const clearIntervalVal = (roomId) => {
-  clearInterval(activeGames[roomId].interval);
+  activeGames[roomId] && clearInterval(activeGames[roomId].interval);
 };
 
 const millisToMinutesAndSeconds = (millis) => {
@@ -110,7 +107,6 @@ const userHasSocket = (userId, socketId) => {
 };
 
 const isPlayerActive = (player) => {
-  console.log(activeUsers[player].socket);
   return player && activeUsers[player].socket.length > 0;
 };
 
@@ -140,8 +136,8 @@ const disconnectPlayer = (socketId, io) => {
         console.log("PLAYER ABANDONED");
       } else {
         clearTimeout(activeUsers[player]);
-        clearIntervalVal(activeUsers[player].activeGame);
         console.log("ALL PLAYERS ABANDONED");
+        clearIntervalVal(activeUsers[player].activeGame);
         const result = await OngoingGames.deleteMany({
           $or: [{ player1: userId }, { player2: userId }],
         });
@@ -198,7 +194,6 @@ const disconnectPlayer = (socketId, io) => {
 // };
 
 const convertOngoingGameToPastGame = async (roomId, winnerId) => {
-  console.log("BOTH PLAYERS DISCONNECTED");
   const gameToSave = await OngoingGames.findOne({ room: roomId });
   if (!gameToSave) {
     console.log(`Game not found for room: ${roomId}`);

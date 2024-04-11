@@ -82,7 +82,6 @@ const BlindChess = ({ game, gameId, handleBlindChessMove }) => {
         });
       }
     }
-    console.log(lMoves);
     setLegalMoves(lMoves);
   };
 
@@ -115,7 +114,6 @@ const BlindChess = ({ game, gameId, handleBlindChessMove }) => {
 
   const handleSetMove = (move) => {
     if (move) {
-      console.log("MOVE??", move);
       setRecognizedMove(move);
     }
   };

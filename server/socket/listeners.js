@@ -102,7 +102,6 @@ const listen = (io, socket) => {
     };
     if (infoIfRandomDuck) {
       // !== null if game mode is POWER_UP_DUCK
-      console.log("GOKUL POWER UP,", infoIfRandomDuck);
       broadcastVotingEvent(io, gameRoom, infoIfRandomDuck);
     }
   });
@@ -138,6 +137,7 @@ const listen = (io, socket) => {
       let event = isWhite ? "whiteTime" : "blackTime";
       let playerTime = isWhite ? time.player1 : time.player2;
       if (playerTime < -999.99) {
+        console.log("Clearing here");
         clearIntervalVal(gameRoom);
         return;
       }

@@ -185,7 +185,6 @@ const Match = () => {
   const voteInfo = useSelector((state) => state.board.voteInfo);
   const cookies = new Cookies();
   const userId = cookies.get("userId");
-  console.log("ISPLAYER", isPlayer);
 
   const castDuckVote = () => {
     dispatch(
@@ -207,8 +206,6 @@ const Match = () => {
     return matchState.increment;
   };
   useEffect(() => {
-    console.log("TEST", isPlayer);
-
     socket.on("voteStart", (startTime) => {
       dispatch(setVoteInfo({ votedSquare: null, isAllowed: true }));
       matchDispatch({ type: "VOTE_TIMER", payload: startTime });
@@ -219,14 +216,12 @@ const Match = () => {
     });
 
     if (isPlayer) {
-      console.log("PLAYER");
       // ----------------- socket listeners -----------------
       socket.on("disconnect socket", () => {
         toast("You have been disconnected!");
         socket.disconnect();
       });
       socket.on("oppMove", (input) => {
-        console.log("input", input);
         setInput(input);
       });
       socket.on("opponent disconnected", (input) => {
@@ -277,7 +272,6 @@ const Match = () => {
     } else if (isPlayer === false) {
       socket.emit("join room", gameId);
       socket.on("spectatorMove", (fen) => {
-        console.log("SPECTATOR");
         dispatch(setGame(new Chessboard(WHITE, game.gameMode, fen)));
       });
     }
@@ -331,7 +325,6 @@ const Match = () => {
         userId !== undefined &&
         (gameInfoData.player1 === userId || gameInfoData.player2 === userId);
       orientation = !userId || gameInfoData.player1 === userId ? WHITE : BLACK;
-      console.log("TEST", gameInfoData);
       const chessboard = new Chessboard(
         orientation,
         gameInfoData.mode,
@@ -355,7 +348,6 @@ const Match = () => {
         gameInfoData.player1 === userId
           ? gameInfoData.player2
           : gameInfoData.player1;
-      console.log(opponentId);
       let opponentInfo, playerInfo;
       if (isPlayerVal) {
         opponentInfo = (await fetchUser(opponentId)).data;
@@ -437,6 +429,10 @@ const Match = () => {
 
   const onPlayerTimeout = () => {
     console.log("Player Timeout");
+    socket.emit("game end", {
+      gameRoom: gameId,
+      winnerId: matchState.opponent.id,
+    });
   };
 
   const onOpponentTimeout = () => {
@@ -491,9 +487,7 @@ const Match = () => {
                 Is player ?  NOT isBlind? show board
                 Is spectator? show board
                 */}
-              {!isPlayer || game.gameMode !== GAME_MODE.BLIND ? (
-                <Board game={game} getIncrement={getIncrement} />
-              ) : (
+              {isPlayer && game.gameMode === GAME_MODE.BLIND ? (
                 <div className="blind-chess">
                   <h1 style={{ textAlign: "center" }}>
                     You are playing with the{" "}
@@ -509,6 +503,8 @@ const Match = () => {
                     handleBlindChessMove={handleBlindChessMove}
                   />
                 </div>
+              ) : (
+                <Board game={game} getIncrement={getIncrement} />
               )}
               <div className="info">
                 <h2>{matchState.player?.username}</h2>

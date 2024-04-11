@@ -60,18 +60,14 @@ export default class VoiceMove {
       }
     });
     result = result_split.join(" ");
-    console.log(result, fzySet.get(result));
     let fzySetList = fzySet.get(result) || [];
     try {
       if (fzySetList.length > 0) {
         const result = fzySetList[0][1].split(" ");
-        console.log("NEW RESULT", result);
         let fromCol = String.fromCharCode(result[0][0].charCodeAt(0) - 49);
         let fromRow = 8 - parseInt(WORDS_NUMBER[result[1]]);
         let toCol = String.fromCharCode(result[3][0].charCodeAt(0) - 49);
         let toRow = 8 - parseInt(WORDS_NUMBER[result[4]]);
-        // console.log("VOICE", result, fromCol, fromRow, toCol, toRow);
-        // console.log("Result: ", result);
         return {
           move: {
             fromRow: parseInt(fromRow),

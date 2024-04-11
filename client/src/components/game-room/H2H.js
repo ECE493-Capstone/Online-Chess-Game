@@ -82,7 +82,6 @@ const H2H = ({ player1Id, player2Id }) => {
       const player1Data = (await fetchUser(player1Id)).data;
       const player2Data = (await fetchUser(player2Id)).data;
       const h2hRecord = await getH2HRecord(player1Id, player2Id);
-      console.log("DATA: ", player1Data, player2Data, h2hRecord);
       dispatch({
         type: "INIT",
         payload: {

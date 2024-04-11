@@ -39,22 +39,6 @@ const findExistingSocket = async (query) => {
 };
 
 const handleUserReconnect = async (userId, socket, io) => {
-  // const result = await Socket.findOneAndUpdate(
-  //   { userId: userId },
-  //   { $set: { socketId: socket.id } },
-  //   { upsert: true }
-  // ).then((res) => {
-  //   if (res) {
-  //     res.rooms.forEach((room) => {
-  //       socket.join(room);
-  //     });
-  //   } else {
-  //     console.log("OOP");
-  //   }
-  // });
-  // CHECK IF USER IS NEW
-  // IF NOT, RECONNECT
-
   const activeGame = getUserActiveGame(userId);
   addSocket(userId, socket.id);
   socket.join(activeGame);
