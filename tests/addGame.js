@@ -1,6 +1,4 @@
-const OngoingGames = require("../server/models/OngoingGames");
 const PastGames = require("../server/models/PastGames");
-const Queue = require("../server/models/Queue");
 
 const addPastGame = async (roomId, white, black, mode, timeControl, room, fen, winner) => {
 
@@ -14,6 +12,8 @@ const addPastGame = async (roomId, white, black, mode, timeControl, room, fen, w
       fen: fen,
       winner: winner,
     });
+
+    console.log("Saving this game: ", JSON.stringify(newPastGame));
     await newPastGame.save();
 };
 

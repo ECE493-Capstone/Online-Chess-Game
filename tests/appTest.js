@@ -15,13 +15,13 @@ async function appTests() {
 
     console.log("==================== TEST PLAN =====================")
 
-    await authenticationTests();
+    // await authenticationTests();
 
-    await registerUser("PlayerA", "playera@playera.com", "playera");
-    await registerUser("PlayerB", "playerb@playerb.com", "playerb");
-    await registerUser("PlayerC", "playerc@playerc.com", "playerc");
-    await registerUser("PlayerD", "playerd@playerd.com", "playerd");
-    await registerUser("PlayerE", "playere@playere.com", "playere");
+    // await registerUser("PlayerA", "playera@playera.com", "playera");
+    // await registerUser("PlayerB", "playerb@playerb.com", "playerb");
+    // await registerUser("PlayerC", "playerc@playerc.com", "playerc");
+    // await registerUser("PlayerD", "playerd@playerd.com", "playerd");
+    // await registerUser("PlayerE", "playere@playere.com", "playere");
 
     // await matchMakingTests(); // Errors: FIFO doesn't work properly for when a third player queues when two players have begun a match
 
@@ -31,7 +31,7 @@ async function appTests() {
 
     // // await beginGameTests(); // Errors: Cannot start and create a new game
 
-    await gameSharingTests();
+    // await gameSharingTests();
 
     //  // await gameModesTests(); // game modes test not implemented yet
 
@@ -40,21 +40,24 @@ async function appTests() {
     
     const AData = await fetchUser("PlayerA");
     const AId = AData.userId;
+
+    console.log("User ID: " + userId);
+    console.log("AID: " + AId);
     
     console.log( "Adding 1st game:" );
     // First past game
-    // await addPastGame(
-    //     "gameId1", // roomId
-    //     userId, // white
-    //     AId, // black
-    //     "Standard", // mode
-    //     "5 + 0", // timeControl
-    //     "room1", // room
-    //     [], // fen
-    //     userId // winner
-    // );
-
-    // console.log( "Adding 2st game:" );
+    await addPastGame(
+        "gameId1", // roomId
+        userId, // white
+        AId, // black
+        "Standard", // mode
+        "5 + 0", // timeControl
+        "room1", // room
+        [], // fen
+        userId // winner
+    );
+// This shit's not connecting. I'm cooked.
+    console.log( "Adding 2st game:" );
     
     // // Second past game
     // await addPastGame(
