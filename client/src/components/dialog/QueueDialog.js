@@ -4,17 +4,24 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import styled from "styled-components";
 import { useEffect } from "react";
 import { Button } from "@mui/material";
+import toast from "react-hot-toast";
 
 const DialogContainer = styled.div`
-  border: 1px solid white;
-  background-color: black;
-  border-radius: 10px;
-  max-width: 300px;
-  padding: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
+  border: 1px solid white;
+  background-color: black;
+  border-radius: 10px;
+  max-width: 400px;
+  padding: 10px;
+
+  .code {
+    display: flex;
+    margin-top: 15px;
+  }
 
   .cancel-button {
     margin-top: 15px;
@@ -22,15 +29,31 @@ const DialogContainer = styled.div`
 `;
 
 const QueueDialog = ({
-  content = "Finding an opponent",
+  content,
   showSpinner = true,
+  roomCode,
   onCancelClicked,
 }) => {
+  const copyRoomToClipboard = (roomCode) => {
+    navigator.clipboard.writeText(roomCode);
+    toast.success("Room code copied to clipboard");
+  };
   return (
     <DialogContainer id="queue-container">
       <h3>{content}</h3>
       {showSpinner && <CircularProgress size={30} />}
-      <Button id="cancel"
+      {roomCode && (
+        <div className="code">
+          <Button
+            variant="outlined"
+            onClick={() => copyRoomToClipboard(roomCode)}
+          >
+            {roomCode}
+          </Button>
+        </div>
+      )}
+      <Button
+        id="cancel"
         className="cancel-button"
         variant="contained"
         onClick={onCancelClicked}

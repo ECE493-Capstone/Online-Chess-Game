@@ -45,6 +45,7 @@ const RequestButtons = ({
         </Button>
 
         <Button
+          id="resign-button"
           className="button"
           variant="contained"
           onClick={onResignClicked}

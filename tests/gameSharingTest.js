@@ -126,6 +126,9 @@ async function TestSharing(PlayerA, PlayerB, PlayerC) {
         console.error("Failed");
     }
     testsran++;
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    await PlayerA.findElement(By.id('resign-button')).click();
+    await new Promise(resolve => setTimeout(resolve, 1000));
 }
 
 module.exports = gameSharingTests;

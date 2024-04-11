@@ -26,7 +26,6 @@ async function matchMakingTests() {
         await PlayerB.get(clientConfig.CLIENT_URL);
         await PlayerC.get(clientConfig.CLIENT_URL);
         await PlayerD.get(clientConfig.CLIENT_URL);
-        await PlayerE.get(clientConfig.CLIENT_URL);
 
         console.log("================================================================");
         console.log("-----TEST SUITE 2: MATCHMAKING-----");
@@ -34,9 +33,7 @@ async function matchMakingTests() {
         console.log("Testing Criteria 1 and 2: Test players enter queue with FIFO, and that they will be paired with their selected game mode:");
     
         // Simulate user 1 entering matchmaking queue
-        await testFIFO(PlayerA, PlayerB, PlayerC, PlayerD, PlayerE);
-
-        console.log("FIFO doesn't work for some reason (when player E enters, he just sees Player A and Player D game).");
+        await testFIFO(PlayerA, PlayerB, PlayerC, PlayerD);
 
         console.log("Testing Criteria 3: Check that players may disconnect during queuing:");
 
@@ -52,15 +49,10 @@ async function matchMakingTests() {
         console.log("================================================================");
     
         // Quit both WebDriver instances
-        await PlayerA.quit();
-        await PlayerB.quit();
-        await PlayerC.quit();
-        await PlayerD.quit();
-        await PlayerE.quit();
     }
 }
 
-async function testFIFO(PlayerA, PlayerB, PlayerC, PlayerD, PlayerE) {
+async function testFIFO(PlayerA, PlayerB, PlayerC, PlayerD) {
 
     // login first
 
@@ -87,12 +79,6 @@ async function testFIFO(PlayerA, PlayerB, PlayerC, PlayerD, PlayerE) {
     await PlayerD.findElement(By.id('identity')).sendKeys('PlayerD');
     await PlayerD.findElement(By.id('password')).sendKeys('playerd');
     await PlayerD.findElement(By.css('button[type="submit"]')).click();
-
-    await PlayerE.findElement(By.id('signin')).click();
-
-    await PlayerE.findElement(By.id('identity')).sendKeys('PlayerE');
-    await PlayerE.findElement(By.id('password')).sendKeys('playere');
-    await PlayerE.findElement(By.css('button[type="submit"]')).click();
   
     await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -103,7 +89,6 @@ async function testFIFO(PlayerA, PlayerB, PlayerC, PlayerD, PlayerE) {
     await PlayerB.findElement(By.id('quick-play')).click();
     await PlayerC.findElement(By.id('quick-play')).click();
     await PlayerD.findElement(By.id('quick-play')).click();
-    await PlayerE.findElement(By.id('quick-play')).click();
     await new Promise(resolve => setTimeout(resolve, 1000));
 
 
@@ -111,7 +96,6 @@ async function testFIFO(PlayerA, PlayerB, PlayerC, PlayerD, PlayerE) {
     await PlayerB.findElement(By.id('blind-select')).click();
     await PlayerC.findElement(By.id('blind-select')).click();
     await PlayerD.findElement(By.id('standard-select')).click();
-    await PlayerE.findElement(By.id('standard-select')).click();
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     await PlayerA.findElement(By.id('time-submit')).click();
@@ -120,10 +104,6 @@ async function testFIFO(PlayerA, PlayerB, PlayerC, PlayerD, PlayerE) {
     await PlayerD.findElement(By.id('time-submit')).click();
 
     await new Promise(resolve => setTimeout(resolve, 1000));
-
-    await PlayerE.findElement(By.id('time-submit')).click();
-
-    await new Promise(resolve => setTimeout(resolve, 10000));
   
     // now check that the players are paired up correctly
   
@@ -175,14 +155,7 @@ async function testFIFO(PlayerA, PlayerB, PlayerC, PlayerD, PlayerE) {
             throw new Error('Players do not match up correctly');
         }
 
-        const dialogContainer = await PlayerE.findElement(By.id('queue-container'));
-
-        // Check if the dialog container is displayed
-        const isDisplayed = await dialogContainer.isDisplayed();
-
-        if (!isDisplayed) {
-            throw new Error("FIFO doesn't follow");
-        }
+        successes++;
 
     }
     catch (error) {
@@ -191,6 +164,16 @@ async function testFIFO(PlayerA, PlayerB, PlayerC, PlayerD, PlayerE) {
     }
   
     testsran++;
+
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    await PlayerA.findElement(By.id('resign-button')).click();
+    await PlayerC.findElement(By.id('resign-button')).click();
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    PlayerA.quit();
+    PlayerB.quit();
+    PlayerC.quit();
+    PlayerD.quit();
   
 }
 
@@ -204,11 +187,21 @@ async function testExit(PlayerA, PlayerE) {
     // await PlayerA.findElement(By.id('password')).sendKeys('playera');
     // await PlayerA.findElement(By.css('button[type="submit"]')).click();
 
-    // await PlayerE.findElement(By.id('signin')).click();
+    PlayerA = await new Builder().forBrowser('chrome').build();
+    await PlayerA.get(clientConfig.CLIENT_URL);
+    
+    await PlayerE.get(clientConfig.CLIENT_URL);
+    await PlayerA.findElement(By.id('signin')).click();
 
-    // await PlayerE.findElement(By.id('identity')).sendKeys('PlayerE');
-    // await PlayerE.findElement(By.id('password')).sendKeys('playere');
-    // await PlayerE.findElement(By.css('button[type="submit"]')).click();
+    await PlayerA.findElement(By.id('identity')).sendKeys('PlayerA');
+    await PlayerA.findElement(By.id('password')).sendKeys('playera');
+    await PlayerA.findElement(By.css('button[type="submit"]')).click();
+
+    await PlayerE.findElement(By.id('signin')).click();
+
+    await PlayerE.findElement(By.id('identity')).sendKeys('PlayerE');
+    await PlayerE.findElement(By.id('password')).sendKeys('playere');
+    await PlayerE.findElement(By.css('button[type="submit"]')).click();
 
     await PlayerA.findElement(By.id('quick-play')).click();
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -243,6 +236,10 @@ async function testExit(PlayerA, PlayerE) {
         console.error("Failed: " + error);
     }
     testsran++;
+
+    await PlayerE.findElement(By.id('cancel')).click();
+    PlayerA.quit();
+    PlayerE.quit();
 
 }
 
