@@ -7,7 +7,6 @@ const jsonParser = bodyParser.json();
 
 router.get("/h2h", jsonParser, async (req, res) => {
   const { player1, player2 } = req.query;
-  console.log(req.query);
   try {
     const games = await pastGames.find({
       $or: [
@@ -43,8 +42,6 @@ router.get("/h2h", jsonParser, async (req, res) => {
 
 router.get("/byPlayer", jsonParser, async (req, res) => {
   const { player } = req.query;
-  // console.log("this is the query: " + req.query);
-  //   player = "66048fbaa9cde3a65f01e1d6";
   try {
     const games = await pastGames.find({
       $or: [{ player1: player }, { player2: player }],

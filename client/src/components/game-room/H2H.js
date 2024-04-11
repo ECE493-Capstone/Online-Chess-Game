@@ -68,22 +68,20 @@ const H2HReducer = (state, action) => {
   }
 };
 
-const H2H = ({
-  player1Id = "6601e21450d748bdbd642836",
-  player2Id = "6605725ea2486950a5d3bc9b",
-}) => {
+const H2H = ({ player1Id, player2Id }) => {
   const [state, dispatch] = useReducer(H2HReducer, {
     player1: null,
     player2: null,
   });
 
+  console.log("Variable", player1Id, player2Id);
   useEffect(() => {
+    console.log("Player Ids", player1Id, player2Id);
     // fetch player1 and player2 information
     const fetchH2HRecord = async () => {
       const player1Data = (await fetchUser(player1Id)).data;
       const player2Data = (await fetchUser(player2Id)).data;
       const h2hRecord = await getH2HRecord(player1Id, player2Id);
-
       dispatch({
         type: "INIT",
         payload: {
