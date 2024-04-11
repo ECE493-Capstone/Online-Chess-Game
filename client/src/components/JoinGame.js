@@ -1,6 +1,6 @@
-import React from 'react';
+import React from "react";
 import { Button, Modal, TextField, Fab } from "@mui/material";
-import styled from 'styled-components';
+import styled from "styled-components";
 
 const ModalContainer = styled.div`
   position: absolute;
@@ -15,7 +15,6 @@ const ModalContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  
 `;
 
 const ModalHeader = styled.div`
@@ -38,9 +37,21 @@ const ContentWrapper = styled.div`
   max-width: 400px;
 `;
 
-const JoinGame = ({ isModalOpen, handleCloseModal, roomCode, handleRoomCodeChange, handleJoinRoom, submitClicked }) => {
+const JoinGame = ({
+  isModalOpen,
+  handleCloseModal,
+  roomCode,
+  handleRoomCodeChange,
+  handleJoinRoom,
+  submitClicked,
+}) => {
   return (
-    <Modal open={isModalOpen} aria-labelledby="join-game-modal-title" aria-describedby="join-game-modal-description" onClose={handleCloseModal}>
+    <Modal
+      open={isModalOpen}
+      aria-labelledby="join-game-modal-title"
+      aria-describedby="join-game-modal-description"
+      onClose={handleCloseModal}
+    >
       <ModalContainer>
         <ModalHeader>
           <ModalTitle id="join-game-modal-title">Join Game</ModalTitle>
@@ -53,10 +64,20 @@ const JoinGame = ({ isModalOpen, handleCloseModal, roomCode, handleRoomCodeChang
             value={roomCode}
             onChange={handleRoomCodeChange}
             error={submitClicked && roomCode.trim() === ""}
-            helperText={(submitClicked && roomCode.trim() === "") ? "Please enter the room code." : ""}
+            helperText={
+              submitClicked && roomCode.trim() === ""
+                ? "Please enter the room code."
+                : ""
+            }
             style={{ marginTop: "2em" }}
           />
-          <Button variant="contained" style={{ marginTop: "2em" }} onClick={handleJoinRoom}>Join Room</Button>
+          <Button
+            variant="contained"
+            style={{ marginTop: "2em" }}
+            onClick={handleJoinRoom}
+          >
+            Join Room
+          </Button>
         </ContentWrapper>
       </ModalContainer>
     </Modal>
