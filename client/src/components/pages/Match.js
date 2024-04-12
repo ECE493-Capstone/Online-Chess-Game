@@ -21,6 +21,7 @@ import H2H from "../game-room/H2H";
 import YesNoDialog from "../dialog/YesNoDialog";
 import BlindChess from "../BlindChess/BlindChess";
 import BlindChessInstructions from "../BlindChess/BlindChessInstructions";
+import { CHESS_LETTERS } from "../../constants/BoardConstants";
 
 const Container = styled.div`
   /* border: 1px solid white;
@@ -222,6 +223,13 @@ const Match = () => {
         socket.disconnect();
       });
       socket.on("oppMove", (input) => {
+        if (game.gameMode === GAME_MODE.BLIND) {
+          setBlindChessSpan(
+            `Opponent played ${CHESS_LETTERS[input?.fromCol]}${[
+              8 - input?.fromRow,
+            ]} to ${CHESS_LETTERS[input?.toCol]}${[8 - input?.toRow]}`
+          );
+        }
         setInput(input);
       });
       socket.on("opponent disconnected", (input) => {
