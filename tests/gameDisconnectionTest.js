@@ -128,6 +128,7 @@ async function TestNoReconnect(PlayerA, PlayerB) {
   await PlayerA.quit();
 
   // waiting for 60 seconds
+  console.log("Waiting 60 seconds...");
   await new Promise(resolve => setTimeout(resolve, 61000));
 
   try {
