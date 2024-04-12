@@ -58,6 +58,8 @@ export default class VoiceMove {
     const recognizedText = event.results[last][0].transcript;
 
     let result = recognizedText.toLowerCase();
+    console.log("LIstenign: ", result);
+
     let result_split = result.split(" ");
     result_split.forEach((word, index) => {
       if (word in NUMBER_WORDS) {
@@ -73,6 +75,13 @@ export default class VoiceMove {
         let fromRow = 8 - parseInt(WORDS_NUMBER[result[1]]);
         let toCol = String.fromCharCode(result[3][0].charCodeAt(0) - 49);
         let toRow = 8 - parseInt(WORDS_NUMBER[result[4]]);
+        console.log(
+          "Move recognized: ",
+          result[0],
+          result[1],
+          result[3],
+          result[4]
+        );
         return {
           move: {
             fromRow: parseInt(fromRow),
