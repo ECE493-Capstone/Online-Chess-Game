@@ -724,11 +724,22 @@ export class Chessboard {
   _move(fromRow, fromCol, toRow, toCol, promotionPiece) {
     const piece = this.getPiece(fromRow, fromCol);
     const moveInfo = this._getMoveInfo(piece, fromRow, fromCol, toRow, toCol); // obtain info before board changes
-    this.add(toRow, toCol, promotionPiece ? promotionPiece : piece);
+    const autoPromotion =  this._checkAutoPromotion(piece, toRow, toCol);
+    this.add(toRow, toCol, promotionPiece ? promotionPiece : autoPromotion ? autoPromotion : piece);
     this.remove(fromRow, fromCol);
     this._checkMoveCastle(piece, fromCol, toCol);
     this._checkMoveEnPassant(piece, toRow, toCol);
     this._checkMovePowerUpMode(fromRow, fromCol, toRow, toCol, moveInfo);
+  }
+
+  _checkAutoPromotion(piece, toRow, toCol) {
+    if (this._isPawn(piece)) {
+      const promotionRow = this._turn === WHITE ? 0 : 7;
+      if (toRow === promotionRow) {
+        return this._turn === WHITE ? "q" : "Q";
+      }
+    }
+    return null;
   }
 
   _getMoveInfo(piece, fromRow, fromCol, toRow, toCol) {
