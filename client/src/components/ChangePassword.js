@@ -1,3 +1,8 @@
+/*
+  This file serves the following FRs:
+  FR3 - Change.Password
+*/
+
 import { Button, TextField } from "@mui/material";
 import { Box } from "@mui/system";
 import React, { useReducer, useState } from "react";

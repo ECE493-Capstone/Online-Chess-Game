@@ -1,3 +1,10 @@
+/*
+  This file serves the following FRs:
+  FR29 - Handle.PieceTextMove
+  FR30 - Handle.PieceVoiceMove
+*/
+
+
 const CHESS_POSITIONS = [
   "A1",
   "A2",

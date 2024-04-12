@@ -1,3 +1,8 @@
+/*
+  This file serves the following FRs:
+  FR32 - View.Statistics
+*/
+
 import React, { useState, useEffect } from 'react';
 import { MenuItem, Button, ButtonGroup, MenuList, Paper, Popper, Grow, ClickAwayListener, FormControl, InputLabel, Select } from '@mui/material';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts'; // Import from 'recharts' instead of '@mui/x-charts'

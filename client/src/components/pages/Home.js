@@ -1,3 +1,5 @@
+// Simply a landing page to serve all FRs
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../Header";

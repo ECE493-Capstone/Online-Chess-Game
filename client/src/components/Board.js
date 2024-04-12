@@ -1,3 +1,9 @@
+/*
+  This file serves the following FRs:
+  FR12 - Board.Create
+*/
+
+
 import React from "react";
 import styled from "styled-components";
 import Square from "./Square";

@@ -1,3 +1,8 @@
+/*
+  This file serves the following FRs:
+  FR1- Request.Resgistration
+*/
+
 import { Button, TextField } from "@mui/material";
 import { Box } from "@mui/system";
 import React, { useReducer, useState } from "react";

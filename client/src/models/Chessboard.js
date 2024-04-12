@@ -1,3 +1,11 @@
+/* 
+  This file is deigned to support all FRs in the following sections: (FR7-FR30)
+  3.4 Disconnection / Reconnection
+  3.5 Spectating
+  3.6 Game Review
+  3.7 Gameplay Features
+*/
+
 export const WHITE = "w";
 export const BLACK = "b";
 export const GAME_MODE = {
@@ -716,11 +724,22 @@ export class Chessboard {
   _move(fromRow, fromCol, toRow, toCol, promotionPiece) {
     const piece = this.getPiece(fromRow, fromCol);
     const moveInfo = this._getMoveInfo(piece, fromRow, fromCol, toRow, toCol); // obtain info before board changes
-    this.add(toRow, toCol, promotionPiece ? promotionPiece : piece);
+    const autoPromotion =  this._checkAutoPromotion(piece, toRow, toCol);
+    this.add(toRow, toCol, promotionPiece ? promotionPiece : autoPromotion ? autoPromotion : piece);
     this.remove(fromRow, fromCol);
     this._checkMoveCastle(piece, fromCol, toCol);
     this._checkMoveEnPassant(piece, toRow, toCol);
     this._checkMovePowerUpMode(fromRow, fromCol, toRow, toCol, moveInfo);
+  }
+
+  _checkAutoPromotion(piece, toRow, toCol) {
+    if (this._isPawn(piece)) {
+      const promotionRow = this._turn === WHITE ? 0 : 7;
+      if (toRow === promotionRow) {
+        return this._turn === WHITE ? "q" : "Q";
+      }
+    }
+    return null;
   }
 
   _getMoveInfo(piece, fromRow, fromCol, toRow, toCol) {
@@ -1277,11 +1296,9 @@ export class Chessboard {
       let currCol = fromCol + dy;
       while (currRow >= 0 && currRow <= 7 && currCol >= 0 && currCol <= 7) {
         if (this._checkPinMovement(fromRow, fromCol, dx, dy)) {
-          if (
-            this._isEmptySquare(currRow, currCol) &&
-            (!this._isInCheck || this._isBlockableSquare(currRow, currCol))
-          ) {
-            possibleMoves.push([currRow, currCol]);
+          if (this._isEmptySquare(currRow, currCol)) {
+            if (!this._isInCheck || this._isBlockableSquare(currRow, currCol))
+              possibleMoves.push([currRow, currCol]);
           } else {
             if (
               this._isEnemyPiece(this.getPiece(currRow, currCol)) &&
@@ -1455,6 +1472,9 @@ export class Chessboard {
 
     console.log("highlight attacked squares (!) ----------------");
     this.printAttackedSquares();
+
+    console.log("highlight blockable squares (^) ----------------");
+    this.printBlockableSquares();
   }
 
   printBoard() {
@@ -1524,6 +1544,21 @@ export class Chessboard {
         return row
           .map((piece, j) => {
             if (moves.some(([r, c]) => r === i && c === j)) return `|*|`;
+            return piece === null ? "| |" : `|${piece}|`;
+          })
+          .join("");
+      })
+      .join("\n");
+    console.log(prettyBoard);
+  }
+
+  printBlockableSquares() {
+    const prettyBoard = this._board
+      .map((row, i) => {
+        return row
+          .map((piece, j) => {
+            if (this._blockableSquares.some(([r, c]) => r === i && c === j))
+              return `|^|`;
             return piece === null ? "| |" : `|${piece}|`;
           })
           .join("");

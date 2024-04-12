@@ -1,3 +1,8 @@
+/*
+  This file serves the following FRs:
+  FR2 - Request.Login
+*/
+
 import React from "react";
 import Cookies from "universal-cookie";
 import { Navigate } from "react-router-dom";
