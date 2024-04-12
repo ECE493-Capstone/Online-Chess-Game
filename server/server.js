@@ -1,3 +1,6 @@
+/*
+  This file creates the server and manages routes
+*/
 const express = require("express");
 const cors = require("cors");
 const signinRoutes = require("./routes/login.js");

@@ -1,3 +1,6 @@
+/*
+  Creates the socket for client connection
+*/
 const { Server } = require("socket.io");
 const listen = require("./listeners");
 

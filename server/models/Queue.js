@@ -1,3 +1,8 @@
+/*
+  This file serves the following FRs:
+  FR5 - Queue.Enter
+  FR6 - Queue.Exit
+*/
 const mongoose = require("mongoose");
 
 const queueSchema = mongoose.Schema(

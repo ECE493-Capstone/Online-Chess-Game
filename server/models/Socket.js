@@ -1,3 +1,4 @@
+// NOTE:TO BE DELETED
 const mongoose = require("mongoose");
 
 const socketSchema = mongoose.Schema(

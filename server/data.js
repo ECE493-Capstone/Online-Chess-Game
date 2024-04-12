@@ -1,3 +1,12 @@
+/*
+  This file serves the following FRs:
+  FR7 - Handle.Disconnection
+  FR8 - Handle.Reconnection
+  FR15 - Time.Set
+  FR16 - Time.Run
+  FR26 - Vote.DuckSpectatorLocation
+  FR27 - Vote.DuckNoSpectatorLocation
+*/
 const OngoingGames = require("./models/OngoingGames");
 const PastGames = require("./models/PastGames");
 
