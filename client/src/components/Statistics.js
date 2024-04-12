@@ -18,7 +18,7 @@ const PageContainer = styled.div`
 `;
 
 // Sample game mode data. Hard-coded. Once they finish with the API for the actual data, I'll implement them.
-const GameStatistics = ({ handleSetData, data, userId }) => {
+const GameStatistics = ({ handleSetData, data, username }) => {
   // console.log("Data retreived into stats: " + JSON.stringify(data));
   const [selectedGameMode, setSelectedGameMode] = useState("All");
   const [formattedData, setFormattedData] = useState([]);
@@ -35,22 +35,22 @@ const GameStatistics = ({ handleSetData, data, userId }) => {
   
   
       data.forEach((entry) => {
-        if (entry.winner ===  userId) {
-          if (entry.player1 ===  userId) {
+        if (entry.winner ===  username ) {
+          if (entry.player1 ===  username ) {
             winCountWhite++;
           }
           else {
             winCountBlack++;
           }
         } else if (entry.winner === null) {
-          if (entry.player1 === userId) {
+          if (entry.player1 === username ) {
             tieCountWhite++;
           }
           else {
             tieCountBlack++;
           }
         } else {
-          if (entry.player1 === userId) {
+          if (entry.player1 === username ) {
             lossCountWhite++;
           }
           else {

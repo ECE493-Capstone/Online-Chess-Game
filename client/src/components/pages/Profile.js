@@ -312,7 +312,7 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
           draws={statistics.draws}
           handleSetData={handleSetData}
           data={data}
-          userId={storedUserId}
+          username={username}
         />
         <GameHistory data={data} username={username} userId={storedUserId} />
       </div>
