@@ -218,7 +218,7 @@ const Match = () => {
     if (isPlayer) {
       // ----------------- socket listeners -----------------
       socket.on("disconnect socket", () => {
-        toast("You have been disconnected!");
+        toast.error("You have been disconnected!");
         socket.disconnect();
       });
       socket.on("oppMove", (input) => {
@@ -273,6 +273,9 @@ const Match = () => {
       socket.emit("join room", gameId);
       socket.on("spectatorMove", (fen) => {
         dispatch(setGame(new Chessboard(WHITE, game.gameMode, fen)));
+      });
+      socket.on("all abandon", (input) => {
+        toast("Both players have abandoned the game!");
       });
     }
   }, [isPlayer]);

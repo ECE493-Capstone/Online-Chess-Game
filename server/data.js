@@ -72,7 +72,7 @@ const setIntervalVal = (roomId, interval) => {
 };
 
 const clearIntervalVal = (roomId) => {
-  activeGames[roomId] && clearInterval(activeGames[roomId].interval);
+  activeGames[roomId] && clearInterval(activeGames[roomId]?.interval);
 };
 
 const millisToMinutesAndSeconds = (millis) => {
@@ -107,7 +107,7 @@ const userHasSocket = (userId, socketId) => {
 };
 
 const isPlayerActive = (player) => {
-  return player && activeUsers[player].socket.length > 0;
+  return player && activeUsers[player]?.socket.length > 0;
 };
 
 const endGame = (roomId, userId, oppId) => {
@@ -121,7 +121,7 @@ const findUserBySocket = (socketId) => {
   userIds = Object.keys(activeUsers).filter((user) =>
     activeUsers[user].socket.includes(socketId)
   );
-  return userIds ? userIds[0] : null;
+  return userIds && userIds[0] ? userIds[0] : null;
 };
 
 const disconnectPlayer = (socketId, io) => {
@@ -137,18 +137,20 @@ const disconnectPlayer = (socketId, io) => {
       } else {
         clearTimeout(activeUsers[player]);
         console.log("ALL PLAYERS ABANDONED");
-        clearIntervalVal(activeUsers[player].activeGame);
+        clearIntervalVal(activeUsers[player]?.activeGame);
         const result = await OngoingGames.deleteMany({
           $or: [{ player1: userId }, { player2: userId }],
         });
         io.to(activeUsers[userId].activeGame).emit("all abandon");
+        io.to(activeUsers[userId].activeGame).emit("game result", null);
         endGame(activeUsers[userId].activeGame, userId, player);
         return;
       }
       activeUsers[userId].timeout = setTimeout(async () => {
         if (!isPlayerActive(userId)) {
-          endGame(activeUsers[userId].activeGame, userId, player);
-          clearIntervalVal(activeUsers[player].activeGame);
+          console.log("PLAYER", player);
+          io.to(activeUsers[userId]?.activeGame).emit("game result", player);
+          clearIntervalVal(activeUsers[player]?.activeGame);
           convertOngoingGameToPastGame(
             activeUsers[userId].activeGame,
             player
@@ -157,41 +159,13 @@ const disconnectPlayer = (socketId, io) => {
               $or: [{ player1: userId }, { player2: userId }],
             });
           });
+          endGame(activeUsers[userId]?.activeGame, userId, player);
           return;
         }
-      }, 45000);
+      }, 60000);
     }
   });
 };
-// const removeSocket = (socketId, io) => {
-//   Object.keys(activeUsers).forEach((user) => {
-//     if (activeUsers[user].socket === socketId) {
-//       activeUsers[user].socket = null;
-//       const player = getPlayerFromRoom(activeUsers[user].activeGame, user);
-//       if (player && activeUsers[player].socket) {
-//         io.to(activeUsers[player].socket).emit("opponent disconnected");
-//       } else {
-//         clearIntervalVal(activeUsers[user].activeGame);
-//         removeUser(user);
-//         removeUser(player);
-//       }
-//       setTimeout(async () => {
-//         if (!activeUsers[user]?.socket) {
-//           removeUser(user);
-//           clearIntervalVal(activeUsers[user].activeGame);
-//           const player = getPlayerFromRoom(user.activeGame);
-
-//           if (player) {
-//             io.to(activeUsers[player].socket).emit("opponent abandoned");
-//           }
-//           const result = await OngoingGames.deleteMany({
-//             $or: [{ player1: user }, { player2: user }],
-//           });
-//         }
-//       }, 45000);
-//     }
-//   });
-// };
 
 const convertOngoingGameToPastGame = async (roomId, winnerId) => {
   const gameToSave = await OngoingGames.findOne({ room: roomId });
