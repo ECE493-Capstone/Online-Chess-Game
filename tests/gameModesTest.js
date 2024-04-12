@@ -134,7 +134,7 @@ async function TestMostVoted(PlayerA, PlayerB, PlayerC) {
     
     try {
         if (duckPiece !== "D") {
-            throw new Error("DUck piece not found in voted location");
+            throw new Error("Duck piece not found in voted location");
         }
         successes++;
     } catch (error) {

@@ -107,7 +107,7 @@ const userHasSocket = (userId, socketId) => {
 };
 
 const isPlayerActive = (player) => {
-  return player && activeUsers[player].socket.length > 0;
+  return player && activeUsers[player]?.socket.length > 0;
 };
 
 const endGame = (roomId, userId, oppId) => {
@@ -121,7 +121,7 @@ const findUserBySocket = (socketId) => {
   userIds = Object.keys(activeUsers).filter((user) =>
     activeUsers[user].socket.includes(socketId)
   );
-  return userIds ? userIds[0] : null;
+  return userIds && userIds[0] ? userIds[0] : null;
 };
 
 const disconnectPlayer = (socketId, io) => {
@@ -142,12 +142,13 @@ const disconnectPlayer = (socketId, io) => {
           $or: [{ player1: userId }, { player2: userId }],
         });
         io.to(activeUsers[userId].activeGame).emit("all abandon");
-        endGame(activeUsers[userId].activeGame, userId, player);
+        io.to(activeUsers[userId].activeGame).emit("game result", null);
         return;
       }
       activeUsers[userId].timeout = setTimeout(async () => {
         if (!isPlayerActive(userId)) {
           endGame(activeUsers[userId].activeGame, userId, player);
+          io.to(activeUsers[userId]?.activeGame).emit("game result", null);
           clearIntervalVal(activeUsers[player].activeGame);
           convertOngoingGameToPastGame(
             activeUsers[userId].activeGame,

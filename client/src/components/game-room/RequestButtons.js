@@ -27,6 +27,7 @@ const RequestButtons = ({
     <ButtonContainer>
       <ButtonGroup className="group" disabled={isDisabled} color="warning">
         <Button
+          id="undo-button"
           className="button"
           variant="contained"
           onClick={onUndoClicked}
@@ -36,6 +37,7 @@ const RequestButtons = ({
         </Button>
 
         <Button
+          id="draw-button"
           className="button"
           variant="contained"
           onClick={onDrawClicked}

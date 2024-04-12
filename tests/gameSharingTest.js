@@ -74,7 +74,7 @@ async function TestSharing(PlayerA, PlayerB, PlayerC) {
     await new Promise(resolve => setTimeout(resolve, 1000));
     await PlayerB.findElement(By.xpath('(//div[@class="tc-row"]/button)[5]')).click();
     await PlayerB.findElement(By.id('time-submit')).click();
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
     await PlayerA.findElement(By.id('share-btn')).click();
     await new Promise(resolve => setTimeout(resolve, 500));

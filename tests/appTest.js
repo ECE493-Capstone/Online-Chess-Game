@@ -27,13 +27,13 @@ async function appTests() {
 
     await gameRoomTests();
 
-    // // await gameDisconnectionTests(); // Errors: Disconnection/reconnection handling doesn't work properly
+    // await gameDisconnectionTests(); // Errors: Disconnection/reconnection handling doesn't work properly
 
-    // // await beginGameTests(); // Errors: Cannot start and create a new game
+    await beginGameTests(); // Implemented TESTID 0, 1, 3-10
 
     await gameSharingTests();
 
-     await gameModesTests(); // game modes test not implemented yet
+     await gameModesTests(); // Implemented TestID 0
 
     // const userData = await fetchUser("newtesting");
     // const userId = userData.userId;
@@ -56,8 +56,8 @@ async function appTests() {
     //     [], // fen
     //     userId // winner
     // );
-// This not connecting. I'm cooked.
-    console.log( "Adding 2st game:" );
+
+    // console.log( "Adding 2st game:" );
     
     // // Second past game
     // await addPastGame(
@@ -83,7 +83,7 @@ async function appTests() {
     //     null // winner
     // );
 
-    // await profileTests();
+    // await profileTests(); Works, but need to be manually inserted the 3
 
     const removedUserData = await removeUser('newtesting');
     if (removedUserData) {
