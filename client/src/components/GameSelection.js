@@ -1,3 +1,7 @@
+/*
+  This file serves section 3.7.10 Game Modes
+*/
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Popover } from "@mui/material";

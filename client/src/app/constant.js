@@ -1,3 +1,8 @@
+/*
+  This file serves the following FRs:
+  FR15 - Time.Set
+*/
+
 export const TimeControlCategories = [
   [
     {

@@ -1,3 +1,9 @@
+/*
+  This file serves the following FRs:
+  FR25 - Select.Side
+*/
+
+
 import React from "react";
 import { Button, Modal, TextField, Fab } from "@mui/material";
 import styled from "styled-components";

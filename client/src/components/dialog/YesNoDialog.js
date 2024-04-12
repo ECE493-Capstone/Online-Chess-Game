@@ -1,3 +1,9 @@
+/*
+  This file serves the following FRs:
+  FR20 - Request.Undo
+  FR21 - Request.Draw
+*/
+
 import React, { useReducer, useState } from "react";
 import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";

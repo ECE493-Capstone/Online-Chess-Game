@@ -1,3 +1,9 @@
+/*
+  This file serves the following FRs:
+  FR5 - Queue.Enter
+  FR6 - Queue.Exit
+*/
+
 import React, { useReducer, useState } from "react";
 import CircularProgress from "@mui/material/CircularProgress";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";

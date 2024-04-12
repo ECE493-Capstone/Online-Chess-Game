@@ -1,3 +1,29 @@
+/*
+  This file serves all FRs:
+  FR7 - Handle.Disconnection
+  FR8 - Handle.Reconnection
+  FR9 - Spectate
+  FR12 - Board.Create
+  FR13 - Handle.PieceClickLegalMoves
+  FR14 - Handle.ValidateMove
+  FR15 - Timer.Set
+  FR16 - Timer.Run
+  FR17 - View.HeadToHeadRecord
+  FR18 - Handle.PieceClickMove
+  FR19 - Handle.PieceDragDrop
+  FR20 - Request.Undo
+  FR21 - Request.Draw
+  FR22 - Match.Forfeit
+  FR23 - Save.Results
+  FR24 - Save.GameMoves
+  FR25 - Select.Side
+  FR26 - Vote.DuckSpectatorLocation
+  FR27 - Vote.DuckNoSpecatorLocation
+  FR28 - Power.Up
+  and FR31 - Invite.User
+*/
+
+
 import React, { useEffect, useState, useReducer } from "react";
 import Board from "../Board";
 import { BLACK, Chessboard, GAME_MODE, WHITE } from "../../models/Chessboard";

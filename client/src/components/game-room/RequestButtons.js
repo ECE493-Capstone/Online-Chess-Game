@@ -1,3 +1,10 @@
+/*
+  This file serves the following FRs:
+  FR20 - Request.Undo
+  FR21 - Request.Draw
+  FR22 - Match.Forfeit
+*/
+
 import { ButtonGroup, Table } from "@mui/material";
 import React, { useReducer, useState } from "react";
 import Button from "@mui/material/Button";

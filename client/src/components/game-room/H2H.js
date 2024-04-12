@@ -1,3 +1,8 @@
+/*
+  This file serves the following FRs:
+  FR17 - View.HeadToHeadRecord
+*/
+
 import React, { useEffect, useReducer, useState } from "react";
 import styled from "styled-components";
 import { fetchUser } from "../../api/fetchUser.js";
