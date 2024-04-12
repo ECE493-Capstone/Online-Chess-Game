@@ -1,3 +1,9 @@
+/*
+  This file serves the following FRs:
+  FR1 - Request.Resgistration
+  FR2 - Request.Login
+*/
+
 import axios from "axios";
 import serverApiConfig from "./apiConfig";
 

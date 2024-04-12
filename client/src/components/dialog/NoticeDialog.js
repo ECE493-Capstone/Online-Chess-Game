@@ -1,3 +1,9 @@
+/*
+  This file serves the following FRs:
+  FR7 - Handle.Disconnection
+  FR8 - Handle.Reconnection
+*/
+
 import React, { useReducer, useState } from "react";
 import CircularProgress from "@mui/material/CircularProgress";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";

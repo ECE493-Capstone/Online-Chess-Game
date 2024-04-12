@@ -1,3 +1,10 @@
+/*
+  This file serves the following FRs:
+  FR18 - Handle.PieceClickMove
+  FR19 - Handle.PieceDragDrop
+*/
+
+
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setClickPiece, setGame, setVoteInfo } from "../features/boardSlice";

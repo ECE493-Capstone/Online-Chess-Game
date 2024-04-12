@@ -1,3 +1,8 @@
+/*
+  This file serves the following FRs:
+  FR11 - Game.History
+*/
+
 import {
   Paper,
   Table,

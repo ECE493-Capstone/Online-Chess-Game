@@ -1,3 +1,12 @@
+/* 
+  This file is deigned to support all FRs in the following sections: (FR7-FR30)
+  3.4 Disconnection / Reconnection
+  3.5 Spectating
+  3.6 Game Review
+  3.7 Gameplay Features
+*/
+
+
 export const WHITE = "w";
 export const BLACK = "b";
 export const GAME_MODE = {

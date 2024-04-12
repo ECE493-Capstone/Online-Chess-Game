@@ -1,3 +1,8 @@
+/*
+  This file serves the following FRs:
+  FR32 - View.Statistics
+*/
+
 import axios from "axios";
 import serverApiConfig from "./apiConfig";
 

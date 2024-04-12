@@ -1,3 +1,8 @@
+/*
+  This file serves the following FRs:
+  FR2 - Request.Login
+*/
+
 import io from "socket.io-client";
 export const socketIo = io({
   reconnectionDelay: 10000, // defaults to 1000

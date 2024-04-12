@@ -1,3 +1,9 @@
+/*
+  This file serves the following FRs:
+  FR25 - Select.Side
+*/
+
+
 import React from "react";
 import { FaChessKing } from "react-icons/fa6";
 import { FaRandom } from "react-icons/fa";

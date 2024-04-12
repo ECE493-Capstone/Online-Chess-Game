@@ -1,3 +1,7 @@
+/*
+  This file serves section 3.7.10 Game Modes
+*/
+
 import React from "react";
 import styled from "styled-components";
 import TimeSelect from "./TimeSelect";

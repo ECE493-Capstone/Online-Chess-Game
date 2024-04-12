@@ -1,3 +1,11 @@
+/*
+  This file serves the following FRs:
+  FR10 - Game.Review
+  FR11 - Game.History
+  FR32 - View.Statistics
+*/
+
+
 import React, { useState, useEffect } from "react";
 import Header from "../Header";
 import ChangePassword from "../ChangePassword";

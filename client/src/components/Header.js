@@ -1,3 +1,9 @@
+/*
+  This file serves the following FRs:
+  FR1 - Request.Registration
+  FR2 - Request.Login
+*/
+
 import React, { useState, useEffect } from "react";
 import { Button, Modal, Box, Menu, MenuItem } from "@mui/material";
 import { useNavigate } from "react-router-dom";

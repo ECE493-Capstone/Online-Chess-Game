@@ -1,3 +1,9 @@
+/*
+  This file serves the following FRs:
+  FR29 - Handle.PieceTextMove
+  FR30 - Handle.PieceVoiceMove
+*/
+
 import React from "react";
 import styled from "styled-components";
 import { LETTER_WORDS } from "../../constants/BoardConstants";

@@ -1,3 +1,10 @@
+/*
+  This file serves the following FRs:
+  FR12 - Board.Create
+*/
+
+
+
 import BlackRook from "../assets/pieces/black-rook.png";
 import BlackRookEvolved from "../assets/pieces/black-rook-evolved.png";
 import BlackBishop from "../assets/pieces/black-bishop.png";

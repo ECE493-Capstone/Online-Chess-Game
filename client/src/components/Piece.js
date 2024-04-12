@@ -1,3 +1,9 @@
+/*
+  This file serves the following FRs:
+  FR18 - Handle.PieceClickMove
+  FR19 - Handle.PieceDragDrop
+*/
+
 import React from "react";
 import getPieceImage from "./Pieces";
 import { useDispatch } from "react-redux";

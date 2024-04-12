@@ -1,3 +1,8 @@
+/*
+  This file serves the following FRs:
+  FR10 - Game.Review
+*/
+
 import React, { useEffect, useReducer, useRef, useState } from "react";
 import styled from "styled-components";
 import Board from "../Board";
