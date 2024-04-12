@@ -23,7 +23,6 @@
   and FR31 - Invite.User
 */
 
-
 import React, { useEffect, useState, useReducer } from "react";
 import Board from "../Board";
 import { BLACK, Chessboard, GAME_MODE, WHITE } from "../../models/Chessboard";
@@ -48,6 +47,7 @@ import YesNoDialog from "../dialog/YesNoDialog";
 import BlindChess from "../BlindChess/BlindChess";
 import BlindChessInstructions from "../BlindChess/BlindChessInstructions";
 import { CHESS_LETTERS } from "../../constants/BoardConstants";
+import Header from "../Header";
 
 const Container = styled.div`
   /* border: 1px solid white;
@@ -481,179 +481,184 @@ const Match = () => {
   };
 
   return (
-    <Container>
-      {showShareToast && (
-        <Snackbar
-          open={showShareToast}
-          autoHideDuration={1500}
-          onClose={() => setShowShareToast(false)}
-          message="URL copied to clipboard"
-        />
-      )}
+    <>
+      <Header />
+      <Container>
+        {showShareToast && (
+          <Snackbar
+            open={showShareToast}
+            autoHideDuration={1500}
+            onClose={() => setShowShareToast(false)}
+            message="URL copied to clipboard"
+          />
+        )}
 
-      <div className="lhs">
-        {game ? (
-          <div className="board">
-            {matchState.endGameInfo !== null && (
-              <div
-                className={`game-result ${
-                  matchState.endGameInfo === "Draw"
-                    ? "draw-result"
-                    : matchState.endGameInfo === "You won!"
-                    ? "win-result"
-                    : "loss-result"
-                }`}
-              >
-                {matchState.endGameInfo}
-              </div>
-            )}
-            <>
-              <div className="info">
-                <h2>{matchState.opponent?.username}</h2>
-                {matchState.opponentTime !== null && (
-                  <Timer
-                    type="opponent"
-                    side={game.side === WHITE ? BLACK : WHITE}
-                    defaultTime={matchState.opponentTime}
-                    isActive={!game.isSameTurn(game.side)}
-                    onTimeoutCb={onOpponentTimeout}
-                  />
-                )}
-              </div>
-              {/* Is player ? isBlind? No board
+        <div className="lhs">
+          {game ? (
+            <div className="board">
+              {matchState.endGameInfo !== null && (
+                <div
+                  className={`game-result ${
+                    matchState.endGameInfo === "Draw"
+                      ? "draw-result"
+                      : matchState.endGameInfo === "You won!"
+                      ? "win-result"
+                      : "loss-result"
+                  }`}
+                >
+                  {matchState.endGameInfo}
+                </div>
+              )}
+              <>
+                <div className="info">
+                  <h2>{matchState.opponent?.username}</h2>
+                  {matchState.opponentTime !== null && (
+                    <Timer
+                      type="opponent"
+                      side={game.side === WHITE ? BLACK : WHITE}
+                      defaultTime={matchState.opponentTime}
+                      isActive={!game.isSameTurn(game.side)}
+                      onTimeoutCb={onOpponentTimeout}
+                    />
+                  )}
+                </div>
+                {/* Is player ? isBlind? No board
                 Is player ?  NOT isBlind? show board
                 Is spectator? show board
                 */}
-              {isPlayer && game.gameMode === GAME_MODE.BLIND ? (
-                <div className="blind-chess">
-                  <h1 style={{ textAlign: "center" }}>
-                    You are playing with the{" "}
-                    {game.side === "w" ? "WHITE" : "BLACK"} pieces
-                  </h1>
-                  <span className="blind-chess-span">
-                    {blindChessSpan}
-                    {game.side !== game.turn ? ". Waiting for opponent..." : ""}
-                  </span>
-                  <BlindChess
-                    game={game}
-                    gameId={gameId}
-                    handleBlindChessMove={handleBlindChessMove}
-                  />
-                </div>
-              ) : (
-                <Board game={game} getIncrement={getIncrement} />
-              )}
-              <div className="info">
-                <h2>{matchState.player?.username}</h2>
-                {matchState.playerTime !== null && (
-                  <Timer
-                    type="player"
-                    side={game.side}
-                    defaultTime={matchState.playerTime}
-                    isActive={game.isSameTurn(game.side)}
-                    onTimeoutCb={onPlayerTimeout}
-                  />
+                {isPlayer && game.gameMode === GAME_MODE.BLIND ? (
+                  <div className="blind-chess">
+                    <h1 style={{ textAlign: "center" }}>
+                      You are playing with the{" "}
+                      {game.side === "w" ? "WHITE" : "BLACK"} pieces
+                    </h1>
+                    <span className="blind-chess-span">
+                      {blindChessSpan}
+                      {game.side !== game.turn
+                        ? ". Waiting for opponent..."
+                        : ""}
+                    </span>
+                    <BlindChess
+                      game={game}
+                      gameId={gameId}
+                      handleBlindChessMove={handleBlindChessMove}
+                    />
+                  </div>
+                ) : (
+                  <Board game={game} getIncrement={getIncrement} />
                 )}
-              </div>
-              <div className="share-btn">
-                <Button
-                  onClick={copyUrlToClipboard}
-                  variant="contained"
-                  color="info"
-                >
-                  {<ShareIcon />}
-                </Button>
-              </div>
-              {matchState.openDrawDialog && (
-                <YesNoDialog
-                  title="Draw Request"
-                  content={`${matchState.opponent.username} has requested a draw. Do you accept?`}
-                  onYesClicked={() => {
-                    socket.emit("reply draw request", {
-                      gameRoom: gameId,
-                      accepted: true,
-                    });
-                    matchDispatch({ type: "DRAW_DIALOG", payload: false });
-                  }}
-                  onNoClicked={() => {
-                    socket.emit("reply draw request", {
-                      gameRoom: gameId,
-                      accepted: false,
-                    });
-                    matchDispatch({ type: "DRAW_DIALOG", payload: false });
-                  }}
-                ></YesNoDialog>
-              )}
-              {matchState.openUndoDialog && (
-                <YesNoDialog
-                  title="Undo Request"
-                  content={`${matchState.opponent.username} has requested an undo. Do you accept?`}
-                  onYesClicked={() => {
-                    socket.emit("reply undo request", {
-                      gameRoom: gameId,
-                      accepted: true,
-                    });
-                    matchDispatch({ type: "UNDO_DIALOG", payload: false });
-                  }}
-                  onNoClicked={() => {
-                    socket.emit("reply undo request", {
-                      gameRoom: gameId,
-                      accepted: false,
-                    });
-                    matchDispatch({ type: "UNDO_DIALOG", payload: false });
-                  }}
-                ></YesNoDialog>
-              )}
-            </>
-          </div>
-        ) : (
-          <NoticeDialog content="Waiting for opponent..." />
+                <div className="info">
+                  <h2>{matchState.player?.username}</h2>
+                  {matchState.playerTime !== null && (
+                    <Timer
+                      type="player"
+                      side={game.side}
+                      defaultTime={matchState.playerTime}
+                      isActive={game.isSameTurn(game.side)}
+                      onTimeoutCb={onPlayerTimeout}
+                    />
+                  )}
+                </div>
+                <div className="share-btn">
+                  <Button
+                    onClick={copyUrlToClipboard}
+                    variant="contained"
+                    color="info"
+                  >
+                    {<ShareIcon />}
+                  </Button>
+                </div>
+                {matchState.openDrawDialog && (
+                  <YesNoDialog
+                    title="Draw Request"
+                    content={`${matchState.opponent.username} has requested a draw. Do you accept?`}
+                    onYesClicked={() => {
+                      socket.emit("reply draw request", {
+                        gameRoom: gameId,
+                        accepted: true,
+                      });
+                      matchDispatch({ type: "DRAW_DIALOG", payload: false });
+                    }}
+                    onNoClicked={() => {
+                      socket.emit("reply draw request", {
+                        gameRoom: gameId,
+                        accepted: false,
+                      });
+                      matchDispatch({ type: "DRAW_DIALOG", payload: false });
+                    }}
+                  ></YesNoDialog>
+                )}
+                {matchState.openUndoDialog && (
+                  <YesNoDialog
+                    title="Undo Request"
+                    content={`${matchState.opponent.username} has requested an undo. Do you accept?`}
+                    onYesClicked={() => {
+                      socket.emit("reply undo request", {
+                        gameRoom: gameId,
+                        accepted: true,
+                      });
+                      matchDispatch({ type: "UNDO_DIALOG", payload: false });
+                    }}
+                    onNoClicked={() => {
+                      socket.emit("reply undo request", {
+                        gameRoom: gameId,
+                        accepted: false,
+                      });
+                      matchDispatch({ type: "UNDO_DIALOG", payload: false });
+                    }}
+                  ></YesNoDialog>
+                )}
+              </>
+            </div>
+          ) : (
+            <NoticeDialog content="Waiting for opponent..." />
+          )}
+        </div>
+        {isOpponentDisconnected && (
+          <NoticeDialog content="Opponent Disconnected" />
         )}
-      </div>
-      {isOpponentDisconnected && (
-        <NoticeDialog content="Opponent Disconnected" />
-      )}
-      {game && (
-        <div className="rhs">
-          <div>
-            <H2H
-              player1Id={matchState.player?.id}
-              player2Id={matchState.opponent?.id}
-            />
-          </div>
-          {game.gameMode === GAME_MODE.BLIND && <BlindChessInstructions />}
-          {isPlayer && (
-            <div className="request-btns">
-              <RequestButtons
-                onUndoClicked={onUndoBtnClicked}
-                onDrawClicked={onDrawBtnClicked}
-                onResignClicked={onResignBtnClicked}
-                isDisabled={matchState.btnDisabled}
+        {game && (
+          <div className="rhs">
+            <div>
+              <H2H
+                player1Id={matchState.player?.id}
+                player2Id={matchState.opponent?.id}
               />
             </div>
-          )}
-          {voteInfo.isAllowed &&
-            (!isPlayer ? (
-              <div className="voting-info">
-                <h3>Click on empty square to vote!</h3>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  disabled={voteInfo.votedSquare === null}
-                  onClick={() => castDuckVote()}
-                >
-                  Vote
-                </Button>
-                {matchState.voteTimer}s left to vote.
+            {game.gameMode === GAME_MODE.BLIND && <BlindChessInstructions />}
+            {isPlayer && (
+              <div className="request-btns">
+                <RequestButtons
+                  onUndoClicked={onUndoBtnClicked}
+                  onDrawClicked={onDrawBtnClicked}
+                  onResignClicked={onResignBtnClicked}
+                  isDisabled={matchState.btnDisabled}
+                />
               </div>
-            ) : (
-              <div className="voting-info">
-                <h3>Waiting for vote... ({matchState.voteTimer}s left)</h3>
-              </div>
-            ))}
-        </div>
-      )}
-    </Container>
+            )}
+            {voteInfo.isAllowed &&
+              (!isPlayer ? (
+                <div className="voting-info">
+                  <h3>Click on empty square to vote!</h3>
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    disabled={voteInfo.votedSquare === null}
+                    onClick={() => castDuckVote()}
+                  >
+                    Vote
+                  </Button>
+                  {matchState.voteTimer}s left to vote.
+                </div>
+              ) : (
+                <div className="voting-info">
+                  <h3>Waiting for vote... ({matchState.voteTimer}s left)</h3>
+                </div>
+              ))}
+          </div>
+        )}
+      </Container>
+    </>
   );
 };
 
