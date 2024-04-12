@@ -27,6 +27,7 @@ const TypeSubmit = ({
         <SideSelect side={side} handleSideClick={handleSideClick} />
       )}
       <Button
+        id="time-submit"
         variant="filled"
         onClick={handleSubmit}
         style={{ backgroundColor: "#00abe3" }}

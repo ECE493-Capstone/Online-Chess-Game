@@ -82,7 +82,11 @@ const Registration = ({ onClose }) => {
         if (data === undefined) return;
         dispatch({ type: "SET_ERROR", payload: data.message });
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        dispatch({ type: "SET_ERROR", payload: err.message });
+        console.log(err);
+        setIsSubmitting(false);
+      });
   };
 
   return (
@@ -119,6 +123,7 @@ const Registration = ({ onClose }) => {
         <div>
           <EmailOutlinedIcon fontSize="large"></EmailOutlinedIcon>
           <TextField
+            required
             id="email"
             label="Enter Your Email"
             variant="outlined"
@@ -129,7 +134,7 @@ const Registration = ({ onClose }) => {
             }
           ></TextField>
         </div>
-        {errorMsg && <Box color="error.main">{errorMsg}</Box>}
+        {errorMsg && <Box id="error-box" color="error.main">{errorMsg}</Box>}
         <div className="footer">
           <Button type="submit" variant="contained" disabled={isSubmitting}>
             Register

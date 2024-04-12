@@ -45,7 +45,7 @@ const YesNoDialog = ({
   onNoClicked,
 }) => {
   return (
-    <DialogContainer>
+    <DialogContainer id="draw-dialog">
       <div className="header">
         <h3 className="headerContent">{title}</h3>
       </div>
@@ -54,6 +54,7 @@ const YesNoDialog = ({
         {content}
         <div className="buttons">
           <Button
+            id="select-yes"
             onClick={onYesClicked}
             variant="outlined"
             color="success"
@@ -62,6 +63,7 @@ const YesNoDialog = ({
             {yesButtonText}
           </Button>
           <Button
+            id="select-no"
             onClick={onNoClicked}
             variant="outlined"
             color="error"

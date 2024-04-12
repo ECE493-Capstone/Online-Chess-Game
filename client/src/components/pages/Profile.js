@@ -227,9 +227,11 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
       try {
         const gamesData = await getPastGamesInformation(userId);
         if (mode === "All") {
+          console.log("Setting data for mode: " + mode);
           setData(gamesData);
         } else {
           console.log("Setting data for mode: " + mode);
+          console.log("These are all the game datas: " + JSON.stringify(gamesData.filter((data) => data.mode === mode)));
           setData(gamesData.filter((data) => data.mode === mode));
         }
       } catch (error) {
@@ -285,10 +287,10 @@ const UserInfo = ({ statistics, setIsLoggedIn }) => {
           <img src={img} alt="profile" style={{ width: "175px" }} />
           <Title>{username}</Title>
           <Subtitle>({email})</Subtitle>
-          <StyledButton variant="contained" onClick={handleOpenChangeUsername}>
+          <StyledButton id="change-username" variant="contained" onClick={handleOpenChangeUsername}>
             Change Username
           </StyledButton>
-          <StyledButton variant="contained" onClick={handleOpenChangePassword}>
+          <StyledButton id="change-password" variant="contained" onClick={handleOpenChangePassword}>
             Change Password
           </StyledButton>
         </ProfileInfo>

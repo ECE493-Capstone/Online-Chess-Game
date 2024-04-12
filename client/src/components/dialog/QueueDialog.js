@@ -39,13 +39,15 @@ const QueueDialog = ({
     toast.success("Room code copied to clipboard");
   };
   return (
-    <DialogContainer>
+    <DialogContainer id="queue-container">
       <h3>{content}</h3>
       {showSpinner && <CircularProgress size={30} />}
       {roomCode && (
         <div className="code">
           <Button
             variant="outlined"
+            id="share-room-code"
+            share-code= {roomCode}
             onClick={() => copyRoomToClipboard(roomCode)}
           >
             {roomCode}
@@ -53,6 +55,7 @@ const QueueDialog = ({
         </div>
       )}
       <Button
+        id="cancel"
         className="cancel-button"
         variant="contained"
         onClick={onCancelClicked}

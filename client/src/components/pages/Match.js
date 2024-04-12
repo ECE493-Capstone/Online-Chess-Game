@@ -163,6 +163,7 @@ const MatchReducer = (state, action) => {
 const Match = () => {
   // data area
   const game = useSelector((state) => state.board.game);
+  const [gamingUrl, setGamingUrl] = React.useState("");
   const [input, setInput] = React.useState(null);
   const [isOpponentDisconnected, setIsOpponentDisconnected] = useState(false);
   const [blindChessSpan, setBlindChessSpan] = useState("Game started...");
@@ -393,6 +394,7 @@ const Match = () => {
 
   const copyUrlToClipboard = () => {
     const currentUrl = window.location.href;
+    setGamingUrl(currentUrl);
     navigator.clipboard
       .writeText(currentUrl)
       .then(
@@ -450,6 +452,7 @@ const Match = () => {
     <Container>
       {showShareToast && (
         <Snackbar
+          id="share-toast"
           open={showShareToast}
           autoHideDuration={1500}
           onClose={() => setShowShareToast(false)}
@@ -462,6 +465,7 @@ const Match = () => {
           <div className="board">
             {matchState.endGameInfo !== null && (
               <div
+                id = "game-result"
                 className={`game-result ${
                   matchState.endGameInfo === "Draw"
                     ? "draw-result"
@@ -474,7 +478,7 @@ const Match = () => {
               </div>
             )}
             <>
-              <div className="info">
+              <div id="opponent-name" className="info">
                 <h2>{matchState.opponent?.username}</h2>
                 {matchState.opponentTime !== null && (
                   <Timer
@@ -509,7 +513,7 @@ const Match = () => {
               ) : (
                 <Board game={game} getIncrement={getIncrement} />
               )}
-              <div className="info">
+              <div id="player-name" className="info">
                 <h2>{matchState.player?.username}</h2>
                 {matchState.playerTime !== null && (
                   <Timer
@@ -523,9 +527,11 @@ const Match = () => {
               </div>
               <div className="share-btn">
                 <Button
+                  id="share-btn"
                   onClick={copyUrlToClipboard}
                   variant="contained"
                   color="info"
+                  clipboard-target = {gamingUrl}
                 >
                   {<ShareIcon />}
                 </Button>
@@ -603,6 +609,7 @@ const Match = () => {
               <div className="voting-info">
                 <h3>Click on empty square to vote!</h3>
                 <Button
+                  id="vote"
                   variant="contained"
                   color="secondary"
                   disabled={voteInfo.votedSquare === null}

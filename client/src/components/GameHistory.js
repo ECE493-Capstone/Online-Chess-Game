@@ -96,9 +96,12 @@ const GameHistory = ({ data, username, userId }) => {
 
           if (game.winner === userId) {
             newWinner = username;
-          } else {
+          } else if (game.winner !== null) {
             const winner = await getOpponentName(game.winner);
             newWinner = winner;
+          }
+          else {
+            newWinner = null;
           }
 
           return {
@@ -111,15 +114,17 @@ const GameHistory = ({ data, username, userId }) => {
       );
 
       setUpdatedData(updatedData);
+      console.log("Updated data: " + JSON.stringify(updatedData));
+      console.log("Updated data length: " + updatedData.length);
     };
 
     fetchData();
-  }, [data, userId, username]);
+  }, [data]);
 
   return (
     <StyledGameReview>
       <TableContainer component={Paper}>
-        <Table stickyHeader>
+        <Table stickyHeader id="game-history">
           <TableBody>
             <TableRow>
               <TableCell className="title">Completed games</TableCell>

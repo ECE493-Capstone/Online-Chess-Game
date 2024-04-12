@@ -73,6 +73,7 @@ const JoinGame = ({
           />
           <Button
             variant="contained"
+            id="join-room-submit"
             style={{ marginTop: "2em" }}
             onClick={handleJoinRoom}
           >

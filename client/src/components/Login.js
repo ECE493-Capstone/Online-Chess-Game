@@ -76,6 +76,7 @@ const Login = ({ onClose, setIsFocused }) => {
       })
       .catch((err) => {
         dispatch({ type: "SET_ERROR", payload: err.response.data.message });
+        setIsSubmitting(false);
       });
   };
 
@@ -111,7 +112,7 @@ const Login = ({ onClose, setIsFocused }) => {
             }
           ></TextField>
         </div>
-        {errorMsg && <Box color="error.main">{errorMsg}</Box>}
+        {errorMsg && <Box id="error-box" color="error.main">{errorMsg}</Box>}
         <div className="footer">
           <Button type="submit" variant="contained" disabled={isSubmitting}>
             Login
