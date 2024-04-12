@@ -62,8 +62,8 @@ export default class VoiceMove {
 
     let result_split = result.split(" ");
     result_split.forEach((word, index) => {
-      if (word in NUMBER_WORDS) {
-        result_split[index] = NUMBER_WORDS[word];
+      if (word.length < 3 && word[0] in NUMBER_WORDS) {
+        result_split[index] = NUMBER_WORDS[word[0]];
       }
     });
     result = result_split.join(" ");
