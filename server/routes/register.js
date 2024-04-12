@@ -1,3 +1,7 @@
+/*
+  This file serves the following FRs:
+  FR2 - Request.Registration
+*/
 const express = require("express");
 const User = require("../models/User");
 const bodyParser = require("body-parser");

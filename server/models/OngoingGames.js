@@ -1,3 +1,10 @@
+/*
+  This file serves the following FRs:
+  FR7 - Handle.Disconnection
+  FR8 - Handle.Reconnection
+  FR9 - Spectate
+  FR12 - Board.Create
+*/
 const mongoose = require("mongoose");
 
 const ongoingGamesSchema = mongoose.Schema(

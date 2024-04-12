@@ -1,3 +1,14 @@
+/*
+  This file serves the following FRs:
+  FR10 - Game.Review
+  FR11 - Game.History
+  FR17 - View.HeadToHeadRecord
+  FR12 - Board.Create
+  FR23 - Save.Results
+  FR24 - Save.GameMoves
+  FR32 - View.Statistics
+*/
+
 const mongoose = require("mongoose");
 
 const pastGamesSchema = mongoose.Schema(

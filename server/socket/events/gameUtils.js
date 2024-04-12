@@ -1,3 +1,13 @@
+/*
+  This file serves the following FRs:
+  FR5 - Queue.Enter
+  FR6 - Queue.Exit
+  FR7 - Handle.Disconnection
+  FR8 - Handle.Reconnection
+  FR22 - Match.Forfeit
+  FR23 - Save.Results
+  FR24 - Save.GameMoves
+*/
 const OngoingGames = require("../../models/OngoingGames");
 const PastGames = require("../../models/PastGames");
 const Queue = require("../../models/Queue");

@@ -1,3 +1,18 @@
+/*
+  This file serves the following FRs:
+  FR9 - Spectate
+  FR20 - Request.Undo
+  FR21 - Request.Draw
+  FR22 - Match.Forfeit
+  FR23 - Save.Results
+  FR24 - Save.GameMoves
+  FR25 - Select.Side
+  FR26 - Vote.DuckSpectatorLocation
+  FR27 - Vote.DuckNoSpectatorLocation
+  FR28 - Power.Up
+  FR29 - Handle.PieceTextMove
+  FR30 - Handle.PieceVoiceMove
+*/
 const Queue = require("../models/Queue");
 const {
   findGameInQueue,

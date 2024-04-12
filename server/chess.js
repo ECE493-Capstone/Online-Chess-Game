@@ -1,3 +1,4 @@
+// NOTE:TO BE DELETED
 const WHITE = "w";
 const BLACK = "b";
 const KING_SIDE_CASTLE = "O-O";

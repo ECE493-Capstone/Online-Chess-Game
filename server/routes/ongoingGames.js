@@ -1,3 +1,11 @@
+/*
+  This file serves the following FRs:
+  FR7 - Handle.Disconnection
+  FR8 - Handle.Reconnection
+  FR9 - Spectate
+  FR12 - Board.Create
+*/
+
 const express = require("express");
 const User = require("../models/OngoingGames");
 const bodyParser = require("body-parser");

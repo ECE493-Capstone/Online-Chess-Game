@@ -1,3 +1,7 @@
+/*
+  This file serves the following FRs:
+  FR3 - Change.Password
+*/
 const express = require("express");
 const User = require("../models/User");
 const bodyParser = require("body-parser");

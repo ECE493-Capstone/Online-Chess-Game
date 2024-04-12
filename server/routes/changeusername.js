@@ -1,3 +1,7 @@
+/*
+  This file serves the following FRs:
+  FR3 - Change.Username
+*/
 const express = require("express");
 const User = require("../models/User");
 const bodyParser = require("body-parser");
@@ -26,8 +30,10 @@ router.post("/", jsonParser, async (req, res) => {
 
     // Check if the new username matches
     if (bcrypt.compareSync(newUsername, user.username)) {
-        // If new username matches, send error response
-        return res.status(401).json({ error: "New username is the same as old one." });
+      // If new username matches, send error response
+      return res
+        .status(401)
+        .json({ error: "New username is the same as old one." });
     }
 
     // Update user's password with the new hashed password
@@ -39,8 +45,7 @@ router.post("/", jsonParser, async (req, res) => {
     // Send success response
     res.status(200);
 
-    res.send({message: "Username changed successfully!"});
-
+    res.send({ message: "Username changed successfully!" });
   } catch (error) {
     // If an error occurs, send internal server error response
     console.error(error);

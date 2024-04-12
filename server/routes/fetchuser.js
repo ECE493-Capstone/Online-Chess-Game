@@ -1,3 +1,9 @@
+/*
+  This file serves the following FRs:
+  FR17 - View.HeadToHeadRecord
+  FR32 - View.Statistics
+*/
+
 const express = require("express");
 const User = require("../models/User");
 const bodyParser = require("body-parser");

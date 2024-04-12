@@ -1,3 +1,8 @@
+/*
+  This file serves the following FRs:
+  FR7 - Handle.Disconnection
+  FR8 - Handle.Reconnection
+*/
 const {
   addSocket,
   getUserActiveGame,
