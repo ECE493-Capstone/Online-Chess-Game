@@ -27,7 +27,7 @@ async function appTests() {
 
     await gameRoomTests();
 
-    // await gameDisconnectionTests(); // Errors: Disconnection/reconnection handling doesn't work properly
+    await gameDisconnectionTests();
 
     await beginGameTests(); // Implemented TESTID 0, 1, 3-10
 

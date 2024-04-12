@@ -24,15 +24,11 @@ async function gameDisconnectionTests() {
         console.log("Testing Criteria 3 and 4: Test that the game reconnects after Player A disconnects and reconnects within 60 seconds:");
     
         // Simulate user 1 entering matchmaking queue
-        // await TestReconnect(PlayerA, PlayerB);
+        await TestReconnect(PlayerA, PlayerB);
 
         console.log("Testing Criteria 1: Test that Player A loses if they don't reconnect within 60 seconds:");
 
         await TestNoReconnect(PlayerA, PlayerB);
-
-        console.log("Testing Criteria 2: Test that the system doesn’t save any history of the game after both players disconnect:");
-
-        await TestNoSave(PlayerA, PlayerB);
     
       } catch (error) {
         console.error("A test failure occurred. Terminating tests: " + error);
@@ -42,10 +38,6 @@ async function gameDisconnectionTests() {
         console.log("Successes: " + successes);
         console.log("Failures: " + failures);
         console.log("================================================================");
-    
-        // Quit both WebDriver instances
-        await PlayerA.quit();
-        await PlayerB.quit();
     }
 }
 
@@ -81,41 +73,49 @@ async function TestReconnect(PlayerA, PlayerB) {
   await PlayerB.findElement(By.id('time-submit')).click();
   await new Promise(resolve => setTimeout(resolve, 3000));
 
-  const gameWindowHandle = await PlayerA.getWindowHandle();
+  console.log("Test ID 0:");
 
-  PlayerA.navigate().back();
+  const currentUrl = await PlayerA.getCurrentUrl();
+  console.log("Current URL:", currentUrl);
+
+  await PlayerA.navigate().back();
 
   // Navigate PlayerA back to previous screen
-
-  await new Promise(resolve => setTimeout(resolve, 3000));
-
-  // Navigate PlayerA back to current screen
-
-//   await PlayerA.close();
-
-//   await new Promise(resolve => setTimeout(resolve, 3000));
-
-//   PlayerA = await new Builder().forBrowser('chrome').build();
-
-//   await PlayerA.get(clientConfig.CLIENT_URL);
-
-//   await new Promise(resolve => setTimeout(resolve, 1000));
-
-//   await PlayerA.findElement(By.id('signin')).click();
-
-//   await PlayerA.findElement(By.id('identity')).sendKeys('PlayerA');
-//   await PlayerA.findElement(By.id('password')).sendKeys('playera');
-//   await PlayerA.findElement(By.css('button[type="submit"]')).click();
+  
 
   await new Promise(resolve => setTimeout(resolve, 1000));
 
-  try {
-    await PlayerB.findElement(By.id("reconnecting-dialog"));
-    failures++;
-    } catch (error) {
-        successes++;
-    }
+  await PlayerA.get(currentUrl);
 
+  await new Promise(resolve => setTimeout(resolve, 1000));
+
+
+
+  try {
+
+      const squareSelector1 = `.board-row:nth-child(${7}) .board-square:nth-child(${5})`;
+      await PlayerA.findElement(By.css(squareSelector1)).click();
+      await new Promise(resolve => setTimeout(resolve, 500));
+    
+      const squareSelector2 = `.board-row:nth-child(${5}) .board-square:nth-child(${5})`;
+      await PlayerA.findElement(By.css(squareSelector2)).click();
+      await new Promise(resolve => setTimeout(resolve, 500));
+      // Check that pawn is at location
+      const square1 = `.board-row:nth-child(${4}) .board-square:nth-child(${4})`;
+      const NSquare1 = await PlayerB.findElement(By.css(square1));
+      const NsSquare1 = await NSquare1.findElement(By.id("square-piece"));
+      const pawnPiece = await NsSquare1.getAttribute("piece")
+
+      if (pawnPiece !== "p") {
+          throw new Error("Player did not properly connect.");
+      }
+      console.log("Passed");
+      successes++;
+  }
+  catch (error) {
+      failures++;
+      console.error("Failed:" + error);
+  }
 
   testsran++;
 
@@ -123,67 +123,33 @@ async function TestReconnect(PlayerA, PlayerB) {
 
 async function TestNoReconnect(PlayerA, PlayerB) {
 
-    // --------------- COMMENT OUT --------------------
-    await PlayerA.findElement(By.id('signin')).click();
+  console.log("Test ID 1:");
 
-    await PlayerA.findElement(By.id('identity')).sendKeys('PlayerA');
-    await PlayerA.findElement(By.id('password')).sendKeys('playera');
-    await PlayerA.findElement(By.css('button[type="submit"]')).click();
-  
-    await PlayerB.findElement(By.id('signin')).click();
-  
-    await PlayerB.findElement(By.id('identity')).sendKeys('PlayerB');
-    await PlayerB.findElement(By.id('password')).sendKeys('playerb');
-    await PlayerB.findElement(By.css('button[type="submit"]')).click();
+  await PlayerA.quit();
 
-    // --------------- COMMENT OUT --------------------
+  // waiting for 60 seconds
+  await new Promise(resolve => setTimeout(resolve, 61000));
 
-    await PlayerA.findElement(By.id('quick-play')).click();
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    await PlayerA.findElement(By.id('standard-select')).click();
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    await PlayerA.findElement(By.xpath('(//div[@class="tc-row"]/button)[5]')).click();
-    await PlayerA.findElement(By.id('time-submit')).click();
-    await new Promise(resolve => setTimeout(resolve, 1000));
-  
-    await PlayerB.findElement(By.id('quick-play')).click();
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    await PlayerB.findElement(By.id('standard-select')).click();
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    await PlayerB.findElement(By.xpath('(//div[@class="tc-row"]/button)[5]')).click();
-    await PlayerB.findElement(By.id('time-submit')).click();
-    await new Promise(resolve => setTimeout(resolve, 3000));
-  
-    PlayerA.close();
+  try {
+    const PlayerBResult = await PlayerB.findElement(By.id('game-result'));
 
-    await new Promise(resolve => setTimeout(resolve, 45000));
+    const PlayerBText = await PlayerBResult.getText();
 
-    // test that game wins for playerB, and lose for playerA
+    // Check if the dialog container is displayed
+    
+    if (PlayerBText !== "You won!") {
+        throw new Error("No reconnections not handled properly");
+    }
+    console.log("Passed");
+    successes++;
+  }
+  catch (error) {
+      failures++;
+      console.error("Failed:" + error);
+  }
+  testsran++;
 
-}
-
-async function TestNoSave(PlayerA, PlayerB) {
-
-    await PlayerA.findElement(By.id('quick-play')).click();
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    await PlayerA.findElement(By.id('standard-select')).click();
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    await PlayerA.findElement(By.xpath('(//div[@class="tc-row"]/button)[5]')).click();
-    await PlayerA.findElement(By.id('time-submit')).click();
-    await new Promise(resolve => setTimeout(resolve, 1000));
-  
-    await PlayerB.findElement(By.id('quick-play')).click();
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    await PlayerB.findElement(By.id('standard-select')).click();
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    await PlayerB.findElement(By.xpath('(//div[@class="tc-row"]/button)[5]')).click();
-    await PlayerB.findElement(By.id('time-submit')).click();
-    await new Promise(resolve => setTimeout(resolve, 3000));
-  
-    PlayerA.close();
-    PlayerB.close();
-
-    // test that the game is not saved in database
+  await PlayerB.quit();
 
 }
 
