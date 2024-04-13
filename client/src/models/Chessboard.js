@@ -395,6 +395,7 @@ export class Chessboard {
     const checkingPiece = this.getPiece(checkRow, checkCol);
     if (!checkingPiece) return [];
     const [kingRow, kingCol] = this._findKing();
+    if (kingRow === null || kingCol === null) return []; // return empty (in case king exploded)
     const blockableSquares = [[checkRow, checkCol]];
     let directions = [];
     if (this._isPawn(checkingPiece) || this._isKnight(checkingPiece)) {
@@ -523,6 +524,8 @@ export class Chessboard {
     if (this.gameMode !== GAME_MODE.POWER_UP_DUCK) return;
     this._removeDuck();
     this.add(row, col, DUCK);
+    this._updateAfterOthersMove();
+    this._checkGameOver();
   }
 
   _getAttackedSquares(fromRow, fromCol) {
@@ -589,6 +592,7 @@ export class Chessboard {
 
   _updateAttackedSquares() {
     const [kingRow, kingCol] = this._findKing();
+    if (kingRow === null || kingCol === null) return; // return if king is exploded
     this._checkingSquares = [];
     const allAttackedSquares = [];
     for (let row = 0; row < 8; row++) {
@@ -625,6 +629,7 @@ export class Chessboard {
 
   _updateIsInCheck() {
     const [row, col] = this._findKing();
+    if (row === null || col === null) return; // return if king is exploded
     this._isInCheck = this._isSquareUnderAttack(row, col);
     return this._isInCheck;
   }
@@ -638,6 +643,7 @@ export class Chessboard {
         }
       }
     }
+    return [null, null];
   }
 
   _findPiece(symbol) {
@@ -666,6 +672,7 @@ export class Chessboard {
 
   _updatePinnedSquares() {
     const [row, col] = this._findKing();
+    if (row === null || col === null) return; // return if king is exploded
     const pinnedSquares = {};
     // check if any piece is pinned
     const directions = [
@@ -724,8 +731,12 @@ export class Chessboard {
   _move(fromRow, fromCol, toRow, toCol, promotionPiece) {
     const piece = this.getPiece(fromRow, fromCol);
     const moveInfo = this._getMoveInfo(piece, fromRow, fromCol, toRow, toCol); // obtain info before board changes
-    const autoPromotion =  this._checkAutoPromotion(piece, toRow, toCol);
-    this.add(toRow, toCol, promotionPiece ? promotionPiece : autoPromotion ? autoPromotion : piece);
+    const autoPromotion = this._checkAutoPromotion(piece, toRow, toCol);
+    this.add(
+      toRow,
+      toCol,
+      promotionPiece ? promotionPiece : autoPromotion ? autoPromotion : piece
+    );
     this.remove(fromRow, fromCol);
     this._checkMoveCastle(piece, fromCol, toCol);
     this._checkMoveEnPassant(piece, toRow, toCol);
@@ -994,11 +1005,7 @@ export class Chessboard {
     this._updateEnPassant(piece, fromRow, fromCol, toRow);
     this._updateCastlingRights(piece, fromRow, fromCol);
 
-    this._updateAttackedSquares(); // Call order: 1
-    this._updateIsInCheck(); // Call order: 2
-    this._updateBlockableSquares(); // Call order: 3
-    this._updatePinnedSquares(); // Call order: 3
-    this._updateLegalMoves(); // Call order: 4
+    this._updateAfterOthersMove();
 
     // DEBUG STUFF ----------------
     console.log(`turn: ${this._turn}`);
@@ -1014,6 +1021,14 @@ export class Chessboard {
     this._turn = this._turn === WHITE ? BLACK : WHITE;
   }
 
+  _updateAfterOthersMove() {
+    // call after an opponent's move or duck vote
+    this._updateAttackedSquares(); // Call order: 1
+    this._updateIsInCheck(); // Call order: 2
+    this._updateBlockableSquares(); // Call order: 3
+    this._updatePinnedSquares(); // Call order: 3
+    this._updateLegalMoves(); // Call order: 4
+  }
   playYourMove(move) {
     const { fromRow, fromCol, toRow, toCol, promotionPiece = null } = move;
     const piece = this.getPiece(fromRow, fromCol);
