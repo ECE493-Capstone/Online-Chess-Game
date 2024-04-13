@@ -97,14 +97,14 @@ const WORDS_NUMBER = {
 };
 
 const LETTER_WORDS = {
-  a: "alpha",
-  b: "bravo",
-  c: "cherry",
-  d: "delta",
+  a: "absolute",
+  b: "balcony",
+  c: "camera",
+  d: "dinosaur",
   e: "elephant",
-  f: "fox",
-  g: "gamma",
-  h: "honey",
+  f: "fantastic",
+  g: "gorilla",
+  h: "holiday",
 };
 
 module.exports = {
